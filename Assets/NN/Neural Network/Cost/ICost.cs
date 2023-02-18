@@ -1,6 +1,6 @@
 public interface ICost
 {
-	double CostFunction(double[] predictedOutputs, double[] expectedOutputs);
+	double CostFunction(double predictedOutput, double expectedOutput);
 
 	double CostDerivative(double predictedOutput, double expectedOutput);
 

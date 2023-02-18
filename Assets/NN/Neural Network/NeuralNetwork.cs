@@ -44,9 +44,9 @@ public class NeuralNetwork
 	}
 
 
-	public void Learn(DataPoint trainingData, double learnRate, double regularization = 0, double momentum = 0)
+	public void Learn(double[] inputs, int action ,double expectedOutput, double predictedOutput, double learnRate, double regularization = 0, double momentum = 0)
 	{
-		UpdateGradients(trainingData, batchLearnData);
+		UpdateGradients(inputs,action, expectedOutput, predictedOutput, batchLearnData);
 
 		// Update weights and biases based on the calculated gradients
 		for (int i = 0; i < layers.Length; i++)
@@ -56,7 +56,7 @@ public class NeuralNetwork
 	}
 
 
-	void UpdateGradients(DataPoint data, NetworkLearnData learnData)
+	void UpdateGradients(double[] data,int action , double expectedOutput, double predictedOutput, NetworkLearnData learnData)
 	{
 		// Feed data through the network to calculate outputs.
 		// Save all inputs/weightedinputs/activations along the way to use for backpropagation.
@@ -68,7 +68,7 @@ public class NeuralNetwork
 		LayerLearnData outputLearnData = learnData.layerData[outputLayerIndex];
 
 		// Update output layer gradients
-		outputLayer.CalculateOutputLayerNodeValues(outputLearnData, data.expectedOutputs, cost);
+		outputLayer.CalculateOutputLayerNodeValues(outputLearnData,action, expectedOutput, predictedOutput, cost);
 		outputLayer.UpdateGradients(outputLearnData);
 
 		// Update all hidden layer gradients
@@ -82,24 +82,18 @@ public class NeuralNetwork
 		}
 
 	}
-	public double[] lastOutputs;
-    public double[] Forward(DataPoint data,bool updateLast = true)
+    public double[] Forward(double[] data)
 	{
+		double[] output = new double[layers.Length];
         if (batchLearnData == null)
-        {
             batchLearnData = new NetworkLearnData(layers);
-        }
-
-        double[] inputsToNextLayer = data.inputs;
 
         for (int i = 0; i < layers.Length; i++)
         {
-            inputsToNextLayer = layers[i].CalculateOutputs(inputsToNextLayer, batchLearnData.layerData[i]);
+            output = layers[i].CalculateOutputs(data, batchLearnData.layerData[i]);
         }
-		if(updateLast)
-			lastOutputs = inputsToNextLayer;
 
-        return inputsToNextLayer;
+        return output;
     }
 
 	public void SetCostFunction(ICost costFunction)

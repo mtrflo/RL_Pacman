@@ -113,13 +113,16 @@ public class Layer
 
 	// Calculate the "node values" for the output layer. This is an array containing for each node:
 	// the partial derivative of the cost with respect to the weighted input
-	public void CalculateOutputLayerNodeValues(LayerLearnData layerLearnData, double[] expectedOutputs, ICost cost)
+	public void CalculateOutputLayerNodeValues(LayerLearnData layerLearnData, int action, double expectedOutput, double predictedOutput, ICost cost)
 	{
 		for (int i = 0; i < layerLearnData.nodeValues.Length; i++)
 		{
 			// Evaluate partial derivatives for current node: cost/activation & activation/weightedInput
-			double costDerivative = cost.CostDerivative(layerLearnData.activations[i], expectedOutputs[i]);
-			double activationDerivative = activation.Derivative(layerLearnData.weightedInputs, i);
+
+			double costDerivative = 0;
+			if(i == action)
+                costDerivative = cost.CostDerivative(predictedOutput, expectedOutput);
+            double activationDerivative = activation.Derivative(layerLearnData.weightedInputs, i);
 			layerLearnData.nodeValues[i] = costDerivative * activationDerivative;
 		}
 	}

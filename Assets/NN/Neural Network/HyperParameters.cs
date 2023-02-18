@@ -18,7 +18,7 @@ public class HyperParameters
 	{
 		activationType = Activation.ActivationType.ReLU;
 		outputActivationType = Activation.ActivationType.Softmax;
-		costType = Cost.CostType.CrossEntropy;
+		costType = Cost.CostType.MeanSquareError;
 		initialLearningRate = 0.05;
 		learnRateDecay = 0.075;
 		minibatchSize = 32;

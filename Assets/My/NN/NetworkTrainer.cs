@@ -73,8 +73,6 @@ public class NetworkTrainer : MonoBehaviour
 		trainingBatches = DataSetHelper.CreateMiniBatches(trainingData, hyperParameters.minibatchSize);
 		hasLoaded = true;
 	}
-
-
 	/*
 	void Run()
 	{
@@ -95,46 +93,15 @@ public class NetworkTrainer : MonoBehaviour
 		UpdateSessionInfo();
 	}
 	*/
-    public int ChooseAction(double[] inputs, int lastAction,float lastStepReward)
+    public void Learn(double[] inputs, int action, double QTarget, double QEval)
     {
-        int action = neuralNetwork.lastOutputs == default ? 0 : neuralNetwork.lastOutputs.ToList().IndexOf(neuralNetwork.lastOutputs.Max());
-        var sw = System.Diagnostics.Stopwatch.StartNew();
-        DataPoint dp = new DataPoint(inputs, lastAction, 4);
-
-		double QTarget = GetQTarget(dp, lastAction, lastStepReward);
-		print("QTarget : " + QTarget);
-		for (int i = 0; i < dp.expectedOutputs.Length; i++)
-			dp.expectedOutputs[i] = lastAction.Equals(i) ? QTarget : 1 - QTarget;
-
-        neuralNetwork.Learn(dp, currentLearnRate, hyperParameters.regularization, hyperParameters.momentum);
+		neuralNetwork.Learn(inputs, action, QTarget, QEval, currentLearnRate, hyperParameters.regularization, hyperParameters.momentum);
         sessionInfo.BatchCompleted();
         batchIndex++;
 
-        //if (batchIndex >= trainingBatches.Length)
-        //{
-            //EpochCompleted();
-        //}
-
         UpdateSessionInfo();
-		if (QTarget == -1)
-		{
-			neuralNetwork.lastOutputs = new double[neuralNetwork.lastOutputs.Length];
-            action = UnityEngine.Random.Range(0, 4);
-		}
-		return action;
     }
 
-	private double GetQTarget(DataPoint dp, int lastAction, float reward)
-	{
-		double gamma = 0.8f;
-		double QTarget = 0;
-		double QEval = neuralNetwork.lastOutputs == default ? 0 : neuralNetwork.lastOutputs[lastAction];
-		double QNext = neuralNetwork.Forward(dp,false).Max();
-		QTarget = QEval + hyperParameters.initialLearningRate * (reward + gamma * QNext - QEval);
-
-		//QTarget = QTarget/4;
-        return QTarget;
-	}
 
     void EpochCompleted()
 	{

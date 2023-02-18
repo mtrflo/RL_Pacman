@@ -35,20 +35,22 @@ public class DPacManController : MonoBehaviour
 
         if (packMapGenerator.IsCooHasWall(moveTo))
         {
-            
-            reward = -100f;
+
+            //reward = -10;
             moveTo = transform.localPosition;
         }
-        else
-            reward = 1f;
-        isMoving = true;
+        //else
+        //    reward = 1;
+
+
+            isMoving = true;
 
         transform.DOLocalMove(moveTo, duration).SetEase(Ease.Linear).OnComplete(() =>
         {
             isMoving = false;
             packMapGenerator.RefreshMapData();
-            
             OnMoved.Invoke();
+            reward = -0.001f;
         });
 
         Animate(new Vector2(xdir,ydir));

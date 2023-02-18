@@ -10,7 +10,8 @@ public readonly struct Activation
 		TanH,
 		ReLU,
 		SiLU,
-		Softmax
+		Softmax,
+		RL
 	}
 
 	public static IActivation GetActivationFromType(ActivationType type)
@@ -27,7 +28,9 @@ public readonly struct Activation
 				return new SiLU();
 			case ActivationType.Softmax:
 				return new Softmax();
-			default:
+            case ActivationType.RL:
+                return new RL();
+            default:
 				UnityEngine.Debug.LogError("Unhandled activation type");
 				return new Sigmoid();
 		}
@@ -145,5 +148,29 @@ public readonly struct Activation
 			return ActivationType.Softmax;
 		}
 	}
+    public readonly struct RL : IActivation
+    {
+        public double Activate(double[] inputs, int index)
+        {
+            return inputs[index];
+        }
 
+        public double Derivative(double[] inputs, int index)
+        {
+            double expSum = 0;
+            for (int i = 0; i < inputs.Length; i++)
+            {
+                expSum += Exp(inputs[i]);
+            }
+            //UnityEngine.Debug.Log("der expSum : " + expSum);
+
+            double ex = Exp(inputs[index]);
+            return (ex * expSum - ex * ex) / (expSum * expSum);
+        }
+
+        public ActivationType GetActivationType()
+        {
+            return ActivationType.RL;
+        }
+    }
 }

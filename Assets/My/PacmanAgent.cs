@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,32 +8,53 @@ public class PacmanAgent : MonoBehaviour
 {
     public DPacManController DPacManController;
     public PacMapGenerator pacMapGenerator;
-    public NetworkTrainer networkTrainer;
-    [Range(0,1)]
-    public float epsilon = 0.8f;
+    public DQNAgent dQNAgent;
     private void Start()
     {
         DPacManController.OnMoved += Step;
         Step();
     }
+
     int lastAction = 0;
     float lastStepReward = 0;
+    
+    
+
+    //Transition
+    double[] state;
+    int action;
+    double[] state_;
+    float reward;
+    //
+
+
+
     void Step()
     {
         //state
-        double[] inputs = ConvertMapToVector(pacMapGenerator.cur_map);
-        lastStepReward = DPacManController.reward;
-        print("lastStepReward : " + lastStepReward);
-        float eps = Random.Range(0f, 1f);
-        lastAction = Random.Range(0, 4);
-        if (eps < epsilon)
-            lastAction = networkTrainer.ChooseAction(inputs, lastAction, lastStepReward);
+        double[] state_ = ConvertMapToVector(pacMapGenerator.cur_map);
+        reward = DPacManController.reward;
+
+
+        //next_state, reward = make_action()
+
+        if (state != null)
+        {
+            print("action : " + action);
+            print("reward : " + reward);
+            dQNAgent.Learn(state, action, state_, reward);
+        }
+        else
+            state = state_;
+        action = dQNAgent.ChooseAction(state);
+        MakeAction(action);
         
-        print("action : " + lastAction);
-        Action(lastAction);
+        state = state_;
+
+        
     }
 
-    void Action(int action)
+    void MakeAction(int action)
     {
         Vector2 to = new Vector2();
         switch (action)
