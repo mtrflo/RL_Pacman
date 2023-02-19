@@ -17,7 +17,7 @@ public class DQNAgent : MonoBehaviour
         int action = 0;
         float e = Random.Range(0, 1f);
 
-        if (true)
+        if (e > epsilon)
         {
             double[] actionValues = trainer.neuralNetwork.Forward(state);
             action = actionValues.ToList().IndexOf(actionValues.Max());
