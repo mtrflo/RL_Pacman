@@ -17,8 +17,8 @@ public class PacmanAgent : MonoBehaviour
 
     int lastAction = 0;
     float lastStepReward = 0;
-    
-    
+
+
 
     //Transition
     double[] state;
@@ -40,7 +40,7 @@ public class PacmanAgent : MonoBehaviour
 
         if (state != null)
         {
-            print("action : " + action);
+            // print("action : " + action);
             print("reward : " + reward);
             dQNAgent.Learn(state, action, state_, reward);
         }
@@ -48,10 +48,10 @@ public class PacmanAgent : MonoBehaviour
             state = state_;
         action = dQNAgent.ChooseAction(state);
         MakeAction(action);
-        
+
         state = state_;
 
-        
+
     }
 
     void MakeAction(int action)

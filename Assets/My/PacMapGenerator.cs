@@ -17,7 +17,7 @@ public class PacMapGenerator : MonoBehaviour//Env Model
     public GameObject packDot;
     public Transform pdParent;
 
-    private Vector2 startPackmanPosition = new Vector2(1,1);
+    private Vector2 startPackmanPosition = new Vector2(1, 1);
     private void Awake()
     {
         GeneratePackdotsFromImage();
@@ -29,7 +29,7 @@ public class PacMapGenerator : MonoBehaviour//Env Model
         int height = sampleMapImage.height;
         Color32[] pixs = sampleMapImage.GetPixels32();
         CellGroup dot_cg = new CellGroup() { cellType = CellType.pacdot, obj_transforms = new List<Transform>() };
-        CellGroups.Add(dot_cg);
+        // CellGroups.Add(dot_cg);
         for (int i = 0; i < width; i++)
         {
             cur_map.Add(new List<int>());
@@ -39,13 +39,13 @@ public class PacMapGenerator : MonoBehaviour//Env Model
                 bool isAlpha = pixs[i * width + j].a == 0;
                 cur_map[i].Add(isAlpha ? 3 : 2);
                 start_static_map[i].Add(isAlpha ? 3 : 2);
-                
-                if (isAlpha && !(startPackmanPosition.x == i && startPackmanPosition.y == j))
-                {
-                    Transform pt = Instantiate(packDot, pdParent).transform;
-                    pt.localPosition = new Vector3(j , i , 0);
-                    dot_cg.obj_transforms.Add(pt);
-                }
+
+                // if (isAlpha && !(startPackmanPosition.x == i && startPackmanPosition.y == j))
+                // {
+                //     Transform pt = Instantiate(packDot, pdParent).transform;
+                //     pt.localPosition = new Vector3(j , i , 0);
+                //     dot_cg.obj_transforms.Add(pt);
+                // }
             }
         }
         RefreshMapData();
@@ -60,7 +60,7 @@ public class PacMapGenerator : MonoBehaviour//Env Model
             {
                 p += cur_map[i][j];
             }
-            print(p);
+            // print(p);
         }
     }
 
@@ -74,18 +74,18 @@ public class PacMapGenerator : MonoBehaviour//Env Model
             for (int j = 0; j < start_static_map[i].Count; j++)
                 cur_map[i][j] = start_static_map[i][j];
         }
-        
+
         for (int i = 0; i < CellGroups.Count; i++)
         {
             CellGroups[i].obj_transforms.RemoveAll(x => x == null);
             foreach (Transform t in CellGroups[i].obj_transforms)
             {
                 cur_map[(int)t.localPosition.y][(int)t.localPosition.x] = (int)CellGroups[i].cellType;
-            } 
+            }
         }
         //PrintMap();
     }
-    
+
     public bool IsCooHasWall(Vector3 pos) => cur_map[(int)pos.y][(int)pos.x] == 2;
 
 
@@ -101,8 +101,8 @@ public class CellGroup
 [Serializable]
 public enum CellType
 {
-    pacman=1,
-    wall=2,
-    ground=3,
-    pacdot=4
+    pacman = 1,
+    wall = 2,
+    ground = 3,
+    pacdot = 4
 }

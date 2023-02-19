@@ -15,7 +15,7 @@ public class DPacManController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
@@ -29,31 +29,31 @@ public class DPacManController : MonoBehaviour
     private bool isMoving = false;
     public void MoveToSide(float xdir, float ydir)
     {
-        Vector3 moveTo = new Vector3(transform.localPosition.x + xdir, transform.localPosition.y + ydir, transform.localPosition.z ) * moveUnitLength;
+        Vector3 moveTo = new Vector3(transform.localPosition.x + xdir, transform.localPosition.y + ydir, transform.localPosition.z) * moveUnitLength;
         if (isMoving)
             return;
 
         if (packMapGenerator.IsCooHasWall(moveTo))
         {
 
-            //reward = -10;
+            reward = -10;
             moveTo = transform.localPosition;
         }
-        //else
-        //    reward = 1;
+        else
+            reward = 1;
 
 
-            isMoving = true;
+        isMoving = true;
 
         transform.DOLocalMove(moveTo, duration).SetEase(Ease.Linear).OnComplete(() =>
         {
             isMoving = false;
             packMapGenerator.RefreshMapData();
             OnMoved.Invoke();
-            reward = -0.001f;
+            // reward = -0.001f;
         });
 
-        Animate(new Vector2(xdir,ydir));
+        Animate(new Vector2(xdir, ydir));
     }
     public float reward = 0;
     void Animate(Vector2 dir)
@@ -65,7 +65,7 @@ public class DPacManController : MonoBehaviour
     {
         if (collision.CompareTag("pacdot"))
         {
-            reward = 1;
+            // reward = 1;
         }
     }
 }
