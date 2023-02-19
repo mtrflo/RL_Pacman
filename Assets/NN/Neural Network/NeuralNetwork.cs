@@ -44,9 +44,9 @@ public class NeuralNetwork
     }
 
 
-    public void Learn(double[] inputs, int action, double expectedOutput, double predictedOutput, double learnRate, double regularization = 0, double momentum = 0)
+    public void Learn(double[] inputs, int action, double[] predictedOutputs, double[] expectedOutputs, double learnRate, double regularization = 0, double momentum = 0)
     {
-        UpdateGradients(inputs, action, expectedOutput, predictedOutput, batchLearnData);
+        UpdateGradients(inputs, action, predictedOutputs, expectedOutputs, batchLearnData);
 
         // Update weights and biases based on the calculated gradients
         for (int i = 0; i < layers.Length; i++)
@@ -56,7 +56,7 @@ public class NeuralNetwork
     }
 
 
-    void UpdateGradients(double[] data, int action, double expectedOutput, double predictedOutput, NetworkLearnData learnData)
+    void UpdateGradients(double[] data, int action, double[] predictedOutputs, double[] expectedOutputs, NetworkLearnData learnData)
     {
         // Feed data through the network to calculate outputs.
         // Save all inputs/weightedinputs/activations along the way to use for backpropagation.
@@ -68,7 +68,7 @@ public class NeuralNetwork
         LayerLearnData outputLearnData = learnData.layerData[outputLayerIndex];
 
         // Update output layer gradients
-        outputLayer.CalculateOutputLayerNodeValues(outputLearnData, action, predictedOutput, expectedOutput, cost);
+        outputLayer.CalculateOutputLayerNodeValues(outputLearnData, action, predictedOutputs, expectedOutputs, cost);
         outputLayer.UpdateGradients(outputLearnData);
 
         // Update all hidden layer gradients

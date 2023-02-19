@@ -30,12 +30,26 @@ public class DQNAgent : MonoBehaviour
 
     public void Learn(double[] state, int action, double[] state_, double reward)
     {
-        double QEval = trainer.neuralNetwork.Forward(state)[action];
+        double[] predictedValues = trainer.neuralNetwork.Forward(state);
+
+        double QEval = predictedValues[action];
         double QNext = trainer.neuralNetwork.Forward(state_).Max();
         double QTarget = reward + gamma * QNext;
 
+        //      predicted   expected
+        // 0    QEval0       QEval2    
+        // 1    QEval1       QEval2
+        // [2]  QEval2       QTarget
+        // 3    QEval3       QEval2   
 
-        trainer.Learn(state, action, QTarget, QEval);
+        double[] expectedValues = new double[predictedValues.Length];
+        for (int i = 0; i < predictedValues.Length; i++)
+        {
+            expectedValues[i] = QEval;
+        }
+        expectedValues[action] = QTarget;
+
+        trainer.Learn(state, action, predictedValues, expectedValues);
         // loss = NN.loss(QEval, QTarget)
         // NN.backpropogate()
     }
