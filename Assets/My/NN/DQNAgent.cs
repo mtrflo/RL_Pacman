@@ -7,7 +7,7 @@ public class DQNAgent : MonoBehaviour
 {
     public NeuralNetwork neuralNetwork;
     public NetworkTrainer trainer;
-    [Range(0,1)]
+    [Range(0, 1)]
     public float epsilon = 0.8f;//exploit - explore     0-1
     [Range(0, 1)]
     public float gamma = 0.8f;
@@ -28,10 +28,10 @@ public class DQNAgent : MonoBehaviour
         return action;
     }
 
-    public void Learn(double[] state,int action,double[] prev_state, double reward)
+    public void Learn(double[] state, int action, double[] state_, double reward)
     {
         double QEval = trainer.neuralNetwork.Forward(state)[action];
-        double QNext = trainer.neuralNetwork.Forward(prev_state).Max();
+        double QNext = trainer.neuralNetwork.Forward(state_).Max();
         double QTarget = reward + gamma * QNext;
 
 
@@ -40,5 +40,5 @@ public class DQNAgent : MonoBehaviour
         // NN.backpropogate()
     }
 
-    
+
 }
