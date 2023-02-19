@@ -68,7 +68,7 @@ public class NeuralNetwork
         LayerLearnData outputLearnData = learnData.layerData[outputLayerIndex];
 
         // Update output layer gradients
-        outputLayer.CalculateOutputLayerNodeValues(outputLearnData, action, expectedOutput, predictedOutput, cost);
+        outputLayer.CalculateOutputLayerNodeValues(outputLearnData, action, predictedOutput, expectedOutput, cost);
         outputLayer.UpdateGradients(outputLearnData);
 
         // Update all hidden layer gradients
