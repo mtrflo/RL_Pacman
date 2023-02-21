@@ -5,13 +5,25 @@ using UnityEngine;
 
 public class DQNAgent : MonoBehaviour
 {
-    public NeuralNetwork neuralNetwork;
+    public static DQNAgent me;
+    public NeuralNetwork neuralNetwork => trainer.neuralNetwork;
     public NetworkTrainer trainer;
     [Range(0, 1)]
     public float epsilon = 0.8f;//exploit - explore     0-1
     [Range(0, 1)]
     public float gamma = 0.8f;
+    private void Awake()
+    {
+        if (me != null)
+            Destroy(gameObject);
+        else
+        {
 
+            DontDestroyOnLoad(this);
+            me = this;
+        }
+
+    }
     public int ChooseAction(double[] state)
     {
         int action = 0;
@@ -23,19 +35,23 @@ public class DQNAgent : MonoBehaviour
             action = actionValues.ToList().IndexOf(actionValues.Max());
         }
         else
-            action = Random.Range(0, 4);
+            action = Random.Range(0, neuralNetwork.layerSizes.Last());
 
         return action;
     }
 
-    public void Learn(double[] state, int action, double[] state_, double reward)
+    public void Learn(double[] state, int action, double[] state_, double reward, bool isEnd = false)
     {
         double[] predictedValues = trainer.neuralNetwork.Forward(state);
 
         double QEval = predictedValues[action];
         double QNext = trainer.neuralNetwork.Forward(state_).Max();
         double QTarget = reward + gamma * QNext;
-
+        if (isEnd)
+        {
+            print("end");
+            QTarget = reward;
+        }
         //      predicted   expected
         // 0    QEval0       QEval2    
         // 1    QEval1       QEval2

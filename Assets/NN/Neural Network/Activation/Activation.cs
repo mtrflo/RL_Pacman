@@ -124,7 +124,6 @@ public readonly struct Activation
             {
                 expSum += Exp(inputs[i]);
             }
-            UnityEngine.Debug.Log("act expSum : " + expSum);
             double res = Exp(inputs[index]) / expSum;
 
             return res;
@@ -137,7 +136,6 @@ public readonly struct Activation
             {
                 expSum += Exp(inputs[i]);
             }
-            UnityEngine.Debug.Log("der expSum : " + expSum);
 
             double ex = Exp(inputs[index]);
             return (ex * expSum - ex * ex) / (expSum * expSum);
