@@ -95,7 +95,7 @@ public class NetworkTrainer : MonoBehaviour
 	*/
     public void Learn(double[] inputs, int action, double[] predictedOutputs, double[] expectedOutputs)
     {
-        neuralNetwork.Learn(inputs, action, predictedOutputs, expectedOutputs, currentLearnRate, hyperParameters.regularization, hyperParameters.momentum);
+        neuralNetwork.Learn(inputs, action, predictedOutputs, expectedOutputs, hyperParameters.initialLearningRate, hyperParameters.regularization, hyperParameters.momentum);
         sessionInfo.BatchCompleted();
         batchIndex++;
 

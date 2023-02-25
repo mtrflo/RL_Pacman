@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class DQNAgent : MonoBehaviour
@@ -42,11 +43,13 @@ public class DQNAgent : MonoBehaviour
 
     public void Learn(double[] state, int action, double[] state_, double reward, bool isEnd = false)
     {
+        //reward = -reward;
         double[] predictedValues = trainer.neuralNetwork.Forward(state);
-
+        print(predictedValues.ToCommaSeparatedString());
         double QEval = predictedValues[action];
         double QNext = trainer.neuralNetwork.Forward(state_).Max();
         double QTarget = reward + gamma * QNext;
+        print("QTarget : " + QTarget);
         if (isEnd)
         {
             print("end");
@@ -61,8 +64,9 @@ public class DQNAgent : MonoBehaviour
         double[] expectedValues = new double[predictedValues.Length];
         for (int i = 0; i < predictedValues.Length; i++)
         {
-            expectedValues[i] = QEval;
+            expectedValues[i] = -reward + gamma * QNext;
         }
+        //print("(QTarget - QEval)" + (QTarget - QEval));
         expectedValues[action] = QTarget;
 
         trainer.Learn(state, action, predictedValues, expectedValues);

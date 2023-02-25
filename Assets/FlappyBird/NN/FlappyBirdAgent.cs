@@ -14,12 +14,16 @@ public class FlappyBirdAgent : MonoBehaviour
     public float delay;
 
     public float reward = 0.1f, terminateReward = -1f;
+    public static int maxEpisodeCount;
+    public int episodeCount;
     private void Awake()
     {
         dQNAgent = FindObjectOfType<DQNAgent>();
     }
+    Rigidbody2D rb;
     private void Start()
     {
+        rb = GetComponent<Rigidbody2D>();
         gameMain.OnGameStarted += Started;
         birdControl.OnDie += ChooseAction;
         if (birdControl.inGame)
@@ -31,7 +35,8 @@ public class FlappyBirdAgent : MonoBehaviour
         StartCoroutine(ActionMaker());
     }
     int action;
-    double[] state;
+    double[] state, state_ = new double[3];
+    
     IEnumerator ActionMaker()
     {
         while (birdControl.inGame || birdControl.dead)
@@ -46,7 +51,9 @@ public class FlappyBirdAgent : MonoBehaviour
     }
     void ChooseAction()
     {
-        double[] state_ = GetRayDistances();
+        state_[0] = GetRayDistances()[0];
+        state_[1] = GetRayDistances()[1];
+        state_[2] = rb.velocity.y;
         if (state == null)
             state = state_;
 
@@ -59,6 +66,14 @@ public class FlappyBirdAgent : MonoBehaviour
         action = dQNAgent.ChooseAction(state);
         MakeAction(action);
         state = state_;
+
+        episodeCount++;
+        if (maxEpisodeCount < episodeCount)
+        {
+            maxEpisodeCount = episodeCount;
+            print("maxEpisodeCount : "+maxEpisodeCount);
+        }
+        
     }
     public Transform[] rayPoints;
     double[] GetRayDistances()
@@ -68,7 +83,7 @@ public class FlappyBirdAgent : MonoBehaviour
         for (int i = 0; i < distances.Length; i++)
         {
             distances[i] = GetRayLength(rayPoints[i]);
-            print(i + " dist : " + distances[i]);
+            //print(i + " dist : " + distances[i]);
 
         }
         return distances;
