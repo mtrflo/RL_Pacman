@@ -17,9 +17,13 @@ public class FlappyBirdAgent : MonoBehaviour
     public static int maxEpisodeCount;
     public int episodeCount;
     public int transitionCount;
+    public UdpSocket udpSocket;
+    Transition transition;
     private void Awake()
     {
         dQNAgent = FindObjectOfType<DQNAgent>();
+        udpSocket = dQNAgent.GetComponent<UdpSocket>();
+        transition = new Transition();
     }
     Rigidbody2D rb;
     private void Start()
@@ -29,6 +33,7 @@ public class FlappyBirdAgent : MonoBehaviour
         birdControl.OnDie += ChooseAction;
         if (birdControl.inGame)
             Started();
+        udpSocket.OnReceived += CA2;
     }
 
     private void Started()
@@ -37,13 +42,15 @@ public class FlappyBirdAgent : MonoBehaviour
     }
     int action;
     double[] state, state_ = new double[3];
-    
+    bool newData = false;
     IEnumerator ActionMaker()
     {
         while (birdControl.inGame || birdControl.dead)
         {
             ChooseAction();
             yield return new WaitForSeconds(delay);
+            yield return new WaitWhile(() => newData);
+            newData = false;
             if (birdControl.dead)
                 break;
         }
@@ -62,8 +69,18 @@ public class FlappyBirdAgent : MonoBehaviour
             reward = terminateReward;
         print("action : " + action);
         print("reward : " + reward);
+        transition.Set(state, action, state_, reward);
+        print("json : "+JsonUtility.ToJson(transition));
+        udpSocket.SendData(JsonUtility.ToJson(transition));
+        //dQNAgent.Learn(state, action, state_, reward, birdControl.dead);
+        
 
-        dQNAgent.Learn(state, action, state_, reward, birdControl.dead);
+        //if (episodeCount % transitionCount == 0)
+        //    dQNAgent.Learn();
+    }
+    private void CA2(string data)
+    {
+        print(data);
         action = dQNAgent.ChooseAction(state);
         MakeAction(action);
         state = state_;
@@ -72,11 +89,9 @@ public class FlappyBirdAgent : MonoBehaviour
         if (maxEpisodeCount < episodeCount)
         {
             maxEpisodeCount = episodeCount;
-            print("maxEpisodeCount : "+maxEpisodeCount);
+            print("maxEpisodeCount : " + maxEpisodeCount);
         }
-
-        //if (episodeCount % transitionCount == 0)
-        //    dQNAgent.Learn();
+        newData = true;
     }
     public Transform[] rayPoints;
     double[] GetRayDistances()

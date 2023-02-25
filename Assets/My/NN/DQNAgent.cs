@@ -76,15 +76,23 @@ public class DQNAgent : MonoBehaviour
         step++;
     }
 }
-
-class Transition
+[Serializable]
+public class Transition
 {
-    double[] state;
-    int action;
-    double[] state_;
-    double reward;
+    public double[] state;
+    public int action;
+    public double[] state_;
+    public double reward;
 
     public Transition(double[] state, int action, double[] state_, double reward)
+    {
+        Set(state,action, state_, reward);
+    }
+    public Transition()
+    {
+
+    }
+    public void Set(double[] state, int action, double[] state_, double reward)
     {
         this.state = state;
         this.action = action;
