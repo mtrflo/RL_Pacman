@@ -137,4 +137,15 @@ public class NetworkTrainer : MonoBehaviour
         return NetworkEvaluator.Evaluate(neuralNetwork, data);
     }
 
+
+    public void Clone(NetworkTrainer networkTrainer)
+    {
+        NeuralNetwork target_nn = networkTrainer.neuralNetwork;
+        for (int i = 0; i < target_nn.layers.Length; i++)
+        {
+            neuralNetwork.layers[i].weights = target_nn.layers[i].weights;
+            neuralNetwork.layers[i].biases = target_nn.layers[i].biases;
+        }
+        
+    }
 }

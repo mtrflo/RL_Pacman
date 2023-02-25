@@ -16,6 +16,7 @@ public class FlappyBirdAgent : MonoBehaviour
     public float reward = 0.1f, terminateReward = -1f;
     public static int maxEpisodeCount;
     public int episodeCount;
+    public int transitionCount;
     private void Awake()
     {
         dQNAgent = FindObjectOfType<DQNAgent>();
@@ -73,7 +74,9 @@ public class FlappyBirdAgent : MonoBehaviour
             maxEpisodeCount = episodeCount;
             print("maxEpisodeCount : "+maxEpisodeCount);
         }
-        
+
+        //if (episodeCount % transitionCount == 0)
+        //    dQNAgent.Learn();
     }
     public Transform[] rayPoints;
     double[] GetRayDistances()

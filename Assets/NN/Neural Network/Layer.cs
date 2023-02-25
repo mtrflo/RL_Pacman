@@ -5,8 +5,8 @@ public class Layer
     public readonly int numNodesIn;
     public readonly int numNodesOut;
 
-    public readonly double[] weights;
-    public readonly double[] biases;
+    public double[] weights;
+    public double[] biases;
 
     // Cost gradient with respect to weights and with respect to biases
     public readonly double[] costGradientW;
@@ -115,12 +115,17 @@ public class Layer
     // the partial derivative of the cost with respect to the weighted input
     public void CalculateOutputLayerNodeValues(LayerLearnData layerLearnData, int action, double[] predictedOutputs, double[] expectedOutputs, ICost cost)
     {
+        
+
+
         for (int i = 0; i < layerLearnData.nodeValues.Length; i++)
         {
             // Evaluate partial derivatives for current node: cost/activation & activation/weightedInput
             double costDerivative = cost.CostDerivative(predictedOutputs[i], expectedOutputs[i]);
             double activationDerivative = activation.Derivative(layerLearnData.weightedInputs, i);
-            layerLearnData.nodeValues[i] = costDerivative * activationDerivative;
+            layerLearnData.nodeValues[i] = 0;
+            //if (i == action)
+                layerLearnData.nodeValues[i] = costDerivative * activationDerivative;
         }
     }
 

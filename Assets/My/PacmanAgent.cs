@@ -51,6 +51,11 @@ public class PacmanAgent : MonoBehaviour
 
         state = state_;
 
+        //if(step == 100) {
+        //    dQNAgent.Learn();
+        //    dQNAgent.ClearTransition();
+        //}
+
 
     }
 
