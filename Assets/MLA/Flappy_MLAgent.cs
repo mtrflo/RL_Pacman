@@ -19,6 +19,10 @@ public class Flappy_MLAgent : Agent
 
         birdControl.OnDie += End;
     }
+    public override void OnEpisodeBegin()
+    {
+        
+    }
     public override void CollectObservations(VectorSensor sensor)
     {
         state_[0] = GetRayDistances()[0];
