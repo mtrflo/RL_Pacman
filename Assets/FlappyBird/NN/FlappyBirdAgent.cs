@@ -43,21 +43,26 @@ public class FlappyBirdAgent : MonoBehaviour
     }
     int action;
     double[] state, state_ = new double[3];
+    bool isWaiting = true;
     IEnumerator ActionMaker()
     {
         WaitForSeconds wfs = new WaitForSeconds(delay);
+        WaitWhile wh = new WaitWhile(()=>isWaiting);
         while (birdControl.inGame || birdControl.dead)
         {
             ChooseAction();
+            //yield return wh;
             yield return wfs;
             if (birdControl.dead)
                 break;
         }
         
-        //Invoke("Restart", Time.deltaTime * 3);
+        Invoke("Restart", Time.deltaTime * 3);
     }
-    async void ChooseAction()
+    void ChooseAction()
     {
+        print("ChooseAction");
+        isWaiting = true;
         state_[0] = GetRayDistances()[0];
         state_[1] = GetRayDistances()[1];
         state_[2] = rb.velocity.y;
@@ -70,26 +75,12 @@ public class FlappyBirdAgent : MonoBehaviour
         print("reward : " + reward);
         transition.Set(state, action, state_, reward, birdControl.dead);
         //print("json : " + JsonUtility.ToJson(transition));
-        Task<UdpReceiveResult> udpReceiveResult = udpSocket.SendAndGetData(JsonUtility.ToJson(transition));
-        while (!udpReceiveResult.IsCompleted)
-        {
-            await Task.Yield();
-        }
-        byte[] get_data = udpReceiveResult.Result.Buffer;
-        string text = Encoding.UTF8.GetString(get_data);
-        CA2(text);
-        //dQNAgent.Learn(state, action, state_, reward, birdControl.dead);
-
-
-        //if (episodeCount % transitionCount == 0)
-        //    dQNAgent.Learn();
-        if (birdControl.dead)
-            Restart();
+        CA2(udpSocket.SendAndGetData(JsonUtility.ToJson(transition)));
     }
     private void CA2(string data)
     {
         print("data : " + data);
-        action = dQNAgent.ChooseAction(state);
+        action = int.Parse(data,0);//dQNAgent.ChooseAction(state);
         MakeAction(action);
         state = state_;
 
@@ -127,9 +118,11 @@ public class FlappyBirdAgent : MonoBehaviour
 
     void MakeAction(int action)
     {
-        if (action == 1 && !birdControl.dead)
+        if (action == 1)
         {
-            birdControl?.JumpUp();
+            print("jump action");
+            print("jump null : "+birdControl==null);
+            birdControl.JumpUp();
         }
     }
 

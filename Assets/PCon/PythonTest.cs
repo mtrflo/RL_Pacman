@@ -25,7 +25,7 @@ public class PythonTest : MonoBehaviour
 
     public void SendToPython()
     {
-        udpSocket.SendAndGetData("Sent From Unity: " + numToSendToPython.ToString());
+        //udpSocket.SendAndGetData("Sent From Unity: " + numToSendToPython.ToString());
         numToSendToPython++;
         sendToPythonText.text = "Send Number: " + numToSendToPython.ToString();
     }

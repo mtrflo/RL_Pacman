@@ -23,6 +23,7 @@ using System.Runtime.CompilerServices;
 using UnityEngine.Profiling;
 using System.Threading.Tasks;
 using UnityEditor.PackageManager;
+using System.Net.NetworkInformation;
 
 public class UdpSocket : MonoBehaviour
 {
@@ -51,28 +52,23 @@ public class UdpSocket : MonoBehaviour
     //        yield return new WaitForSeconds(1f);
     //    }
     //}
-
-    public async Task<UdpReceiveResult> SendAndGetData(string message) // Use to send data to Python
+    public struct UdpState
     {
-        string text;
-        //if (client == null)
-        //    return null;
-        //try
-        //{
-            Profiler.BeginSample("SendAndGetData");
-            byte[] data = Encoding.UTF8.GetBytes(message);
-            client.
-            client.Send(data, data.Length, remoteEndPoint);
-            Profiler.EndSample();
-            client.BeginReceive(OnReceived,socket);
-            
-            //await Task.Yield();return text;
-        //}
-        //catch (Exception err)
-        //{
-        //    print(err.ToString());
-        //    return await Task.Yield();
-        //}
+        public UdpClient u;
+        public IPEndPoint e;
+    }
+    public string SendAndGetData(string message) // Use to send data to Python
+    {
+        UdpState udpState = new UdpState();
+        udpState.u = client;
+        udpState.e = anyIP;
+        Profiler.BeginSample("SendAndGetData");
+        byte[] data = Encoding.UTF8.GetBytes(message);
+
+        client.Send(data, data.Length, remoteEndPoint);
+        byte[] result = client.Receive(ref anyIP);
+        Profiler.EndSample();
+        return Encoding.UTF8.GetString(result);
     }
     IPEndPoint anyIP;
     void Awake()
@@ -101,7 +97,7 @@ public class UdpSocket : MonoBehaviour
         OnReceived = (s) => { };
     }
 
-    private void Start() 
+    private void Start()
     {
         pythonTest = FindObjectOfType<PythonTest>(); // Instead of using a public variable
     }
