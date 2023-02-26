@@ -19,9 +19,14 @@ using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Runtime.CompilerServices;
+using UnityEngine.Profiling;
+using System.Threading.Tasks;
+using UnityEditor.PackageManager;
 
 public class UdpSocket : MonoBehaviour
 {
+    public static UdpSocket me;
     [HideInInspector] public bool isTxStarted = false;
 
     [SerializeField] string IP = "127.0.0.1"; // local host
@@ -47,22 +52,36 @@ public class UdpSocket : MonoBehaviour
     //    }
     //}
 
-    public void SendData(string message) // Use to send data to Python
+    public async Task<UdpReceiveResult> SendAndGetData(string message) // Use to send data to Python
     {
-        try
-        {
+        string text;
+        //if (client == null)
+        //    return null;
+        //try
+        //{
+            Profiler.BeginSample("SendAndGetData");
             byte[] data = Encoding.UTF8.GetBytes(message);
+            client.
             client.Send(data, data.Length, remoteEndPoint);
-        }
-        catch (Exception err)
-        {
-            print(err.ToString());
-        }
+            Profiler.EndSample();
+            client.BeginReceive(OnReceived,socket);
+            
+            //await Task.Yield();return text;
+        //}
+        //catch (Exception err)
+        //{
+        //    print(err.ToString());
+        //    return await Task.Yield();
+        //}
     }
-
+    IPEndPoint anyIP;
     void Awake()
     {
-        if(remoteEndPoint != null) { return; }
+        anyIP = new IPEndPoint(IPAddress.Any, 0);
+
+        if (me == null)
+            me = this;
+        if (remoteEndPoint != null) { return; }
         // Create remote endpoint (to Matlab) 
         remoteEndPoint = new IPEndPoint(IPAddress.Parse(IP), txPort);
 
@@ -71,10 +90,10 @@ public class UdpSocket : MonoBehaviour
 
         // local endpoint define (where messages are received)
         // Create a new thread for reception of incoming messages
-        receiveThread = new Thread(new ThreadStart(ReceiveData));
-        receiveThread.IsBackground = true;
-        receiveThread.Start();
-
+        //receiveThread = new Thread(new ThreadStart(ReceiveData));
+        //receiveThread.IsBackground = true;
+        //receiveThread.Start();
+        //StartCoroutine(ReceiveData());
         // Initialize (seen in comments window)
         print("UDP Comms Initialised");
 
@@ -88,16 +107,20 @@ public class UdpSocket : MonoBehaviour
     }
 
     // Receive data, update packets received
-    private void ReceiveData()
+    private IEnumerator ReceiveData()
     {
+        IPEndPoint anyIP = new IPEndPoint(IPAddress.Any, 0);
+        string text;
+        WaitForSeconds wfs = new WaitForSeconds(2f);
         while (true)
         {
+            yield return wfs;
             try
             {
-                IPEndPoint anyIP = new IPEndPoint(IPAddress.Any, 0);
+                //
                 byte[] data = client.Receive(ref anyIP);
-                string text = Encoding.UTF8.GetString(data);
-                print(">> " + text);
+                text = Encoding.UTF8.GetString(data);
+                //print(">> " + text);
                 ProcessInput(text);
             }
             catch (Exception err)
@@ -110,23 +133,26 @@ public class UdpSocket : MonoBehaviour
     private void ProcessInput(string input)
     {
         // PROCESS INPUT RECEIVED STRING HERE
-        pythonTest.UpdatePythonRcvdText(input); // Update text by string received from python
+        //pythonTest.UpdatePythonRcvdText(input); // Update text by string received from python
 
-        if (!isTxStarted) // First data arrived so tx started
-        {
-            isTxStarted = true;
-        }
-        pythonTest.SendToPython();
-        OnReceived(input);
+        //if (!isTxStarted) // First data arrived so tx started
+        //{
+        //    isTxStarted = true;
+        //}
+        //pythonTest.SendToPython();
+        OnReceived.Invoke(input);
     }
 
     //Prevent crashes - close clients and threads properly!
     void OnDisable()
     {
-        if (receiveThread != null)
-            receiveThread.Abort();
+        //if (receiveThread != null)
+        //    receiveThread.Abort();
 
+        //client.Close();
+    }
+    private void OnApplicationQuit()
+    {
         client.Close();
     }
-
 }
