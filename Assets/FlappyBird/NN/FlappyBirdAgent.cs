@@ -42,14 +42,14 @@ public class FlappyBirdAgent : MonoBehaviour
     }
     int action;
     double[] state, state_ = new double[3];
-    bool newData = false;
+    bool newData = true;
     IEnumerator ActionMaker()
     {
         while (birdControl.inGame || birdControl.dead)
         {
             ChooseAction();
             yield return new WaitForSeconds(delay);
-            yield return new WaitWhile(() => newData);
+            yield return new WaitWhile(() => !newData);
             newData = false;
             if (birdControl.dead)
                 break;
