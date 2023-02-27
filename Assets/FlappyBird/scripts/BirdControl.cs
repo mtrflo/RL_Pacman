@@ -74,11 +74,11 @@ public class BirdControl : MonoBehaviour {
 		{
             if (!dead)
             {
-                GameObject[] objs = GameObject.FindGameObjectsWithTag("movable");
-                foreach (GameObject g in objs)
-                {
-                    g.BroadcastMessage("GameOver");
-                }
+                //GameObject[] objs = GameObject.FindGameObjectsWithTag("movable");
+                //foreach (GameObject g in objs)
+                //{
+                //    g.BroadcastMessage("GameOver");
+                //}
 
                 GetComponent<Animator>().SetTrigger("die");
                 AudioSource.PlayClipAtPoint(hit, Vector3.zero);

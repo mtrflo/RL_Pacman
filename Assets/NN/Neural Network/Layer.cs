@@ -1,4 +1,7 @@
+using Unity.VisualScripting.FullSerializer;
 using static System.Math;
+using UnityEngine;
+using Unity.VisualScripting;
 
 public class Layer
 {
@@ -123,10 +126,12 @@ public class Layer
             // Evaluate partial derivatives for current node: cost/activation & activation/weightedInput
             double costDerivative = cost.CostDerivative(predictedOutputs[i], expectedOutputs[i]);
             double activationDerivative = activation.Derivative(layerLearnData.weightedInputs, i);
-            layerLearnData.nodeValues[i] = 0;
+            //layerLearnData.nodeValues[i] = 0;
             //if (i == action)
                 layerLearnData.nodeValues[i] = costDerivative * activationDerivative;
         }
+        Debug.Log("CalculateOutputLayerNodeValues : "+ layerLearnData.nodeValues.ToCommaSeparatedString());
+        
     }
 
     // Calculate the "node values" for a hidden layer. This is an array containing for each node:

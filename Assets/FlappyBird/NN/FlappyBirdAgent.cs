@@ -10,6 +10,7 @@ using UnityEngine.SceneManagement;
 
 public class FlappyBirdAgent : MonoBehaviour
 {
+    public static int birdsCount = 0;
     public GameMain gameMain;
     public BirdControl birdControl;
     public DQNAgent dQNAgent => DQNAgent.me;
@@ -24,7 +25,8 @@ public class FlappyBirdAgent : MonoBehaviour
     Transition transition;
     private void Awake()
     {
-        transition = new Transition();
+        birdsCount++;
+        dQNAgent = FindObjectOfType<DQNAgent>();
     }
     Rigidbody2D rb;
     private void Start()
@@ -56,8 +58,9 @@ public class FlappyBirdAgent : MonoBehaviour
             if (birdControl.dead)
                 break;
         }
-        
-        Invoke("Restart", Time.deltaTime * 3);
+        if (birdControl.dead)
+            Restart();
+            //Invoke("Restart", Time.deltaTime * 3);
     }
     void ChooseAction()
     {
@@ -88,7 +91,8 @@ public class FlappyBirdAgent : MonoBehaviour
         if (maxEpisodeCount < episodeCount)
         {
             maxEpisodeCount = episodeCount;
-            print("maxEpisodeCount : " + maxEpisodeCount);
+            print("maxEpisodeCount : "+maxEpisodeCount);
+            dQNAgent.ReplaceTarget();
         }
     }
     public Transform[] rayPoints;
@@ -128,7 +132,11 @@ public class FlappyBirdAgent : MonoBehaviour
 
     void Restart()
     {
-        print("res");
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        birdsCount--;
+        if (birdsCount <= 0)
+        {
+            birdsCount = 0;
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
     }
 }

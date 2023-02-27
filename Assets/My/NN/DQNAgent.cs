@@ -50,7 +50,7 @@ public class DQNAgent : MonoBehaviour
 
     public void Learn(double[] state, int action, double[] state_, double reward, bool isEnd = false)
     {
-        reward = -reward;
+        //reward = -reward;
         double[] predictedValues = mainTrainer.neuralNetwork.Forward(state);
         double QEval = predictedValues[action];
         double QNext = targetTrainer.neuralNetwork.Forward(state_).Max();
@@ -63,17 +63,16 @@ public class DQNAgent : MonoBehaviour
         double[] expectedValues = new double[predictedValues.Length];
         for (int i = 0; i < predictedValues.Length; i++)
         {
-            expectedValues[i] = predictedValues[i] - (QTarget - QEval);
+            expectedValues[i] = predictedValues[i] * - (QTarget - QEval);
         }
         expectedValues[action] = QTarget;
         mainTrainer.Learn(state, action, predictedValues, expectedValues);
+    }
 
-        if (replaceTargetCount == step)
-        {
-            targetTrainer.Clone(mainTrainer);
-            step = 0;
-        }
-        step++;
+    public void ReplaceTarget()
+    {
+        targetTrainer.Clone(mainTrainer);
+        print("replace");
     }
 }
 [Serializable]
