@@ -63,7 +63,7 @@ public class DQNAgent : MonoBehaviour
         double[] expectedValues = new double[predictedValues.Length];
         for (int i = 0; i < predictedValues.Length; i++)
         {
-            expectedValues[i] = predictedValues[i] * - (QTarget - QEval);
+            expectedValues[i] = 0;// predictedValues[i] * - (QTarget - QEval);
         }
         expectedValues[action] = QTarget;
         mainTrainer.Learn(state, action, predictedValues, expectedValues);

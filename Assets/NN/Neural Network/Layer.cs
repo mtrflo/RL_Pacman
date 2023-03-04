@@ -126,8 +126,9 @@ public class Layer
             // Evaluate partial derivatives for current node: cost/activation & activation/weightedInput
             double costDerivative = cost.CostDerivative(predictedOutputs[i], expectedOutputs[i]);
             double activationDerivative = activation.Derivative(layerLearnData.weightedInputs, i);
-            //layerLearnData.nodeValues[i] = 0;
-            //if (i == action)
+            //double activationDerivative = layerLearnData.inputs[i];
+            layerLearnData.nodeValues[i] = 0;
+            if (i == action)
                 layerLearnData.nodeValues[i] = costDerivative * activationDerivative;
         }
         Debug.Log("CalculateOutputLayerNodeValues : "+ layerLearnData.nodeValues.ToCommaSeparatedString());
