@@ -26,7 +26,6 @@ public class FlappyBirdAgent : MonoBehaviour
     private void Awake()
     {
         birdsCount++;
-        dQNAgent = FindObjectOfType<DQNAgent>();
     }
     Rigidbody2D rb;
     private void Start()
