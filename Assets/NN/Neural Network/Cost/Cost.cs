@@ -39,7 +39,7 @@ public class Cost
         public double CostDerivative(double predictedOutput, double expectedOutput)
         {
             //UnityEngine.Debug.Log("CostDerivative : " + (predictedOutput - expectedOutput));
-            return -2*(predictedOutput - expectedOutput);
+            return predictedOutput - expectedOutput;
         }
 
         public CostType CostFunctionType()

@@ -75,14 +75,26 @@ public class FlappyBirdAgent : MonoBehaviour
             reward = terminateReward;
         print("action : " + action);
         print("reward : " + reward);
-        transition.Set(state, action, state_, reward, birdControl.dead);
+        //transition.Set(state, action, state_, reward, birdControl.dead);
         //print("json : " + JsonUtility.ToJson(transition));
-        CA2(udpSocket.SendAndGetData(JsonUtility.ToJson(transition)));
+        //CA2(udpSocket.SendAndGetData(JsonUtility.ToJson(transition)));
+        dQNAgent.Learn(state,action,state_,reward, birdControl.dead);
+        action = dQNAgent.ChooseAction(state);
+        MakeAction(action);
+        state = state_;
+
+        episodeCount++;
+        if (maxEpisodeCount < episodeCount)
+        {
+            maxEpisodeCount = episodeCount;
+            print("maxEpisodeCount : " + maxEpisodeCount);
+            dQNAgent.ReplaceTarget();
+        }
     }
     private void CA2(string data)
     {
         print("data : " + data);
-        action = int.Parse(data,0);//dQNAgent.ChooseAction(state);
+        action = dQNAgent.ChooseAction(state);
         MakeAction(action);
         state = state_;
 

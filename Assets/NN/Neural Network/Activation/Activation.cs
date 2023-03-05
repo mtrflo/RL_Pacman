@@ -29,7 +29,7 @@ public readonly struct Activation
             case ActivationType.Softmax:
                 return new Softmax();
             case ActivationType.RL:
-                return new RL();
+                return new Linear();
             default:
                 UnityEngine.Debug.LogError("Unhandled activation type");
                 return new Sigmoid();
@@ -146,7 +146,7 @@ public readonly struct Activation
             return ActivationType.Softmax;
         }
     }
-    public readonly struct RL : IActivation
+    public readonly struct Linear : IActivation
     {
         public double Activate(double[] inputs, int index)
         {
@@ -155,7 +155,7 @@ public readonly struct Activation
 
         public double Derivative(double[] inputs, int index)
         {
-            return 1;
+            return inputs[index];
         }
 
         public ActivationType GetActivationType()
