@@ -48,29 +48,65 @@ public class NNLayer
         return output;
     }
 
-    public void UpdateWeights(double gradient)
+    public void UpdateWeights(double[] gradient)
     {
         for (int i = 0; i < input_size; i++)
             for (int j = 0; j < output_size; j++)
-                weights[i][j] -= lr * gradient;
+                weights[i][j] -= lr * gradient[i];
     }
 
     public double[] Backward(double[] gradient)
     {
-        double[] delta_i = default;
+        if (activation.GetActivationType() != Activation.ActivationType.Linear)
+        {
+            //gradient = MathUtils.Multiply(activation.Derivative(dot_bias), gradient);
+            for (int i = 0; i < gradient.Length; i++)
+            {
+                gradient[i] = activation.Derivative(dot_bias, i) * gradient[i];
+            }
+        }
 
-        return delta_i;
+        double[] dW = new double[output_size];
+        //for (int i=0; i<output_size; i++) 
+        //{
+        //    dW[i] = MathUtils.Dot();
+        //}
+        //this.UpdateWeights(dW);
+        
+        //double[] dA = new dounle [];
+        //for () {
+        //MathUtils.Dot(gradient, this.weights);
+
+        //}
+
+        return default;
     }
 }
 
 public static class MathUtils
 {
+    public static double Dot(double[] v1, double value)
+    {
+        double res = 0;
+        for (int i = 0; i < v1.Length; i++)
+            res += v1[i] * value;
+
+        return res;
+    }
     public static double Dot(double[] v1, double[] v2)
     {
         double res = 0;
         for (int i = 0; i < v1.Length; i++)
             res += v1[i] * v2[i];
 
+        return res;
+    }
+
+    public static double[] Multiply(double[] v1, double[] v2)
+    {
+        double[] res = new double[v1.Length];
+        for (int i = 0; i < res.Length; i++)
+            res[i] = v1[i] * v2[i];
         return res;
     }
 }

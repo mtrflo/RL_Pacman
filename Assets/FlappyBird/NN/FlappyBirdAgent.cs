@@ -14,6 +14,7 @@ public class FlappyBirdAgent : MonoBehaviour
     public GameMain gameMain;
     public BirdControl birdControl;
     public DQNAgent dQNAgent => DQNAgent.me;
+    public RLAgent rLAgent => MonoRLAgent.me.rLAgent;
 
     public float delay;
 
@@ -63,7 +64,6 @@ public class FlappyBirdAgent : MonoBehaviour
     }
     void ChooseAction()
     {
-        print("ChooseAction");
         isWaiting = true;
         state_[0] = GetRayDistances()[0];
         state_[1] = GetRayDistances()[1];
@@ -75,11 +75,10 @@ public class FlappyBirdAgent : MonoBehaviour
             reward = terminateReward;
         print("action : " + action);
         print("reward : " + reward);
-        //transition.Set(state, action, state_, reward, birdControl.dead);
-        //print("json : " + JsonUtility.ToJson(transition));
-        //CA2(udpSocket.SendAndGetData(JsonUtility.ToJson(transition)));
-        dQNAgent.Learn(state,action,state_,reward, birdControl.dead);
-        action = dQNAgent.ChooseAction(state);
+        transition.Set(state, action, state_, reward, birdControl.dead);
+        action = rLAgent.SelectAction(state);
+        rLAgent.Remember(transition);
+        rLAgent.ExperienceReplay();
         MakeAction(action);
         state = state_;
 
@@ -91,32 +90,14 @@ public class FlappyBirdAgent : MonoBehaviour
             dQNAgent.ReplaceTarget();
         }
     }
-    private void CA2(string data)
-    {
-        print("data : " + data);
-        action = dQNAgent.ChooseAction(state);
-        MakeAction(action);
-        state = state_;
 
-        episodeCount++;
-        if (maxEpisodeCount < episodeCount)
-        {
-            maxEpisodeCount = episodeCount;
-            print("maxEpisodeCount : "+maxEpisodeCount);
-            dQNAgent.ReplaceTarget();
-        }
-    }
     public Transform[] rayPoints;
     double[] GetRayDistances()
     {
         double[] distances = new double[rayPoints.Length];
 
         for (int i = 0; i < distances.Length; i++)
-        {
             distances[i] = GetRayLength(rayPoints[i]);
-            //print(i + " dist : " + distances[i]);
-
-        }
         return distances;
     }
 
@@ -134,11 +115,7 @@ public class FlappyBirdAgent : MonoBehaviour
     void MakeAction(int action)
     {
         if (action == 1)
-        {
-            print("jump action");
-            print("jump null : "+birdControl==null);
             birdControl.JumpUp();
-        }
     }
 
     void Restart()

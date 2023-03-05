@@ -11,7 +11,8 @@ public readonly struct Activation
         ReLU,
         SiLU,
         Softmax,
-        RL
+        RL,
+        Linear
     }
 
     public static IActivation GetActivationFromType(ActivationType type)
