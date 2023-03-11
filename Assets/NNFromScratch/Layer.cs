@@ -1,20 +1,27 @@
+using System;
+using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
 namespace MonoRL
 {
-
+    [Serializable]
     public class Layer
     {
+        [SerializeField]
         public readonly int InputSize;//size
+        [SerializeField]
         public readonly int NodeSize;//size
 
-        public double[,] Weights;//data
+        public List<Weights> Weights;//data
         public double[] Biases;
         public IActivation Activation;
 
+        [SerializeField]
         private double[] _Delta;
+        [SerializeField]
         private double[] _Inputs;//data
+        [SerializeField]
         private double[] _Outputs;
 
         public Layer(int inputSize, int nodeSize, Activation.ActivationType activationType)
@@ -22,7 +29,7 @@ namespace MonoRL
             InputSize = inputSize;
             NodeSize = nodeSize;
             Activation = MonoRL.Activation.GetActivationFromType(activationType);
-            Weights = new double[nodeSize, inputSize];
+            Weights = new List<Weights>();
             Biases = new double[nodeSize];
             _Delta = new double[nodeSize];
             _Inputs = new double[inputSize];
@@ -40,7 +47,7 @@ namespace MonoRL
                 calculatedOutputs[nodeIndex] = 0;
                 for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
                 {
-                    calculatedOutputs[nodeIndex] += Weights[nodeIndex, inputIndex] * inputs[inputIndex];
+                    calculatedOutputs[nodeIndex] += Weights[nodeIndex].weigths[inputIndex] * inputs[inputIndex];
                 }
                 calculatedOutputs[nodeIndex] += Biases[nodeIndex];
             }
@@ -73,7 +80,7 @@ namespace MonoRL
                 propagatedDelta[inputIndex] = 0;
                 for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
                 {
-                    propagatedDelta[inputIndex] += _Delta[nodeIndex] * Weights[nodeIndex, inputIndex];
+                    propagatedDelta[inputIndex] += _Delta[nodeIndex] * Weights[nodeIndex].weigths[inputIndex];
                 }
             }
 
@@ -87,7 +94,7 @@ namespace MonoRL
                 for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
                 {
                     double gradW = _Delta[nodeIndex] * _Inputs[inputIndex];
-                    Weights[nodeIndex, inputIndex] -= lr * gradW;
+                    Weights[nodeIndex].weigths[inputIndex] -= lr * gradW;
                 }
             }
             //Debug.Log("Weights : " + Weights.ToCommaSeparatedString());
@@ -107,8 +114,11 @@ namespace MonoRL
         private void InitializeWeights()
         {
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
+            {
+                Weights.Add(new Weights());
                 for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
-                    Weights[nodeIndex, inputIndex] = 0.5;
+                    Weights[nodeIndex].weigths.Add(0.5);
+            }
         }
 
         private void InitializeBiases()
@@ -118,4 +128,13 @@ namespace MonoRL
         }
     }
 
+}
+[Serializable]
+public class Weights
+{
+    public List<double> weigths;
+    public Weights()
+    {
+        weigths = new List<double>();
+    }
 }

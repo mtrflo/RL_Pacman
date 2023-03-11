@@ -110,7 +110,6 @@ public class BirdControl : MonoBehaviour {
     {
         transform.GetComponent<Rigidbody2D>().velocity = new Vector2(0, upSpeed);
         AudioSource.PlayClipAtPoint(jumpUp, Vector3.zero);
-		print("jump");
     }
 	
 	public void GameOver()

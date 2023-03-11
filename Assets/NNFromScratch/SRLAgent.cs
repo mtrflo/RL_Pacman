@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -15,7 +16,7 @@ namespace MonoRL
         public float gamma = 0.8f;
         [Range(0, 1)]
         public float lr = 0.1f;
-        Network network,targetNetwork;
+        public Network network,targetNetwork;
 
         private void Awake()
         {
@@ -38,9 +39,9 @@ namespace MonoRL
             if (e > epsilon)
             {
                 double[] actionValues = network.Forward(observation);
-                //print("actionValues : " + actionValues.ToCommaSeparatedString());
-                if (actionValues[0] == double.NaN)
-                    Debug.Log("NAAAAAAAAAAAAAAAAAAAAAAAAAN");
+                print("actionValues : " + actionValues.ToCommaSeparatedString());
+                //if (actionValues[0] == double.NaN)
+                //    Debug.Log("NAAAAAAAAAAAAAAAAAAAAAAAAAN");
                 action = actionValues.ToList().IndexOf(actionValues.Max());
             }
             else
@@ -73,6 +74,16 @@ namespace MonoRL
                 targetNetwork.Layers[i].Weights = network.Layers[i].Weights;
                 targetNetwork.Layers[i].Biases = network.Layers[i].Biases;
             }
+        }
+        [ContextMenu("Save")]
+        public void SaveNetwork()
+        {
+            string data = JsonUtility.ToJson(network);
+            File.WriteAllText(Path.Combine(Application.streamingAssetsPath,"network.net"),data);
+        }
+        public void LoadNetwork()
+        {
+
         }
     }
 }

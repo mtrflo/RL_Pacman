@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using MonoRL;
 namespace MonoRL
 {
-
+    [Serializable]
     public class Network
     {
         public List<Layer> Layers = new List<Layer>();

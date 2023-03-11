@@ -11,6 +11,7 @@ namespace MonoRL
         {
             ReLU,
             Sigmoid,
+            TanH,
             Linear
         }
 
@@ -22,6 +23,10 @@ namespace MonoRL
                     return new ReLU();
                 case ActivationType.Linear:
                     return new Linear();
+                case ActivationType.Sigmoid:
+                    return new Sigmoid();
+                case ActivationType.TanH:
+                    return new TanH();
                 default:
                     UnityEngine.Debug.LogError("Unhandled activation type");
                     return new Linear();
@@ -80,6 +85,28 @@ namespace MonoRL
             public ActivationType GetActivationType()
             {
                 return ActivationType.Sigmoid;
+            }
+        }
+
+
+        public readonly struct TanH : IActivation
+        {
+            public double Activate(double z)
+            {
+                double e2 = Exp(2 * z);
+                return (e2 - 1) / (e2 + 1);
+            }
+
+            public double Derivative(double z)
+            {
+                double e2 = Exp(2 * z);
+                double t = (e2 - 1) / (e2 + 1);
+                return 1 - t * t;
+            }
+
+            public ActivationType GetActivationType()
+            {
+                return ActivationType.TanH;
             }
         }
     }

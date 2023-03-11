@@ -46,7 +46,6 @@ public class FlappyBirdAgent : MonoBehaviour
     }
     int action;
     double[] state, state_ = new double[3];
-    bool isWaiting = true;
     IEnumerator ActionMaker()
     {
         WaitForSecondsRealtime wfsr = new WaitForSecondsRealtime(delay);
@@ -62,7 +61,6 @@ public class FlappyBirdAgent : MonoBehaviour
     }
     void ChooseAction()
     {
-        isWaiting = true;
         state_[0] = GetRayDistances()[0];
         state_[1] = GetRayDistances()[1];
         state_[2] = rb.velocity.y;
