@@ -1,5 +1,5 @@
-using static System.Math;
-
+using Unity.VisualScripting;
+using UnityEngine;
 
 namespace MonoRL
 {
@@ -95,6 +95,7 @@ namespace MonoRL
                     Weights[nodeIndex, inputIndex] -= lr * gradW;
                 }
             }
+            Debug.Log("Weights : " + Weights.ToCommaSeparatedString());
         }
 
         private void UpdateBiases(double lr)
@@ -104,13 +105,15 @@ namespace MonoRL
                 double gradB = _Delta[nodeIndex];
                 Biases[nodeIndex] -= lr * gradB;
             }
+
+            Debug.Log("UpdateBiases : " + Biases.ToCommaSeparatedString());
         }
 
         private void InitializeWeights()
         {
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
                 for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
-                    Weights[nodeIndex, inputIndex] = 0;
+                    Weights[nodeIndex, inputIndex] = 1;
         }
 
         private void InitializeBiases()
