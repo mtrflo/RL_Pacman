@@ -15,7 +15,7 @@ public class FlappyBirdAgent : MonoBehaviour
     public static int birdsCount = 0;
     public GameMain gameMain;
     public BirdControl birdControl;
-    public DQNAgent dQNAgent => DQNAgent.me;
+    //public DQNAgent dQNAgent => DQNAgent.me;
     public SRLAgent rLAgent => SRLAgent.me;
 
     public float delay;
@@ -25,7 +25,7 @@ public class FlappyBirdAgent : MonoBehaviour
     public int episodeCount;
     public int transitionCount;
     public UdpSocket udpSocket => UdpSocket.me;
-    Transition transition;
+    Transition transition = new Transition();
     private void Awake()
     {
         birdsCount++;
@@ -83,12 +83,12 @@ public class FlappyBirdAgent : MonoBehaviour
         state = state_;
         rLAgent.Learn(transition);
         episodeCount++;
-        if (maxEpisodeCount < episodeCount)
-        {
-            maxEpisodeCount = episodeCount;
-            print("maxEpisodeCount : " + maxEpisodeCount);
-            dQNAgent.ReplaceTarget();
-        }
+        //if (maxEpisodeCount < episodeCount)
+        //{
+        //    maxEpisodeCount = episodeCount;
+        //    print("maxEpisodeCount : " + maxEpisodeCount);
+        //    dQNAgent.ReplaceTarget();
+        //}
     }
 
     public Transform[] rayPoints;

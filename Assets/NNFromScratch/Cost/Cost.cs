@@ -1,4 +1,8 @@
 using System;
+using System.Diagnostics;
+using System.Security.Principal;
+using Unity.VisualScripting.FullSerializer;
+
 namespace MonoRL
 {
 
@@ -33,6 +37,27 @@ namespace MonoRL
             public double CostDerivative(double a, double y)
             {
                 return 1;
+            }
+
+            public CostType CostFunctionType()
+            {
+                return CostType.DistanceError;
+            }
+        }
+
+        public class SquaredError : ICost
+        {
+            public double CostFunction(double a, double y)
+            {
+                UnityEngine.Debug.Log("CostFunction : " + Math.Pow(a - y, 2));
+
+                return Math.Pow(a - y, 2);
+            }
+
+            public double CostDerivative(double a, double y)
+            {
+                UnityEngine.Debug.Log("CostDerivative : " + (2 * (a - y)));
+                return 2*(a - y);
             }
 
             public CostType CostFunctionType()

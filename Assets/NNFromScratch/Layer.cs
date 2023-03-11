@@ -6,84 +6,79 @@ namespace MonoRL
 
     public class Layer
     {
-        public readonly int inputs;
-        public readonly int nodes;
+        public readonly int InputSize;//size
+        public readonly int NodeSize;//size
 
-        public double[][] weights;
-        public double[] biases;
-        public IActivation activation;
+        public double[,] Weights;//data
+        public double[] Biases;
+        public IActivation Activation;
 
-        private double[] delta;
-        private double[] X;
-        private double[] Z;
-        private double[] A;
-
-        double learningRate = 0.3;
-
-        public Layer(int inputs, int nodes, Activation.ActivationType activationType)
+        private double[] _Delta;
+        private double[] _Inputs;//data
+        private double[] _Outputs;
+        
+        public Layer(int inputSize, int nodeSize, Activation.ActivationType activationType)
         {
-            this.inputs = inputs;
-            this.nodes = nodes;
-            this.activation = Activation.GetActivationFromType(activationType);
-            this.weights = new double[inputs][];
-            this.biases = new double[nodes];
-            this.delta = new double[nodes];
-            this.X = new double[nodes];
-            this.Z = new double[nodes];
-            this.A = new double[nodes];
+            InputSize = inputSize;
+            NodeSize = nodeSize;
+            Activation = MonoRL.Activation.GetActivationFromType(activationType);
+            Weights = new double[nodeSize,inputSize];
+            Biases = new double[nodeSize];
+            _Delta = new double[nodeSize];
+            _Inputs = new double[nodeSize];
+            _Outputs = new double[nodeSize];
 
             InitializeWeights();
             InitializeBiases();
         }
 
-        public double[] Forward(double[] X)
+        public double[] Forward(double[] inputs)
         {
-            double[] Z = new double[nodes];
-            for (int node = 0; node < this.nodes; node++)
+            double[] calculatedOutputs = new double[NodeSize];
+            for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
-                Z[node] = 0;
-                for (int input = 0; input  < this.inputs; input++)
+                calculatedOutputs[nodeIndex] = 0;
+                for (int inputIndex = 0; inputIndex  < InputSize; inputIndex++)
                 {
-                    Z[node] += this.weights[node][input] * X[input] + this.biases[node];
+                    calculatedOutputs[nodeIndex] += Weights[nodeIndex,inputIndex] * inputs[inputIndex] + Biases[nodeIndex];
                 }
             }
 
-            double[] A = new double[nodes];
-            for (int node = 0; node < this.nodes; node++)
+            double[] activatedValues = new double[NodeSize];
+            for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
-                A[node] = this.activation.Activate(Z[node]);
+                activatedValues[nodeIndex] = Activation.Activate(calculatedOutputs[nodeIndex]);
             }
 
-            this.X = X;
-            this.Z = Z;
-            this.A = A;
+            _Inputs = inputs;
+            _Outputs = calculatedOutputs;
 
-            return A;
+            return activatedValues;
         }
 
         public double[] Backward(double lr, double[] deltas)
         {
-            for (int node = 0; node < this.nodes; node++)
+            for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
-                this.delta[node] = 0;
+                _Delta[nodeIndex] = 0;
                 for (int i = 0; i < deltas.Length; i++)
                 {
-                    double delta_ = delta[i];
-                    double z = this.Z[node];
-                    this.delta[node] += delta_ * this.activation.Derivative(z);
+                    double delta_ = _Delta[i];
+                    double output = _Outputs[nodeIndex];
+                    _Delta[nodeIndex] += delta_ * Activation.Derivative(output);
                 }
             }
 
             UpdateWeights(lr);
             UpdateBiases(lr);
 
-            double[] propagatedDelta = new double[this.inputs];
-            for (int input = 0; input < this.inputs; input++)
+            double[] propagatedDelta = new double[InputSize];
+            for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
             {
-                propagatedDelta[input] = 0;
-                for (int node = 0; node < this.nodes; node++)
+                propagatedDelta[inputIndex] = 0;
+                for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
                 {
-                    propagatedDelta[input] += this.delta[node] * this.weights[node][input];
+                    propagatedDelta[inputIndex] += _Delta[nodeIndex] * Weights[nodeIndex, inputIndex];
                 }
             }
 
@@ -92,42 +87,36 @@ namespace MonoRL
 
         private void UpdateWeights(double lr)
         {
-            for (int node = 0; node < this.nodes; node++)
+            for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
-                for (int input = 0; input < this.inputs; input++)
+                for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
                 {
-                    double gradW = this.delta[node] * this.X[input];
-                    this.weights[node][input] -= lr * gradW;
+                    double gradW = _Delta[nodeIndex] * _Inputs[inputIndex];
+                    Weights[nodeIndex, inputIndex] -= lr * gradW;
                 }
             }
         }
 
         private void UpdateBiases(double lr)
         {
-            for (int node = 0; node < this.nodes; node++)
+            for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
-                double gradB = this.delta[node];
-                this.biases[node] -= lr * gradB;
+                double gradB = _Delta[nodeIndex];
+                Biases[nodeIndex] -= lr * gradB;
             }
         }
 
         private void InitializeWeights()
         {
-            for (int node = 0; node < this.nodes; node++)
-            {
-                for (int input = 0; input < this.inputs; input++)
-                {
-                    this.weights[node][input] = 0;
-                }
-            }
+            for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
+                for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
+                    Weights[nodeIndex, inputIndex] = 0;
         }
 
         private void InitializeBiases()
         {
-            for (int node = 0; node < this.nodes; node++)
-            {
-                this.biases[node] = 0;
-            }
+            for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
+                Biases[nodeIndex] = 0;
         }
     }
 

@@ -7,45 +7,41 @@ namespace MonoRL
 
     public class Network
     {
-        public List<Layer> layers;
-        public double learningRate = 0.003;
-        public ICost cost;
+        public List<Layer> Layers = new List<Layer>();
+        public double LearningRate = 0.003;
+        public ICost Cost;
 
 
-        public Network()
+        public Network(double learningRate = 0.003)
         {
-            this.cost = new Cost.DistanceError();
-            this.layers.Add(new Layer(3, 4, Activation.ActivationType.ReLU));
-            this.layers.Add(new Layer(4, 10, Activation.ActivationType.ReLU));
-            this.layers.Add(new Layer(10, 2, Activation.ActivationType.Linear));
+            LearningRate = learningRate;
+            Cost = new Cost.SquaredError();
+            Layers.Add(new Layer(3, 4, Activation.ActivationType.ReLU));
+            Layers.Add(new Layer(4, 10, Activation.ActivationType.ReLU));
+            Layers.Add(new Layer(10, 2, Activation.ActivationType.Linear));
         }
 
-        public double[] Forward(double[] input)
+        public double[] Forward(double[] inputs)
         {
-            for (int i = 0; i < this.layers.Count; i++)
-            {
-                input = this.layers[i].Forward(input);
-            }
-            double[] output = input;
-            return output;
+            for (int i = 0; i < Layers.Count; i++)
+                inputs = Layers[i].Forward(inputs);
+            return inputs;
         }
 
-        public void Backward(double[] input, double[] Y)
+        public void Backward(double[] inputs, double[] expectedOutputs)
         {
-            Layer outputLayer = this.layers[this.layers.Count - 1];
-            double[] deltas = new double[outputLayer.nodes];
-            double[] output = this.Forward(input);
+            Layer outputLayer = Layers[Layers.Count - 1];
+            double[] deltas = new double[outputLayer.NodeSize];
+            double[] output = Forward(inputs);
 
-            for (int i = 0; i < outputLayer.nodes; i++)
-            {
-                deltas[i] = this.cost.CostDerivative(output[i], Y[i]);
-            }
+            for (int i = 0; i < outputLayer.NodeSize; i++)
+                deltas[i] = Cost.CostDerivative(output[i], expectedOutputs[i]);
 
-            input = outputLayer.Backward(this.learningRate, deltas);
-            for (int i = this.layers.Count - 2; i >= 0; i--)
+            inputs = outputLayer.Backward(LearningRate, deltas);
+            for (int i = Layers.Count - 2; i >= 0; i--)
             {
-                Layer layer = this.layers[i];
-                input = layer.Backward(this.learningRate, input);
+                Layer layer = Layers[i];
+                inputs = layer.Backward(LearningRate, inputs);
             }
         }
     }
