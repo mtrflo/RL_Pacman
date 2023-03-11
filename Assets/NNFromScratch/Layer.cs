@@ -63,9 +63,8 @@ namespace MonoRL
                 _Delta[nodeIndex] = 0;
                 for (int i = 0; i < deltas.Length; i++)
                 {
-                    double delta_ = _Delta[i];
                     double output = _Outputs[nodeIndex];
-                    _Delta[nodeIndex] += delta_ * Activation.Derivative(output);
+                    _Delta[nodeIndex] += deltas[i] * Activation.Derivative(output);
                 }
             }
 
