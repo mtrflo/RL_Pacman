@@ -25,7 +25,7 @@ namespace MonoRL
             Weights = new double[nodeSize, inputSize];
             Biases = new double[nodeSize];
             _Delta = new double[nodeSize];
-            _Inputs = new double[nodeSize];
+            _Inputs = new double[inputSize];
             _Outputs = new double[nodeSize];
 
             InitializeWeights();
@@ -108,13 +108,13 @@ namespace MonoRL
         {
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
                 for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
-                    Weights[nodeIndex, inputIndex] = 1;
+                    Weights[nodeIndex, inputIndex] = 0.5;
         }
 
         private void InitializeBiases()
         {
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
-                Biases[nodeIndex] = 0;
+                Biases[nodeIndex] = 0.5;
         }
     }
 

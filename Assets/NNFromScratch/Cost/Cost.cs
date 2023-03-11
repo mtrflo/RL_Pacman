@@ -12,6 +12,7 @@ namespace MonoRL
         public enum CostType
         {
             DistanceError,
+            SquaredError
         }
 
         public static ICost GetCostFromType(CostType type)
@@ -20,7 +21,8 @@ namespace MonoRL
             {
                 case CostType.DistanceError:
                     return new DistanceError();
-
+                case CostType.SquaredError:
+                    return new SquaredError();
                 default:
                     UnityEngine.Debug.LogError("Unhandled cost type");
                     return new DistanceError();

@@ -83,12 +83,12 @@ public class FlappyBirdAgent : MonoBehaviour
         state = state_;
         rLAgent.Learn(transition);
         episodeCount++;
-        //if (maxEpisodeCount < episodeCount)
-        //{
-        //    maxEpisodeCount = episodeCount;
-        //    print("maxEpisodeCount : " + maxEpisodeCount);
-        //    dQNAgent.ReplaceTarget();
-        //}
+        if (maxEpisodeCount < episodeCount)
+        {
+            maxEpisodeCount = episodeCount;
+            print("maxEpisodeCount : " + maxEpisodeCount);
+            //dQNAgent.ReplaceTarget();
+        }
     }
 
     public Transform[] rayPoints;

@@ -10,6 +10,7 @@ namespace MonoRL
         public enum ActivationType
         {
             ReLU,
+            Sigmoid,
             Linear
         }
 
@@ -60,6 +61,25 @@ namespace MonoRL
             public ActivationType GetActivationType()
             {
                 return ActivationType.Linear;
+            }
+        }
+
+        public readonly struct Sigmoid : IActivation
+        {
+            public double Activate(double z)
+            {
+                return 1.0 / (1 + Exp(-z));
+            }
+
+            public double Derivative(double z)
+            {
+                double a = Activate(z);
+                return a * (1 - a);
+            }
+
+            public ActivationType GetActivationType()
+            {
+                return ActivationType.Sigmoid;
             }
         }
     }
