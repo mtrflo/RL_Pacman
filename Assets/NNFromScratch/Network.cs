@@ -7,18 +7,17 @@ namespace MonoRL
     [Serializable]
     public class Network
     {
-        public List<Layer> Layers = new List<Layer>();
         public double LearningRate = 0.003;
+        public Activation.ActivationType hiddenAType, outputAType;
+        public List<Layer> Layers = new List<Layer>();
+
         public ICost Cost;
-
-
-        public Network(double learningRate = 0.003)
+        public void Init()
         {
-            LearningRate = learningRate;
             Cost = new Cost.SquaredError();
-            Layers.Add(new Layer(3, 4, Activation.ActivationType.ReLU));
-            Layers.Add(new Layer(4, 10, Activation.ActivationType.ReLU));
-            Layers.Add(new Layer(10, 2, Activation.ActivationType.Linear));
+            Layers.Add(new Layer(3, 4, hiddenAType));
+            Layers.Add(new Layer(4, 10, hiddenAType));
+            Layers.Add(new Layer(10, 2, outputAType));
         }
 
         public double[] Forward(double[] inputs)
