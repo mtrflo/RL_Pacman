@@ -50,19 +50,16 @@ public class FlappyBirdAgent : MonoBehaviour
     bool isWaiting = true;
     IEnumerator ActionMaker()
     {
-        WaitForSeconds wfs = new WaitForSeconds(delay);
-        WaitWhile wh = new WaitWhile(()=>isWaiting);
+        WaitForSecondsRealtime wfsr = new WaitForSecondsRealtime(delay);
         while (birdControl.inGame || birdControl.dead)
         {
             ChooseAction();
-            //yield return wh;
-            yield return wfs;
+            yield return wfsr;
             if (birdControl.dead)
                 break;
         }
         if (birdControl.dead)
             Restart();
-            //Invoke("Restart", Time.deltaTime * 3);
     }
     void ChooseAction()
     {
@@ -87,7 +84,7 @@ public class FlappyBirdAgent : MonoBehaviour
         {
             maxEpisodeCount = episodeCount;
             print("maxEpisodeCount : " + maxEpisodeCount);
-            //dQNAgent.ReplaceTarget();
+            rLAgent.ReplaceTarget();
         }
     }
 
