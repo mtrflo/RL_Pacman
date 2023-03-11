@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using MonoRL;
+using Unity.MLAgents;
 
 public class FlappyBirdAgent : MonoBehaviour
 {
@@ -14,7 +16,7 @@ public class FlappyBirdAgent : MonoBehaviour
     public GameMain gameMain;
     public BirdControl birdControl;
     public DQNAgent dQNAgent => DQNAgent.me;
-    public RLAgent rLAgent => MonoRLAgent.me.rLAgent;
+    public SRLAgent rLAgent => SRLAgent.me;
 
     public float delay;
 
@@ -77,11 +79,9 @@ public class FlappyBirdAgent : MonoBehaviour
         print("reward : " + reward);
         transition.Set(state, action, state_, reward, birdControl.dead);
         action = rLAgent.SelectAction(state);
-        rLAgent.Remember(transition);
-        rLAgent.ExperienceReplay();
         MakeAction(action);
         state = state_;
-
+        rLAgent.Learn(transition);
         episodeCount++;
         if (maxEpisodeCount < episodeCount)
         {
