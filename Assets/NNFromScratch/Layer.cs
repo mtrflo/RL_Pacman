@@ -16,13 +16,13 @@ namespace MonoRL
         private double[] _Delta;
         private double[] _Inputs;//data
         private double[] _Outputs;
-        
+
         public Layer(int inputSize, int nodeSize, Activation.ActivationType activationType)
         {
             InputSize = inputSize;
             NodeSize = nodeSize;
             Activation = MonoRL.Activation.GetActivationFromType(activationType);
-            Weights = new double[nodeSize,inputSize];
+            Weights = new double[nodeSize, inputSize];
             Biases = new double[nodeSize];
             _Delta = new double[nodeSize];
             _Inputs = new double[nodeSize];
@@ -38,10 +38,11 @@ namespace MonoRL
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
                 calculatedOutputs[nodeIndex] = 0;
-                for (int inputIndex = 0; inputIndex  < InputSize; inputIndex++)
+                for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
                 {
-                    calculatedOutputs[nodeIndex] += Weights[nodeIndex,inputIndex] * inputs[inputIndex] + Biases[nodeIndex];
+                    calculatedOutputs[nodeIndex] += Weights[nodeIndex, inputIndex] * inputs[inputIndex];
                 }
+                calculatedOutputs[nodeIndex] += Biases[nodeIndex];
             }
 
             double[] activatedValues = new double[NodeSize];
@@ -60,12 +61,7 @@ namespace MonoRL
         {
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
-                _Delta[nodeIndex] = 0;
-                for (int i = 0; i < deltas.Length; i++)
-                {
-                    double output = _Outputs[nodeIndex];
-                    _Delta[nodeIndex] += deltas[i] * Activation.Derivative(output);
-                }
+                _Delta[nodeIndex] = deltas[nodeIndex] * Activation.Derivative(_Outputs[nodeIndex]);
             }
 
             UpdateWeights(lr);
