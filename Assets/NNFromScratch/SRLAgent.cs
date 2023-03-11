@@ -38,7 +38,9 @@ namespace MonoRL
             if (e > epsilon)
             {
                 double[] actionValues = network.Forward(observation);
-                print("actionValues : " + actionValues.ToCommaSeparatedString());
+                //print("actionValues : " + actionValues.ToCommaSeparatedString());
+                if (actionValues[0] == double.NaN)
+                    Debug.Log("NAAAAAAAAAAAAAAAAAAAAAAAAAN");
                 action = actionValues.ToList().IndexOf(actionValues.Max());
             }
             else

@@ -38,7 +38,6 @@ public class FlappyBirdAgent : MonoBehaviour
         birdControl.OnDie += ChooseAction;
         if (birdControl.inGame)
             Started();
-        print("start");
     }
 
     private void Started()
@@ -72,8 +71,8 @@ public class FlappyBirdAgent : MonoBehaviour
 
         if (birdControl.dead)
             reward = terminateReward;
-        print("action : " + action);
-        print("reward : " + reward);
+        //print("action : " + action);
+        //print("reward : " + reward);
         transition.Set(state, action, state_, reward, birdControl.dead);
         action = rLAgent.SelectAction(state);
         MakeAction(action);

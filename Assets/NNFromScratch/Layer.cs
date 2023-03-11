@@ -90,7 +90,7 @@ namespace MonoRL
                     Weights[nodeIndex, inputIndex] -= lr * gradW;
                 }
             }
-            Debug.Log("Weights : " + Weights.ToCommaSeparatedString());
+            //Debug.Log("Weights : " + Weights.ToCommaSeparatedString());
         }
 
         private void UpdateBiases(double lr)
@@ -101,7 +101,7 @@ namespace MonoRL
                 Biases[nodeIndex] -= lr * gradB;
             }
 
-            Debug.Log("UpdateBiases : " + Biases.ToCommaSeparatedString());
+            //Debug.Log("UpdateBiases : " + Biases.ToCommaSeparatedString());
         }
 
         private void InitializeWeights()
