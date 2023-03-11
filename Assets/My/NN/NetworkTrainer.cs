@@ -43,10 +43,10 @@ public class NetworkTrainer : MonoBehaviour
 
     public void StartTrainingSession()
     {
-        if (!hasLoaded)
-        {
-            LoadData();
-        }
+        //if (!hasLoaded)
+        //{
+        //    LoadData();
+        //}
 
         neuralNetwork = new NeuralNetwork(hyperParameters.layerSizes);
         var activation = Activation.GetActivationFromType(hyperParameters.activationType);
@@ -66,7 +66,7 @@ public class NetworkTrainer : MonoBehaviour
 
     void LoadData()
     {
-        return;
+        
         imageLoader = FindObjectOfType<ImageLoader>();
         allData = imageLoader.GetAllData();
         (trainingData, validationData) = DataSetHelper.SplitData(allData, trainingSplit);

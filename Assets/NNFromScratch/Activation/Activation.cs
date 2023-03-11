@@ -1,62 +1,66 @@
 using System.Diagnostics;
 using static System.Math;
-
-public readonly struct Activation
+namespace MonoRL
 {
 
-    public enum ActivationType
+
+    public readonly struct Activation
     {
-        ReLU,
-        Linear
-    }
 
-    public static IActivation GetActivationFromType(ActivationType type)
-    {
-        switch (type)
+        public enum ActivationType
         {
-            case ActivationType.ReLU:
-                return new ReLU();
-            case ActivationType.Linear:
-                return new Linear();
-            default:
-                UnityEngine.Debug.LogError("Unhandled activation type");
-                return new Linear();
-        }
-    }
-
-    public readonly struct ReLU : IActivation
-    {
-        public double Activate(double z)
-        {
-            return Max(0, z);
+            ReLU,
+            Linear
         }
 
-        public double Derivative(double z)
+        public static IActivation GetActivationFromType(ActivationType type)
         {
-            return (z > 0) ? 1 : 0;
+            switch (type)
+            {
+                case ActivationType.ReLU:
+                    return new ReLU();
+                case ActivationType.Linear:
+                    return new Linear();
+                default:
+                    UnityEngine.Debug.LogError("Unhandled activation type");
+                    return new Linear();
+            }
         }
 
-        public ActivationType GetActivationType()
+        public readonly struct ReLU : IActivation
         {
-            return ActivationType.ReLU;
-        }
-    }
+            public double Activate(double z)
+            {
+                return Max(0, z);
+            }
 
-    public readonly struct Linear : IActivation
-    {
-        public double Activate(double z)
-        {
-            return z;
+            public double Derivative(double z)
+            {
+                return (z > 0) ? 1 : 0;
+            }
+
+            public ActivationType GetActivationType()
+            {
+                return ActivationType.ReLU;
+            }
         }
 
-        public double Derivative(double z)
+        public readonly struct Linear : IActivation
         {
-            return 1;
-        }
+            public double Activate(double z)
+            {
+                return z;
+            }
 
-        public ActivationType GetActivationType()
-        {
-            return ActivationType.Linear;
+            public double Derivative(double z)
+            {
+                return 1;
+            }
+
+            public ActivationType GetActivationType()
+            {
+                return ActivationType.Linear;
+            }
         }
     }
 }

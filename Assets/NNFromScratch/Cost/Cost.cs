@@ -1,41 +1,44 @@
 using System;
-
-public class Cost
+namespace MonoRL
 {
 
-    public enum CostType
+    public class Cost
     {
-        DistanceError,
-    }
 
-    public static ICost GetCostFromType(CostType type)
-    {
-        switch (type)
+        public enum CostType
         {
-            case CostType.DistanceError:
-                return new DistanceError();
-
-            default:
-                UnityEngine.Debug.LogError("Unhandled cost type");
-                return new DistanceError();
-        }
-    }
-
-    public class DistanceError : ICost
-    {
-        public double CostFunction(double[] a, double[] y)
-        {
-            return a - y;
+            DistanceError,
         }
 
-        public double CostDerivative(double a, double y)
+        public static ICost GetCostFromType(CostType type)
         {
-            return 1;
+            switch (type)
+            {
+                case CostType.DistanceError:
+                    return new DistanceError();
+
+                default:
+                    UnityEngine.Debug.LogError("Unhandled cost type");
+                    return new DistanceError();
+            }
         }
 
-        public CostType CostFunctionType()
+        public class DistanceError : ICost
         {
-            return CostType.DistanceError;
+            public double CostFunction(double a, double y)
+            {
+                return a - y;
+            }
+
+            public double CostDerivative(double a, double y)
+            {
+                return 1;
+            }
+
+            public CostType CostFunctionType()
+            {
+                return CostType.DistanceError;
+            }
         }
     }
 }

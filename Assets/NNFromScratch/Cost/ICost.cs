@@ -1,8 +1,12 @@
-public interface ICost
+namespace MonoRL
 {
-	double CostFunction(double predictedOutput, double expectedOutput);
 
-	double CostDerivative(double predictedOutput, double expectedOutput);
+	public interface ICost
+	{
+		double CostFunction(double predictedOutput, double expectedOutput);
 
-	Cost.CostType CostFunctionType();
+		double CostDerivative(double predictedOutput, double expectedOutput);
+
+		Cost.CostType CostFunctionType();
+	}
 }

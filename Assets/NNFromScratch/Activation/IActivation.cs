@@ -1,8 +1,13 @@
-public interface IActivation
+namespace MonoRL
 {
-    double Activate(double z);
 
-    double Derivative(double z);
+    public interface IActivation
+    {
+        double Activate(double z);
 
-    Activation.ActivationType GetActivationType();
+        double Derivative(double z);
+
+        Activation.ActivationType GetActivationType();
+    }
+
 }

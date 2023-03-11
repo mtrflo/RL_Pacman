@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using DG.Tweening;
+using UnityEngine.SceneManagement;
 
 public class StartMain : MonoBehaviour {
 
@@ -99,6 +100,6 @@ public class StartMain : MonoBehaviour {
 
     private void OnPressStart()
     {
-        Application.LoadLevel(1);
+         SceneManager.LoadScene(1);
     }
 }
