@@ -61,7 +61,7 @@ namespace MonoRL
 
             double[] expectedValues = new double[predictedValues.Length];
             for (int i = 0; i < predictedValues.Length; i++)
-                expectedValues[i] = predictedValues[i] * - (QTarget - QEval);
+                expectedValues[i] = predictedValues[i];// * - (QTarget - QEval);
             expectedValues[transition.action] = QTarget;
 
             network.Backward(transition.state, expectedValues);
