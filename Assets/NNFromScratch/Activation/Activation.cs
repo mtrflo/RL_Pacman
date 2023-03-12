@@ -28,6 +28,8 @@ namespace MonoRL
                     return new Sigmoid();
                 case ActivationType.TanH:
                     return new TanH();
+                case ActivationType.LReLU:
+                    return new LReLU();
                 default:
                     UnityEngine.Debug.LogError("Unhandled activation type");
                     return new Linear();
