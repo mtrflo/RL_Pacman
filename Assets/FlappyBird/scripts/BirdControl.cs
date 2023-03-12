@@ -23,9 +23,11 @@ public class BirdControl : MonoBehaviour {
 
 	public Action OnDie;
 
+	private Animator animator;
     // Use this for initialization
     void Start () {
-		OnDie = () => { };
+        animator = GetComponent<Animator>();
+        OnDie = () => { };
         float birdOffset = 0.05f;
         float birdTime = 0.3f;
         float birdStartY = transform.position.y;
@@ -80,8 +82,8 @@ public class BirdControl : MonoBehaviour {
                 //    g.BroadcastMessage("GameOver");
                 //}
 
-                GetComponent<Animator>().SetTrigger("die");
-                AudioSource.PlayClipAtPoint(hit, Vector3.zero);
+                animator.SetTrigger("die");
+                //AudioSource.PlayClipAtPoint(hit, Vector3.zero);
 				GameOver();
 				OnDie();
             }
@@ -100,7 +102,7 @@ public class BirdControl : MonoBehaviour {
         if (other.name == "pass_trigger")
         {
             scoreMgr.GetComponent<ScoreMgr>().AddScore();
-            AudioSource.PlayClipAtPoint(score, Vector3.zero);
+            //AudioSource.PlayClipAtPoint(score, Vector3.zero);
         }
 
 
@@ -109,7 +111,7 @@ public class BirdControl : MonoBehaviour {
     public void JumpUp()
     {
         transform.GetComponent<Rigidbody2D>().velocity = new Vector2(0, upSpeed);
-        AudioSource.PlayClipAtPoint(jumpUp, Vector3.zero);
+        //AudioSource.PlayClipAtPoint(jumpUp, Vector3.zero);
     }
 	
 	public void GameOver()
@@ -117,4 +119,10 @@ public class BirdControl : MonoBehaviour {
 		dead = true;
 	}
 
+    public void ResetComponent()
+    {
+        animator.ResetTrigger("die");
+        dead = false;
+        landed = false;
+    }
 }

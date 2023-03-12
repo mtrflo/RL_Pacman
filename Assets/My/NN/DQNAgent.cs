@@ -90,13 +90,17 @@ public class Transition
     }
     public Transition()
     {
-
+        
     }
     public void Set(double[] state, int action, double[] state_, double reward, bool isDone)
     {
-        this.state = state;
+        if(this.state == null)
+            this.state = new double[state.Length];
+        if(this.state_== null)
+            this.state_ = new double[state_.Length];
+        state.CopyTo(this.state,0);
         this.action = action;
-        this.state_ = state_;
+        state_.CopyTo(this.state_, 0);
         this.reward = reward;
         this.isDone = isDone;
     }

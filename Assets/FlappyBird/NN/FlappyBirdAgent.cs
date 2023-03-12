@@ -24,15 +24,19 @@ public class FlappyBirdAgent : MonoBehaviour
     public static int maxEpisodeCount;
     public int episodeCount;
     public int transitionCount;
-    public UdpSocket udpSocket => UdpSocket.me;
-    Transition transition = new Transition();
+    
+    private Transition _Transition = new Transition();
+    private Rigidbody2D rb;
     private void Awake()
     {
         birdsCount++;
+        prev_state = new double[3];
+        current_state = new double[3];
     }
-    Rigidbody2D rb;
     private void Start()
     {
+        startPos = transform.position;
+        startRot = transform.rotation;
         rb = GetComponent<Rigidbody2D>();
         gameMain.OnGameStarted += Started;
         birdControl.OnDie += ChooseAction;
@@ -45,11 +49,11 @@ public class FlappyBirdAgent : MonoBehaviour
         StartCoroutine(ActionMaker());
     }
     int action;
-    double[] state, state_ = new double[3];
+    double[] prev_state, current_state;
     IEnumerator ActionMaker()
     {
         WaitForSecondsRealtime wfsr = new WaitForSecondsRealtime(delay);
-        while (birdControl.inGame || birdControl.dead)
+        while (birdControl.inGame)
         {
             ChooseAction();
             yield return wfsr;
@@ -61,21 +65,20 @@ public class FlappyBirdAgent : MonoBehaviour
     }
     void ChooseAction()
     {
-        state_[0] = GetRayDistances()[0];
-        state_[1] = GetRayDistances()[1];
-        state_[2] = rb.velocity.y;
-        if (state == null)
-            state = state_;
-
+        current_state[0] = GetRayDistances()[0];
+        current_state[1] = GetRayDistances()[1];
+        current_state[2] = rb.velocity.y;
+        float s_reward = reward;
         if (birdControl.dead)
-            reward = terminateReward;
-        print("action : " + action);
-        print("reward : " + reward);
-        transition.Set(state, action, state_, reward, birdControl.dead);
-        action = rLAgent.SelectAction(state);
+            s_reward = terminateReward;
+        //print("action : " + action);
+        //print("reward : " + reward);
+        _Transition.Set(prev_state, action, current_state, s_reward, birdControl.dead);
+        current_state.CopyTo(prev_state, 0);
+        
+        action = rLAgent.SelectAction(prev_state);
         MakeAction(action);
-        state = state_;
-        rLAgent.Learn(transition);
+        rLAgent.Learn(_Transition);
         episodeCount++;
         if (maxEpisodeCount < episodeCount)
         {
@@ -114,11 +117,29 @@ public class FlappyBirdAgent : MonoBehaviour
 
     void Restart()
     {
-        birdsCount--;
-        if (birdsCount <= 0)
-        {
-            birdsCount = 0;
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        }
+        ResetAgent();
+        //birdsCount--;
+        //if (birdsCount <= 0)
+        //{
+        //    birdsCount = 0;
+        //    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        //}
+    }
+    Vector3 startPos;
+    Quaternion startRot;
+    public void ResetAgent()
+    {
+        rb.velocity = Vector2.zero;
+        rb.gravityScale = 1;
+        prev_state = new double[3];
+        current_state = new double[3];
+        episodeCount = 0;
+        transform.position = startPos;
+        transform.rotation = startRot;
+
+        birdControl.ResetComponent();
+
+
+        StartCoroutine(ActionMaker());
     }
 }

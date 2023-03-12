@@ -58,7 +58,7 @@ namespace MonoRL
                 activatedValues[nodeIndex] = Activation.Activate(calculatedOutputs[nodeIndex]);
             }
 
-            _Inputs = inputs;
+            inputs.CopyTo(_Inputs,0);
             _Outputs = calculatedOutputs;
 
             return activatedValues;
@@ -117,14 +117,14 @@ namespace MonoRL
             {
                 Weights.Add(new Weights());
                 for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
-                    Weights[nodeIndex].weigths.Add(0.5);
+                    Weights[nodeIndex].weigths.Add(UnityEngine.Random.Range(-0.5f,0.5f));
             }
         }
 
         private void InitializeBiases()
         {
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
-                Biases[nodeIndex] = 0.5;
+                Biases[nodeIndex] = UnityEngine.Random.Range(-0.5f, 0.5f);
         }
     }
 

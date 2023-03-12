@@ -16,8 +16,8 @@ namespace MonoRL
         public float gamma = 0.8f;
         [Range(0, 1)]
         public float lr = 0.1f;
-        public Network network,targetNetwork;
-        public TextAsset savedNetwork;
+        public Network network, targetNetwork;
+        public string version = "test";
         private void Awake()
         {
             if (me != null)
@@ -56,14 +56,14 @@ namespace MonoRL
             double QEval = predictedValues[transition.action];
             double QNext = network.Forward(transition.state_).Max();
             double QTarget = transition.reward + gamma * QNext;
-            //if (transition.isDone)
-            //    QTarget = transition.reward;
+            if (transition.isDone)
+                QTarget = transition.reward;
 
             double[] expectedValues = new double[predictedValues.Length];
             for (int i = 0; i < predictedValues.Length; i++)
                 expectedValues[i] = predictedValues[i];// * - (QTarget - QEval);
             expectedValues[transition.action] = QTarget;
-            
+
             network.Backward(transition.state, expectedValues);
         }
 
@@ -74,21 +74,31 @@ namespace MonoRL
                 for (int j = 0; j < network.Layers[i].Weights.Count; j++)
                     for (int k = 0; k < network.Layers[i].Weights[j].weigths.Count; k++)
                         targetNetwork.Layers[i].Weights[j].weigths[k] = network.Layers[i].Weights[j].weigths[k];
-             
+
                 targetNetwork.Layers[i].Biases = network.Layers[i].Biases;
             }
+        }
+        private void OnApplicationQuit()
+        {
+            SaveNetwork();
         }
         [ContextMenu("Save")]
         public void SaveNetwork()
         {
             string data = JsonUtility.ToJson(network);
-            File.WriteAllText(Path.Combine(Application.streamingAssetsPath,"network.txt"),data);
+            File.WriteAllText(Path.Combine(Application.streamingAssetsPath, version + ".txt"), data);
         }
         public void LoadNetwork()
         {
-            if (savedNetwork == null) 
+            if (version == "" )
                 return;
-            network = JsonUtility.FromJson<Network>(savedNetwork.text);
+            string filePath = Path.Combine(Application.streamingAssetsPath, version + ".txt");
+
+            if (!File.Exists(filePath))
+                return;
+
+            string data = File.ReadAllText(filePath);
+            network = JsonUtility.FromJson<Network>(data);
         }
     }
 }

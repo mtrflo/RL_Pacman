@@ -2,6 +2,8 @@ using static System.Math;
 using System;
 using System.Collections.Generic;
 using MonoRL;
+using Unity.VisualScripting;
+
 namespace MonoRL
 {
     [Serializable]
@@ -30,9 +32,11 @@ namespace MonoRL
 
         public double[] Forward(double[] inputs)
         {
+            double[] calc_inputs = new double[inputs.Length];
+            inputs.CopyTo(calc_inputs,0);
             for (int i = 0; i < Layers.Count; i++)
-                inputs = Layers[i].Forward(inputs);
-            return inputs;
+                calc_inputs = Layers[i].Forward(calc_inputs);
+            return calc_inputs;
         }
 
         public void Backward(double[] inputs, double[] expectedOutputs)
@@ -44,12 +48,8 @@ namespace MonoRL
             for (int i = 0; i < outputLayer.NodeSize; i++)
                 deltas[i] = Cost.CostDerivative(output[i], expectedOutputs[i]);
 
-            inputs = outputLayer.Backward(LearningRate, deltas);
-            for (int i = Layers.Count - 2; i >= 0; i--)
-            {
-                Layer layer = Layers[i];
-                inputs = layer.Backward(LearningRate, inputs);
-            }
+            for (int i = Layers.Count - 1; i >= 0; i--)
+                deltas = Layers[i].Backward(LearningRate, deltas);
         }
     }
 
