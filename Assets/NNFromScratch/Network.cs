@@ -12,6 +12,8 @@ namespace MonoRL
     {
         public double LearningRate = 0.003;
         public Activation.ActivationType hiddenAType, outputAType;
+        public int[] layersSize;
+
         public List<Layer> Layers = new List<Layer>();
 
         public ICost Cost;
@@ -26,10 +28,10 @@ namespace MonoRL
                 Layers.Last().Activation = Activation.GetActivationFromType(outputAType);
                 return;
             }
-
-            Layers.Add(new Layer(3, 4, hiddenAType));
-            Layers.Add(new Layer(4, 10, hiddenAType));
-            Layers.Add(new Layer(10, 2, outputAType));
+            for (int i = 0; i < layersSize.Length-2; i++)
+                Layers.Add(new Layer(layersSize[i], layersSize[i + 1], hiddenAType));
+            
+            Layers.Add(new Layer(layersSize[layersSize.Length -2], layersSize[layersSize.Length-1], outputAType));
         }
 
         public double[] Forward(double[] inputs)
