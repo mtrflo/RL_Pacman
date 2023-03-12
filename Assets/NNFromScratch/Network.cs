@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using MonoRL;
 using Unity.VisualScripting;
+using System.Linq;
 
 namespace MonoRL
 {
@@ -19,9 +20,10 @@ namespace MonoRL
             Cost = new Cost.SquaredError();
             if (Layers.Count != 0)
             {
-                Layers[0].Activation = Activation.GetActivationFromType(hiddenAType);
-                Layers[1].Activation = Activation.GetActivationFromType(hiddenAType);
-                Layers[2].Activation = Activation.GetActivationFromType(outputAType);
+                for (int i = 0; i < Layers.Count-1; i++)
+                    Layers[i].Activation = Activation.GetActivationFromType(hiddenAType);
+                
+                Layers.Last().Activation = Activation.GetActivationFromType(outputAType);
                 return;
             }
 

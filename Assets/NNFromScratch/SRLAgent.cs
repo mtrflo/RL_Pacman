@@ -16,8 +16,8 @@ namespace MonoRL
         public float gamma = 0.8f;
         [Range(0, 1)]
         public float lr = 0.1f;
-        public Network network, targetNetwork;
         public string version = "test";
+        public Network network, targetNetwork;
         private void Awake()
         {
             if (me != null)
@@ -54,14 +54,14 @@ namespace MonoRL
         {
             double[] predictedValues = network.Forward(transition.state);
             double QEval = predictedValues[transition.action];
-            double QNext = network.Forward(transition.state_).Max();
+            double QNext = targetNetwork.Forward(transition.state_).Max();
             double QTarget = transition.reward + gamma * QNext;
             if (transition.isDone)
                 QTarget = transition.reward;
 
             double[] expectedValues = new double[predictedValues.Length];
             for (int i = 0; i < predictedValues.Length; i++)
-                expectedValues[i] = predictedValues[i];// * - (QTarget - QEval);
+                expectedValues[i] = predictedValues[i] * - (QTarget - QEval);
             expectedValues[transition.action] = QTarget;
 
             network.Backward(transition.state, expectedValues);
@@ -75,7 +75,7 @@ namespace MonoRL
                     for (int k = 0; k < network.Layers[i].Weights[j].weigths.Count; k++)
                         targetNetwork.Layers[i].Weights[j].weigths[k] = network.Layers[i].Weights[j].weigths[k];
 
-                targetNetwork.Layers[i].Biases = network.Layers[i].Biases;
+                network.Layers[i].Biases.CopyTo(targetNetwork.Layers[i].Biases, 0);
             }
         }
         private void OnApplicationQuit()
