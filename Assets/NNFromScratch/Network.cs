@@ -15,6 +15,14 @@ namespace MonoRL
         public void Init()
         {
             Cost = new Cost.SquaredError();
+            if (Layers.Count != 0)
+            {
+                Layers[0].Activation = Activation.GetActivationFromType(hiddenAType);
+                Layers[1].Activation = Activation.GetActivationFromType(hiddenAType);
+                Layers[2].Activation = Activation.GetActivationFromType(outputAType);
+                return;
+            }
+
             Layers.Add(new Layer(3, 4, hiddenAType));
             Layers.Add(new Layer(4, 10, hiddenAType));
             Layers.Add(new Layer(10, 2, outputAType));

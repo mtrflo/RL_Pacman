@@ -9,9 +9,9 @@ namespace MonoRL
     public class Layer
     {
         [SerializeField]
-        public readonly int InputSize;//size
+        public int InputSize;//size
         [SerializeField]
-        public readonly int NodeSize;//size
+        public int NodeSize;//size
 
         public List<Weights> Weights;//data
         public double[] Biases;

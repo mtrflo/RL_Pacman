@@ -17,7 +17,7 @@ namespace MonoRL
         [Range(0, 1)]
         public float lr = 0.1f;
         public Network network,targetNetwork;
-
+        public TextAsset savedNetwork;
         private void Awake()
         {
             if (me != null)
@@ -26,6 +26,9 @@ namespace MonoRL
                 return;
             }
             me = this;
+            LoadNetwork();
+
+
             network.Init();
             targetNetwork.Init();
             DontDestroyOnLoad(this);
@@ -39,9 +42,6 @@ namespace MonoRL
             if (e > epsilon)
             {
                 double[] actionValues = network.Forward(observation);
-                print("actionValues : " + actionValues.ToCommaSeparatedString());
-                //if (actionValues[0] == double.NaN)
-                //    Debug.Log("NAAAAAAAAAAAAAAAAAAAAAAAAAN");
                 action = actionValues.ToList().IndexOf(actionValues.Max());
             }
             else
@@ -56,8 +56,8 @@ namespace MonoRL
             double QEval = predictedValues[transition.action];
             double QNext = network.Forward(transition.state_).Max();
             double QTarget = transition.reward + gamma * QNext;
-            if (transition.isDone)
-                QTarget = transition.reward;
+            //if (transition.isDone)
+            //    QTarget = transition.reward;
 
             double[] expectedValues = new double[predictedValues.Length];
             for (int i = 0; i < predictedValues.Length; i++)
@@ -82,11 +82,13 @@ namespace MonoRL
         public void SaveNetwork()
         {
             string data = JsonUtility.ToJson(network);
-            File.WriteAllText(Path.Combine(Application.streamingAssetsPath,"network.net"),data);
+            File.WriteAllText(Path.Combine(Application.streamingAssetsPath,"network.txt"),data);
         }
         public void LoadNetwork()
         {
-
+            if (savedNetwork == null) 
+                return;
+            network = JsonUtility.FromJson<Network>(savedNetwork.text);
         }
     }
 }

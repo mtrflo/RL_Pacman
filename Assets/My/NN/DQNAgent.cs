@@ -55,10 +55,10 @@ public class DQNAgent : MonoBehaviour
         double QEval = predictedValues[action];
         double QNext = targetTrainer.neuralNetwork.Forward(state_).Max();
         double QTarget = reward + gamma * QNext;
-        if (isEnd)
-        {
-            QTarget = reward;
-        }
+        //if (isEnd)
+        //{
+        //    QTarget = reward;
+        //}
 
         double[] expectedValues = new double[predictedValues.Length];
         for (int i = 0; i < predictedValues.Length; i++)
