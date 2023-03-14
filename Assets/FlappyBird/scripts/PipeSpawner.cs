@@ -12,11 +12,19 @@ public class PipeSpawner : MonoBehaviour {
 	void Start ()
 	{
 		// Start calling the Spawn function repeatedly after a delay .		
-	}
+		StartCoroutine(StartSpawning());
 
-    public void StartSpawning()
+    }
+
+    public IEnumerator StartSpawning()
     {
-        InvokeRepeating("Spawn", spawnDelay, spawnTime);
+		yield return new WaitForSecondsRealtime(spawnDelay);
+		WaitForSecondsRealtime wfsr = new WaitForSecondsRealtime(spawnTime);
+		while (true)
+		{
+			yield return wfsr;
+			Spawn();
+        }
     }
 	
 	

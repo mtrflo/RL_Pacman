@@ -30,8 +30,8 @@ public class FlappyBirdAgent : MonoBehaviour
     private void Awake()
     {
         birdsCount++;
-        prev_state = new double[3];
-        current_state = new double[3];
+        prev_state = new double[6];
+        current_state = new double[6];
     }
     private void Start()
     {
@@ -65,9 +65,13 @@ public class FlappyBirdAgent : MonoBehaviour
     }
     void ChooseAction()
     {
-        current_state[0] = GetRayDistances()[0];
-        current_state[1] = GetRayDistances()[1];
-        current_state[2] = rb.velocity.y;
+        current_state[0] = GetRayDistances()[0];//up
+        current_state[1] = GetRayDistances()[1];//down
+        current_state[2] = GetRayDistances()[2];//forward
+        current_state[3] = GetRayDistances()[3];//up forward
+        current_state[4] = GetRayDistances()[4];//down forward
+        current_state[5] = rb.velocity.y;
+
         float s_reward = reward;
         if (birdControl.dead)
             s_reward = terminateReward;
@@ -131,8 +135,8 @@ public class FlappyBirdAgent : MonoBehaviour
     {
         rb.velocity = Vector2.zero;
         rb.gravityScale = 1;
-        prev_state = new double[3];
-        current_state = new double[3];
+        prev_state = new double[6];
+        current_state = new double[6];
         episodeCount = 0;
         transform.position = startPos;
         transform.rotation = startRot;

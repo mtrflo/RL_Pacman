@@ -74,6 +74,8 @@ public class BirdControl : MonoBehaviour {
 	{
 		if (other.name == "land" || other.name == "pipe_up" || other.name == "pipe_down")
 		{
+            if (other.name == "pipe_up" || other.name == "pipe_down")
+                Destroy(other.gameObject);
             if (!dead)
             {
                 //GameObject[] objs = GameObject.FindGameObjectsWithTag("movable");
