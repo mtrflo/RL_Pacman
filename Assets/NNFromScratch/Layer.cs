@@ -22,9 +22,9 @@ namespace MonoRL
         [SerializeField]
         private double[] _Outputs;
 
-        [SerializeField]
+        [NonSerialized]
         private double[][] _GradW;
-        [SerializeField]
+        [NonSerialized]
         private double[] _GradB;
 
         public Layer(int inputSize, int nodeSize, Activation.ActivationType activationType)
