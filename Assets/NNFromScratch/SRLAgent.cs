@@ -59,8 +59,8 @@ namespace MonoRL
         public void Learn(Transition transition)
         {
             replayBuffer.Add(transition);
-
-            if (replayBuffer.IsFull())
+            replayBuffer.maxSize = bufferSize;
+            if (batchSize <= replayBuffer.maxSize)
             {
                 Transition[] randomSamples = replayBuffer.GetRandomSamples(batchSize);
 
@@ -123,6 +123,15 @@ namespace MonoRL
 
             string data = File.ReadAllText(filePath);
             network = JsonUtility.FromJson<Network>(data);
+        }
+        private void OnValidate()
+        {
+            if (Application.isPlaying && replayBuffer != null)
+            {
+                if (replayBuffer.maxSize < bufferSize)
+                    replayBuffer.buffer.RemoveRange(0, bufferSize - replayBuffer.maxSize);
+                replayBuffer.maxSize = bufferSize;
+            }
         }
     }
 }

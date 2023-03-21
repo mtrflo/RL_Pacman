@@ -1,9 +1,12 @@
+using System;
 using System.Collections.Generic;
 
 public class ReplayBuffer<T>
 {
-    private List<T> buffer;
-    private int maxSize;
+    [NonSerialized]
+    public List<T> buffer;
+    [NonSerialized]
+    public int maxSize;
 
     public ReplayBuffer(int maxSize)
     {
