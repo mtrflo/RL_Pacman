@@ -16,9 +16,11 @@ namespace MonoRL
         public float gamma = 0.8f;
         [Range(0, 1)]
         public float lr = 0.1f;
+        [Header("ReplayBuffer")]
+        public int bufferSize = 500;
+        public int batchSize = 50;
         public string version = "test";
         public Network network, targetNetwork;
-        public int bufferSize = 500;
         public ReplayBuffer<Transition> replayBuffer;
         private void Awake()
         {
@@ -60,27 +62,27 @@ namespace MonoRL
 
             if (replayBuffer.IsFull())
             {
-                Transition[] randomSamples = replayBuffer.GetRandomSamples();
+                Transition[] randomSamples = replayBuffer.GetRandomSamples(batchSize);
 
-                double[] batchInputs = randomSamples.Select(x => x.state).ToArray();
-                double[] batchExpectedOutputs = randomSamples.Select(x => x.state).ToArray();
+                double[][] batchInputs = randomSamples.Select(x => x.state).ToArray();
+                double[][] batchExpectedOutputs = new double[batchInputs.Length][];
 
-                for (int batchIndex = 0; batchIndex < randomSamples.Count - 1; batchIndex++)
+                for (int batchIndex = 0; batchIndex < batchSize; batchIndex++)
                 {
-                    Transition transition = randomSamples[batchIndex];
-                    batchInputs[batchIndex] = transition.state;
+                    Transition sampleTransition = randomSamples[batchIndex];
+                    batchInputs[batchIndex] = sampleTransition.state;
 
-                    double[] predictedValues = network.Forward(transition.state);
-                    double QEval = predictedValues[transition.action];
-                    double QNext = targetNetwork.Forward(transition.state_).Max();
-                    double QTarget = transition.reward + gamma * QNext;
-                    if (transition.isDone)
-                        QTarget = transition.reward;
+                    double[] predictedValues = network.Forward(sampleTransition.state);
+                    double QEval = predictedValues[sampleTransition.action];
+                    double QNext = targetNetwork.Forward(sampleTransition.state_).Max();
+                    double QTarget = sampleTransition.reward + gamma * QNext;
+                    if (sampleTransition.isDone)
+                        QTarget = sampleTransition.reward;
 
                     double[] expectedValues = new double[predictedValues.Length];
                     for (int i = 0; i < predictedValues.Length; i++)
                         expectedValues[i] = predictedValues[i];// * - (QTarget - QEval);
-                    expectedValues[transition.action] = QTarget;
+                    expectedValues[sampleTransition.action] = QTarget;
 
                     batchExpectedOutputs[batchIndex] = expectedValues;
                 }

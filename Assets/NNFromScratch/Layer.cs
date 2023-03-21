@@ -21,8 +21,10 @@ namespace MonoRL
         private double[] _Inputs;//data
         [SerializeField]
         private double[] _Outputs;
-
+        
+        [SerializeField]
         private double[][] _GradW;
+        [SerializeField]
         private double[] _GradB;
 
         public Layer(int inputSize, int nodeSize, Activation.ActivationType activationType)
@@ -108,6 +110,8 @@ namespace MonoRL
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
                 _GradB[nodeIndex] += delta[nodeIndex];
+                if(_GradW[nodeIndex] == null)
+                    _GradW[nodeIndex] = new double[InputSize];
                 for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
                     _GradW[nodeIndex][inputIndex] += delta[nodeIndex] * _Inputs[inputIndex];
             }
