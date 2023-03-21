@@ -109,8 +109,8 @@ namespace MonoRL
 
         public void ClearGradients()
         {
-            _GradW = new double[nodeSize][];
-            _GradB = new double[nodeSize];
+            _GradW = new double[NodeSize][];
+            _GradB = new double[NodeSize];
         }
 
         private void UpdateGradients(double[] delta)
