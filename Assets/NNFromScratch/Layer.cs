@@ -34,7 +34,7 @@ namespace MonoRL
             Biases = new double[nodeSize];
             _Inputs = new double[inputSize];
             _Outputs = new double[nodeSize];
-            _GradW = new double[nodeSize][inputSize];
+            _GradW = new double[nodeSize][];
             _GradB = new double[nodeSize];
 
             InitializeWeights();
