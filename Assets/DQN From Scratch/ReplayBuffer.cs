@@ -25,7 +25,15 @@ public class ReplayBuffer<T>
         int index = UnityEngine.Random.Range(0, buffer.Count);
         return buffer[index];
     }
+    public T[] GetRandomSamples(int count)
+    {
+        T[] samples = new T[count];
 
+        for (int i = 0; i < count; i++)
+            samples[i] = buffer[UnityEngine.Random.Range(0, buffer.Count)];
+
+        return samples;
+    }
     public int Size()
     {
         return buffer.Count;
