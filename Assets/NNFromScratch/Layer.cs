@@ -21,7 +21,7 @@ namespace MonoRL
         private double[] _Inputs;//data
         [SerializeField]
         private double[] _Outputs;
-        
+
         [SerializeField]
         private double[][] _GradW;
         [SerializeField]
@@ -103,6 +103,14 @@ namespace MonoRL
                     Weights[nodeIndex].weigths[inputIndex] -= lr * gradW;
                 }
             }
+
+            ClearGradients();
+        }
+
+        public void ClearGradients()
+        {
+            _GradW = new double[nodeSize][];
+            _GradB = new double[nodeSize];
         }
 
         private void UpdateGradients(double[] delta)
@@ -110,12 +118,14 @@ namespace MonoRL
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
                 _GradB[nodeIndex] += delta[nodeIndex];
-                if(_GradW[nodeIndex] == null)
+                if (_GradW[nodeIndex] == null)
                     _GradW[nodeIndex] = new double[InputSize];
                 for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
                     _GradW[nodeIndex][inputIndex] += delta[nodeIndex] * _Inputs[inputIndex];
             }
         }
+
+
 
         private void InitializeWeights()
         {

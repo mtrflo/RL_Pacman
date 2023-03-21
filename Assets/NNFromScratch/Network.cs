@@ -60,7 +60,7 @@ namespace MonoRL
         {
             int batchSize = batchInputs.Length;
 
-            for (int batchIndex = 0; batchIndex < batchInputs.Length; batchIndex++)
+            for (int batchIndex = 0; batchIndex < batchSize; batchIndex++)
             {
                 double[] inputs = batchInputs[batchIndex];
                 double[] expectedOutputs = batchExpectedOutputs[batchIndex];
