@@ -18,7 +18,8 @@ public class FlappyBirdAgent : MonoBehaviour
     public BirdControl birdControl;
     //public DQNAgent dQNAgent => DQNAgent.me;
     public SRLAgent rLAgent => SRLAgent.me;
-
+    
+    private float startDelay;
     public float delay;
 
     public float reward = 0.1f, terminateReward = -1f;
@@ -30,9 +31,12 @@ public class FlappyBirdAgent : MonoBehaviour
     private Rigidbody2D rb;
     private void Awake()
     {
+        TimeController.ChangeVarsByTimeScale += (ts) => { delay = startDelay/ts; };
         birdsCount++;
         prev_state = new List<double>();
         current_state = new List<double>();
+
+        startDelay = delay;
     }
     private void Start()
     {
@@ -69,6 +73,9 @@ public class FlappyBirdAgent : MonoBehaviour
         current_state.Clear();
         AddObservation(GetRayDistances()[0]);
         AddObservation(GetRayDistances()[1]);
+        AddObservation(GetRayDistances()[2]);
+        AddObservation(GetRayDistances()[3]);
+        AddObservation(GetRayDistances()[4]);
         AddObservation(rb.velocity.y);
         if (prev_state.Count == 0)
             Utils.CopyTo(current_state, prev_state);
