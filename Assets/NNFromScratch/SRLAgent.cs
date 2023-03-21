@@ -1,9 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
+using Random = UnityEngine.Random;
 namespace MonoRL
 {
 
@@ -133,5 +135,35 @@ namespace MonoRL
                 replayBuffer.maxSize = bufferSize;
             }
         }
+    }
+}
+[Serializable]
+public class Transition
+{
+    public double[] state;
+    public int action;
+    public double[] state_;
+    public double reward;
+    public bool isDone;
+    public Transition(double[] state, int action, double[] state_, double reward, bool isDone)
+    {
+        Set(state, action, state_, reward, isDone);
+        this.isDone = isDone;
+    }
+    public Transition()
+    {
+
+    }
+    public void Set(double[] state, int action, double[] state_, double reward, bool isDone)
+    {
+        if (this.state == null)
+            this.state = new double[state.Length];
+        if (this.state_ == null)
+            this.state_ = new double[state_.Length];
+        state.CopyTo(this.state, 0);
+        this.action = action;
+        state_.CopyTo(this.state_, 0);
+        this.reward = reward;
+        this.isDone = isDone;
     }
 }

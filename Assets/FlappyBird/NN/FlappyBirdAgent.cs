@@ -10,7 +10,7 @@ using UnityEngine.SceneManagement;
 using MonoRL;
 using Unity.MLAgents;
 using PMT;
-
+using MonoRL;
 public class FlappyBirdAgent : MonoBehaviour
 {
     public static int birdsCount = 0;
@@ -27,11 +27,13 @@ public class FlappyBirdAgent : MonoBehaviour
     public int episodeCount;
     public int transitionCount;
     
+    public TimeController timeController;
+
     private Transition _Transition = new Transition();
     private Rigidbody2D rb;
     private void Awake()
     {
-        TimeController.ChangeVarsByTimeScale += (ts) => { delay = startDelay/ts; };
+        timeController.ChangeVarsByTimeScale += (ts) => { delay = startDelay/ts; };
         birdsCount++;
         prev_state = new List<double>();
         current_state = new List<double>();

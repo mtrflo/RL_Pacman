@@ -8,7 +8,7 @@ public class PacmanAgent : MonoBehaviour
 {
     public DPacManController DPacManController;
     public PacMapGenerator pacMapGenerator;
-    public DQNAgent dQNAgent;
+    public MonoRL.SRLAgent dQNAgent;
     private void Start()
     {
         DPacManController.OnMoved += Step;
@@ -42,11 +42,11 @@ public class PacmanAgent : MonoBehaviour
         {
             // print("action : " + action);
             print("reward : " + reward);
-            dQNAgent.Learn(state, action, state_, reward);
+            //dQNAgent.Learn(state, action, state_, reward);
         }
         else
             state = state_;
-        action = dQNAgent.ChooseAction(state);
+        //action = dQNAgent.ChooseAction(state);
         MakeAction(action);
 
         state = state_;

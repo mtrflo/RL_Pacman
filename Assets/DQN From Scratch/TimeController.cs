@@ -8,7 +8,7 @@ public class TimeController : MonoBehaviour
     public float timeScale = 1.0f;
     private float fixedTimestep = 0.02f;
 
-    public static Action<float> ChangeVarsByTimeScale;
+    public Action<float> ChangeVarsByTimeScale;
     private void Awake()
     {
         ChangeVarsByTimeScale = Change;
