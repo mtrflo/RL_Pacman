@@ -18,11 +18,12 @@ namespace MonoRL
         public IActivation Activation;
 
         [SerializeField]
-        private double[] _Delta;
-        [SerializeField]
         private double[] _Inputs;//data
         [SerializeField]
         private double[] _Outputs;
+
+        private double[][] _GradW;
+        private double[] _GradB;
 
         public Layer(int inputSize, int nodeSize, Activation.ActivationType activationType)
         {
@@ -31,9 +32,10 @@ namespace MonoRL
             Activation = MonoRL.Activation.GetActivationFromType(activationType);
             Weights = new List<Weights>();
             Biases = new double[nodeSize];
-            _Delta = new double[nodeSize];
             _Inputs = new double[inputSize];
             _Outputs = new double[nodeSize];
+            _GradW = new double[nodeSize][inputSize];
+            _GradB = new double[nodeSize];
 
             InitializeWeights();
             InitializeBiases();
@@ -58,21 +60,20 @@ namespace MonoRL
                 activatedValues[nodeIndex] = Activation.Activate(calculatedOutputs[nodeIndex]);
             }
 
-            inputs.CopyTo(_Inputs,0);
+            inputs.CopyTo(_Inputs, 0);
             _Outputs = calculatedOutputs;
 
             return activatedValues;
         }
 
-        public double[] Backward(double lr, double[] deltas)
+        public double[] Backward(double[] deltas)
         {
-            for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
-            {
-                _Delta[nodeIndex] = deltas[nodeIndex] * Activation.Derivative(_Outputs[nodeIndex]);
-            }
+            double[] delta = new double[NodeSize];
 
-            UpdateWeights(lr);
-            UpdateBiases(lr);
+            for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
+                delta[nodeIndex] = deltas[nodeIndex] * Activation.Derivative(_Outputs[nodeIndex]);
+
+            UpdateGradients(delta);
 
             double[] propagatedDelta = new double[InputSize];
             for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
@@ -80,35 +81,36 @@ namespace MonoRL
                 propagatedDelta[inputIndex] = 0;
                 for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
                 {
-                    propagatedDelta[inputIndex] += _Delta[nodeIndex] * Weights[nodeIndex].weigths[inputIndex];
+                    propagatedDelta[inputIndex] += delta[nodeIndex] * Weights[nodeIndex].weigths[inputIndex];
                 }
             }
 
             return propagatedDelta;
         }
 
-        private void UpdateWeights(double lr)
+        public void ApplyGradients(double lr, int batchSize)
         {
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
+                double gradB = _GradB[nodeIndex] / batchSize;
+                Biases[nodeIndex] -= lr * gradB;
+
                 for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
                 {
-                    double gradW = _Delta[nodeIndex] * _Inputs[inputIndex];
+                    double gradW = _GradW[nodeIndex][inputIndex] / batchSize;
                     Weights[nodeIndex].weigths[inputIndex] -= lr * gradW;
                 }
             }
-            //Debug.Log("Weights : " + Weights.ToCommaSeparatedString());
         }
 
-        private void UpdateBiases(double lr)
+        private void UpdateGradients(double[] delta)
         {
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
-                double gradB = _Delta[nodeIndex];
-                Biases[nodeIndex] -= lr * gradB;
+                _GradB[nodeIndex] += delta[nodeIndex];
+                for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
+                    _GradW[nodeIndex][inputIndex] += delta[nodeIndex] * _Inputs[inputIndex];
             }
-
-            //Debug.Log("UpdateBiases : " + Biases.ToCommaSeparatedString());
         }
 
         private void InitializeWeights()
@@ -117,7 +119,7 @@ namespace MonoRL
             {
                 Weights.Add(new Weights());
                 for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
-                    Weights[nodeIndex].weigths.Add(UnityEngine.Random.Range(-0.5f,0.5f));
+                    Weights[nodeIndex].weigths.Add(UnityEngine.Random.Range(-0.5f, 0.5f));
             }
         }
 
