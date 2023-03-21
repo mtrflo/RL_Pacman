@@ -43,4 +43,9 @@ public class ReplayBuffer<T>
     {
         buffer.Clear();
     }
+
+    public bool IsFull()
+    {
+        return buffer.Count == maxSize;
+    }
 }

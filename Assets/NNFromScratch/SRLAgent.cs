@@ -18,8 +18,12 @@ namespace MonoRL
         public float lr = 0.1f;
         public string version = "test";
         public Network network, targetNetwork;
+        public int bufferSize = 500;
+        public ReplayBuffer<Transition> replayBuffer;
         private void Awake()
         {
+            replayBuffer = new ReplayBuffer<Transition>(bufferSize);
+
             if (me != null)
             {
                 Destroy(gameObject);
@@ -52,19 +56,37 @@ namespace MonoRL
 
         public void Learn(Transition transition)
         {
-            double[] predictedValues = network.Forward(transition.state);
-            double QEval = predictedValues[transition.action];
-            double QNext = targetNetwork.Forward(transition.state_).Max();
-            double QTarget = transition.reward + gamma * QNext;
-            if (transition.isDone)
-                QTarget = transition.reward;
+            replayBuffer.Add(transition);
 
-            double[] expectedValues = new double[predictedValues.Length];
-            for (int i = 0; i < predictedValues.Length; i++)
-                expectedValues[i] = predictedValues[i];// * - (QTarget - QEval);
-            expectedValues[transition.action] = QTarget;
+            if (replayBuffer.IsFull())
+            {
+                Transition[] randomSamples = replayBuffer.GetRandomSamples();
 
-            network.Backward(transition.state, expectedValues);
+                double[] batchInputs = randomSamples.Select(x => x.state).ToArray();
+                double[] batchExpectedOutputs = randomSamples.Select(x => x.state).ToArray();
+
+                for (int batchIndex = 0; batchIndex < randomSamples.Count - 1; batchIndex++)
+                {
+                    Transition transition = randomSamples[batchIndex];
+                    batchInputs[batchIndex] = transition.state;
+
+                    double[] predictedValues = network.Forward(transition.state);
+                    double QEval = predictedValues[transition.action];
+                    double QNext = targetNetwork.Forward(transition.state_).Max();
+                    double QTarget = transition.reward + gamma * QNext;
+                    if (transition.isDone)
+                        QTarget = transition.reward;
+
+                    double[] expectedValues = new double[predictedValues.Length];
+                    for (int i = 0; i < predictedValues.Length; i++)
+                        expectedValues[i] = predictedValues[i];// * - (QTarget - QEval);
+                    expectedValues[transition.action] = QTarget;
+
+                    batchExpectedOutputs[batchIndex] = expectedValues;
+                }
+
+                network.Learn(batchInputs, batchExpectedOutputs);
+            }
         }
 
         public void ReplaceTarget()
@@ -90,7 +112,7 @@ namespace MonoRL
         }
         public void LoadNetwork()
         {
-            if (version == "" )
+            if (version == "")
                 return;
             string filePath = Path.Combine(Application.streamingAssetsPath, version + ".txt");
 
