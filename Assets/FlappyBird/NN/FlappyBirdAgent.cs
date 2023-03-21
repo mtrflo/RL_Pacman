@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using MonoRL;
 using Unity.MLAgents;
+using PMT;
 
 public class FlappyBirdAgent : MonoBehaviour
 {
@@ -30,8 +31,8 @@ public class FlappyBirdAgent : MonoBehaviour
     private void Awake()
     {
         birdsCount++;
-        prev_state = new double[6];
-        current_state = new double[6];
+        prev_state = new List<double>();
+        current_state = new List<double>();
     }
     private void Start()
     {
@@ -49,7 +50,7 @@ public class FlappyBirdAgent : MonoBehaviour
         StartCoroutine(ActionMaker());
     }
     int action;
-    double[] prev_state, current_state;
+    List<double> prev_state, current_state;
     IEnumerator ActionMaker()
     {
         WaitForSecondsRealtime wfsr = new WaitForSecondsRealtime(delay);
@@ -65,22 +66,27 @@ public class FlappyBirdAgent : MonoBehaviour
     }
     void ChooseAction()
     {
-        current_state[0] = GetRayDistances()[0];//up
-        current_state[1] = GetRayDistances()[1];//down
-        current_state[2] = GetRayDistances()[2];//forward
-        current_state[3] = GetRayDistances()[3];//up forward
-        current_state[4] = GetRayDistances()[4];//down forward
-        current_state[5] = rb.velocity.y;
+        current_state.Clear();
+        AddObservation(GetRayDistances()[0]);
+        AddObservation(GetRayDistances()[1]);
+        AddObservation(rb.velocity.y);
+        if (prev_state.Count == 0)
+            Utils.CopyTo(current_state, prev_state);
+        //current_state[0] = GetRayDistances()[0];//up
+        //current_state[1] = GetRayDistances()[1];//down
+        //current_state[2] = GetRayDistances()[2];//forward
+        //current_state[3] = GetRayDistances()[3];//up forward
+        //current_state[4] = GetRayDistances()[4];//down forward
+        //current_state[5] = rb.velocity.y;
 
         float s_reward = reward;
         if (birdControl.dead)
             s_reward = terminateReward;
         //print("action : " + action);
         //print("reward : " + reward);
-        _Transition.Set(prev_state, action, current_state, s_reward, birdControl.dead);
-        current_state.CopyTo(prev_state, 0);
-        
-        action = rLAgent.SelectAction(prev_state);
+        _Transition.Set(prev_state.ToArray(), action, current_state.ToArray(), s_reward, birdControl.dead);
+        Utils.CopyTo(current_state, prev_state);
+        action = rLAgent.SelectAction(prev_state.ToArray());
         MakeAction(action);
         rLAgent.Learn(_Transition);
         episodeCount++;
@@ -135,8 +141,8 @@ public class FlappyBirdAgent : MonoBehaviour
     {
         rb.velocity = Vector2.zero;
         rb.gravityScale = 1;
-        prev_state = new double[6];
-        current_state = new double[6];
+        prev_state.Clear();
+        current_state.Clear();
         episodeCount = 0;
         transform.position = startPos;
         transform.rotation = startRot;
@@ -146,4 +152,10 @@ public class FlappyBirdAgent : MonoBehaviour
 
         StartCoroutine(ActionMaker());
     }
+
+    public void AddObservation(double observation)
+    {
+        current_state.Add(observation);
+    }
+
 }
