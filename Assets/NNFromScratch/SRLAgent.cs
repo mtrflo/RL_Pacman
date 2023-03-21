@@ -59,8 +59,8 @@ namespace MonoRL
         public void Learn(Transition transition)
         {
             replayBuffer.Add(transition);
-            replayBuffer.maxSize = bufferSize;
-            if (batchSize <= replayBuffer.maxSize)
+
+            if (replayBuffer.Size() >= batchSize)
             {
                 Transition[] randomSamples = replayBuffer.GetRandomSamples(batchSize);
 
