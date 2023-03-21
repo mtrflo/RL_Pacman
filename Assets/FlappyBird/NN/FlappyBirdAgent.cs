@@ -123,6 +123,8 @@ public class FlappyBirdAgent : MonoBehaviour
         {
             dstns = hit.distance;
         }
+        if (dstns == -1)
+            print("-111");
         return dstns;
     }
 
