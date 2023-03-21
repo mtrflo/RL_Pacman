@@ -42,7 +42,12 @@ namespace MonoRL
             InitializeWeights();
             InitializeBiases();
         }
-
+        public void SetNonSerializedData(int inputSize, int nodeSize, Activation.ActivationType activationType)
+        {
+            Activation = MonoRL.Activation.GetActivationFromType(activationType);
+            _GradW = new double[nodeSize][];
+            _GradB = new double[nodeSize];
+        }
         public double[] Forward(double[] inputs)
         {
             double[] calculatedOutputs = new double[NodeSize];

@@ -23,9 +23,9 @@ namespace MonoRL
             if (Layers.Count != 0)
             {
                 for (int i = 0; i < Layers.Count - 1; i++)
-                    Layers[i].Activation = Activation.GetActivationFromType(hiddenAType);
+                    Layers[i].SetNonSerializedData(layersSize[i], layersSize[i + 1], hiddenAType);
 
-                Layers.Last().Activation = Activation.GetActivationFromType(outputAType);
+                Layers.Last().SetNonSerializedData(layersSize[layersSize.Length - 2], layersSize[layersSize.Length - 1], outputAType);
                 return;
             }
             for (int i = 0; i < layersSize.Length - 2; i++)
