@@ -134,18 +134,19 @@ namespace MonoRL
 
         private void InitializeWeights()
         {
+            float variance = 1.0f / NodeSize;
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
                 Weights.Add(new Weights());
                 for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
-                    Weights[nodeIndex].weigths.Add(UnityEngine.Random.Range(-0.5f, 0.5f));
+                    Weights[nodeIndex].weigths.Add(UnityEngine.Random.Range(-Mathf.Sqrt(variance), Mathf.Sqrt(variance)));
             }
         }
 
         private void InitializeBiases()
         {
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
-                Biases[nodeIndex] = UnityEngine.Random.Range(-0.5f, 0.5f);
+                Biases[nodeIndex] = 0;
         }
     }
 
