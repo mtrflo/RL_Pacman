@@ -96,7 +96,7 @@ public class FlappyBirdAgent : MonoBehaviour
         if (maxEpisodeCount < episodeCount)
         {
             maxEpisodeCount = episodeCount;
-            print("maxEpisodeCount : " + maxEpisodeCount);
+            print("maxTimeStep : " + maxEpisodeCount);
             rLAgent.ReplaceTarget();
         }
     }
