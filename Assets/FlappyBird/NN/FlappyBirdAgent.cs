@@ -38,10 +38,10 @@ public class FlappyBirdAgent : MonoBehaviour
         current_state = new List<double>();
 
         startDelay = delay;
+        timeController.ChangeVarsByTimeScale += (ts) => { delay = startDelay / ts; };
     }
     private void Start()
     {
-        timeController.ChangeVarsByTimeScale += (ts) => { delay = startDelay / ts; };
         startPos = transform.position;
         startRot = transform.rotation;
         rb = GetComponent<Rigidbody2D>();
@@ -59,11 +59,11 @@ public class FlappyBirdAgent : MonoBehaviour
     List<double> prev_state, current_state;
     IEnumerator ActionMaker()
     {
-        WaitForSecondsRealtime wfsr = new WaitForSecondsRealtime(delay);
+        //WaitForSecondsRealtime wfsr = new WaitForSecondsRealtime(delay);
         while (birdControl.inGame)
         {
             ChooseAction();
-            yield return wfsr;
+            yield return new WaitForSecondsRealtime(delay);
             if (birdControl.dead)
                 break;
         }
@@ -73,20 +73,14 @@ public class FlappyBirdAgent : MonoBehaviour
     void ChooseAction()
     {
         current_state.Clear();
-        AddObservation(GetRayDistances()[0]);
-        AddObservation(GetRayDistances()[1]);
-        AddObservation(GetRayDistances()[2]);
-        AddObservation(GetRayDistances()[3]);
-        AddObservation(GetRayDistances()[4]);
+        double[] distances = GetRayDistances();
+        foreach (var distance in distances) 
+            AddObservation(distance);
+        
         AddObservation(rb.velocity.y);
+        
         if (prev_state.Count == 0)
             Utils.CopyTo(current_state, prev_state);
-        //current_state[0] = GetRayDistances()[0];//up
-        //current_state[1] = GetRayDistances()[1];//down
-        //current_state[2] = GetRayDistances()[2];//forward
-        //current_state[3] = GetRayDistances()[3];//up forward
-        //current_state[4] = GetRayDistances()[4];//down forward
-        //current_state[5] = rb.velocity.y;
 
         float s_reward = reward;
         if (birdControl.dead)

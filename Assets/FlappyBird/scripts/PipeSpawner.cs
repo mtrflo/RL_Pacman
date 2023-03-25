@@ -7,22 +7,29 @@ public class PipeSpawner : MonoBehaviour {
 	public float spawnDelay = 3f;		// The amount of time before spawning starts.
 	public GameObject pipe;	
 	public float[] heights;
-	
-	
-	void Start ()
+
+	public TimeController timeController;
+
+	private float startSpawnTime = 0;
+    private void Awake()
+    {
+        startSpawnTime = spawnTime;
+        timeController.ChangeVarsByTimeScale += (ts) => { spawnTime = startSpawnTime / ts; };
+    }
+    void Start ()
 	{
-		// Start calling the Spawn function repeatedly after a delay .		
-		StartCoroutine(StartSpawning());
+        // Start calling the Spawn function repeatedly after a delay .		
+        StartCoroutine(StartSpawning());
 
     }
 
     public IEnumerator StartSpawning()
     {
 		yield return new WaitForSecondsRealtime(spawnDelay);
-		WaitForSecondsRealtime wfsr = new WaitForSecondsRealtime(spawnTime);
+		//WaitForSecondsRealtime wfsr = new WaitForSecondsRealtime(spawnTime);
 		while (true)
 		{
-			yield return wfsr;
+			yield return new WaitForSecondsRealtime(spawnTime);
 			Spawn();
         }
     }
