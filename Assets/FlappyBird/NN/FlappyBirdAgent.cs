@@ -33,7 +33,6 @@ public class FlappyBirdAgent : MonoBehaviour
     private Rigidbody2D rb;
     private void Awake()
     {
-        timeController.ChangeVarsByTimeScale += (ts) => { delay = startDelay/ts; };
         birdsCount++;
         prev_state = new List<double>();
         current_state = new List<double>();
@@ -42,6 +41,7 @@ public class FlappyBirdAgent : MonoBehaviour
     }
     private void Start()
     {
+        timeController.ChangeVarsByTimeScale += (ts) => { delay = startDelay / ts; };
         startPos = transform.position;
         startRot = transform.rotation;
         rb = GetComponent<Rigidbody2D>();
