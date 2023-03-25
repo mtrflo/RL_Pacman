@@ -39,7 +39,7 @@ namespace MonoRL
 
             network.Init();
             targetNetwork.Init();
-            DontDestroyOnLoad(this);
+            //DontDestroyOnLoad(this);
         }
 
         public int SelectAction(double[] observation)
