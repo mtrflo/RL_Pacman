@@ -11,10 +11,15 @@ public class PipeSpawner : MonoBehaviour {
 	public TimeController timeController;
 
 	private float startSpawnTime = 0;
+    WaitForSecondsRealtime wfsr;
+
     private void Awake()
     {
         startSpawnTime = spawnTime;
-        timeController.ChangeVarsByTimeScale += (ts) => { spawnTime = startSpawnTime / ts; };
+        timeController.ChangeVarsByTimeScale += (ts) => { 
+			spawnTime = startSpawnTime / ts;
+			wfsr = new WaitForSecondsRealtime(spawnTime);
+        };
     }
     void Start ()
 	{
@@ -29,7 +34,7 @@ public class PipeSpawner : MonoBehaviour {
 		//WaitForSecondsRealtime wfsr = new WaitForSecondsRealtime(spawnTime);
 		while (true)
 		{
-			yield return new WaitForSecondsRealtime(spawnTime);
+			yield return wfsr;
 			Spawn();
         }
     }

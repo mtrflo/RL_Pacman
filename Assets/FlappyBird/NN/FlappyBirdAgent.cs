@@ -38,7 +38,10 @@ public class FlappyBirdAgent : MonoBehaviour
         current_state = new List<double>();
 
         startDelay = delay;
-        timeController.ChangeVarsByTimeScale += (ts) => { delay = startDelay / ts; };
+        timeController.ChangeVarsByTimeScale += (ts) => {
+            delay = startDelay / ts;
+            wfsr = new WaitForSecondsRealtime(delay);
+        };
     }
     private void Start()
     {
@@ -57,13 +60,13 @@ public class FlappyBirdAgent : MonoBehaviour
     }
     int action;
     List<double> prev_state, current_state;
+    WaitForSecondsRealtime wfsr;
     IEnumerator ActionMaker()
     {
-        //WaitForSecondsRealtime wfsr = new WaitForSecondsRealtime(delay);
         while (birdControl.inGame)
         {
             ChooseAction();
-            yield return new WaitForSecondsRealtime(delay);
+            yield return wfsr;
             if (birdControl.dead)
                 break;
         }
