@@ -8,7 +8,7 @@ public class BirdControl : MonoBehaviour {
 
 	public int rotateRate = 10;
 	public float upSpeed = 10;
-    public GameObject scoreMgr;
+    public ScoreMgr scoreMgr;
 
     public AudioClip jumpUp;
     public AudioClip hit;
@@ -17,6 +17,9 @@ public class BirdControl : MonoBehaviour {
     public bool inGame = false;
 
 	public bool dead = false;
+
+    public static PipeMove pipe;
+
 	private bool landed = false;
 
     private Sequence birdSequence;
@@ -26,6 +29,7 @@ public class BirdControl : MonoBehaviour {
 	private Animator animator;
     // Use this for initialization
     void Start () {
+
         animator = GetComponent<Animator>();
         OnDie = () => { };
         float birdOffset = 0.05f;
@@ -75,21 +79,17 @@ public class BirdControl : MonoBehaviour {
 		if (other.name == "land" || other.name == "pipe_up" || other.name == "pipe_down")
 		{
             if (other.name == "pipe_up" || other.name == "pipe_down")
-                Destroy(other.gameObject);
+            {
+                pipe = other.transform.parent.GetComponent<PipeMove>().nextPipe;
+                //Destroy(other.transform.parent.gameObject);
+                Destroy(gameObject);
+            }
             if (!dead)
             {
-                //GameObject[] objs = GameObject.FindGameObjectsWithTag("movable");
-                //foreach (GameObject g in objs)
-                //{
-                //    g.BroadcastMessage("GameOver");
-                //}
-
                 animator.SetTrigger("die");
-                //AudioSource.PlayClipAtPoint(hit, Vector3.zero);
 				GameOver();
 				OnDie();
             }
-
 			
 
 			if (other.name == "land")
@@ -103,7 +103,8 @@ public class BirdControl : MonoBehaviour {
 
         if (other.name == "pass_trigger")
         {
-            scoreMgr.GetComponent<ScoreMgr>().AddScore();
+            scoreMgr.AddScore();
+            pipe = other.transform.parent.GetComponent<PipeMove>().nextPipe;
             //AudioSource.PlayClipAtPoint(score, Vector3.zero);
         }
 
@@ -119,7 +120,14 @@ public class BirdControl : MonoBehaviour {
 	public void GameOver()
 	{
 		dead = true;
-	}
+
+        FlappyBirdAgent.birdsCount--;
+        if (FlappyBirdAgent.birdsCount <= 0)
+        {
+            FlappyBirdAgent.birdsCount = 0;
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+    }
 
     public void ResetComponent()
     {

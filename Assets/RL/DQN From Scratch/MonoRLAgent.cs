@@ -2,7 +2,6 @@ using MonoRL;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Network = MonoRL.Network;
 public class MonoRLAgent : MonoBehaviour
 {
     public static MonoRLAgent me;

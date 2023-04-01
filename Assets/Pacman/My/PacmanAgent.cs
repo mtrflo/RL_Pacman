@@ -8,7 +8,7 @@ public class PacmanAgent : MonoBehaviour
 {
     public DPacManController DPacManController;
     public PacMapGenerator pacMapGenerator;
-    public MonoRL.SRLAgent dQNAgent;
+    public SRLAgent dQNAgent;
     private void Start()
     {
         DPacManController.OnMoved += Step;

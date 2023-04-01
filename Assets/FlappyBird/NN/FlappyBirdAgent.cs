@@ -1,16 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using MonoRL;
-using Unity.MLAgents;
 using PMT;
-using MonoRL;
+using UnityEngine.SceneManagement;
+
 public class FlappyBirdAgent : MonoBehaviour
 {
     public static int birdsCount = 0;
@@ -18,7 +12,7 @@ public class FlappyBirdAgent : MonoBehaviour
     public BirdControl birdControl;
     //public DQNAgent dQNAgent => DQNAgent.me;
     public SRLAgent rLAgent => SRLAgent.me;
-    
+
     private float startDelay;
     public float delay;
 
@@ -26,7 +20,7 @@ public class FlappyBirdAgent : MonoBehaviour
     public static int maxEpisodeCount;
     public int episodeCount;
     public int transitionCount;
-    
+
     public TimeController timeController;
 
     private Transition _Transition = new Transition();
@@ -38,10 +32,11 @@ public class FlappyBirdAgent : MonoBehaviour
         current_state = new List<double>();
 
         startDelay = delay;
-        timeController.ChangeVarsByTimeScale += (ts) => {
-            delay = startDelay / ts;
-            wfsr = new WaitForSecondsRealtime(delay);
-        };
+        //timeController.ChangeVarsByTimeScale += (ts) =>
+        //{
+        //    delay = startDelay / ts;
+        //    wfsr = new WaitForSecondsRealtime(delay);
+        //};
     }
     private void Start()
     {
@@ -63,6 +58,9 @@ public class FlappyBirdAgent : MonoBehaviour
     WaitForSecondsRealtime wfsr;
     IEnumerator ActionMaker()
     {
+        yield return new WaitWhile(()=> PipeMove.lastPipe == null);
+        BirdControl.pipe = PipeMove.lastPipe;
+        wfsr = new WaitForSecondsRealtime(delay);
         while (birdControl.inGame)
         {
             ChooseAction();
@@ -77,11 +75,17 @@ public class FlappyBirdAgent : MonoBehaviour
     {
         current_state.Clear();
         double[] distances = GetRayDistances();
-        foreach (var distance in distances) 
-            AddObservation(distance);
+        //foreach (var distance in distances) 
+        //    AddObservation(distance);
+        
+        AddObservation(transform.position.y);// bird y pos
+        AddObservation(Mathf.Abs(Mathf.Abs(BirdControl.pipe.topPoint.position.x) - Mathf.Abs(transform.position.x)));// pipe distance 
+        AddObservation(Mathf.Abs(Mathf.Abs(BirdControl.pipe.topPoint.position.y) - Mathf.Abs(transform.position.y)));// top point distance 
+        if(BirdControl.pipe.bottomPoint)
+            AddObservation(Mathf.Abs(Mathf.Abs(BirdControl.pipe.bottomPoint.position.y) - Mathf.Abs(transform.position.y)));// bottom point distance 
         
         AddObservation(rb.velocity.y);
-        
+
         if (prev_state.Count == 0)
             Utils.CopyTo(current_state, prev_state);
 
@@ -93,6 +97,7 @@ public class FlappyBirdAgent : MonoBehaviour
         _Transition.Set(prev_state.ToArray(), action, current_state.ToArray(), s_reward, birdControl.dead);
         Utils.CopyTo(current_state, prev_state);
         action = rLAgent.SelectAction(prev_state.ToArray());
+        print("action : "+ action);
         MakeAction(action);
         rLAgent.Learn(_Transition);
         episodeCount++;
@@ -135,7 +140,7 @@ public class FlappyBirdAgent : MonoBehaviour
 
     void Restart()
     {
-        ResetAgent();
+        //ResetAgent();
         //birdsCount--;
         //if (birdsCount <= 0)
         //{
