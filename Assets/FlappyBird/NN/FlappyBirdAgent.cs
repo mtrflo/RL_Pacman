@@ -27,17 +27,15 @@ public class FlappyBirdAgent : MonoBehaviour
     private Rigidbody2D rb;
     private void Awake()
     {
+        timeController = TimeController.me;
         birdsCount++;
         prev_state = new List<double>();
         current_state = new List<double>();
 
         startDelay = delay;
-        //timeController.ChangeVarsByTimeScale += (ts) =>
-        //{
-        //    delay = startDelay / ts;
-        //    wfsr = new WaitForSecondsRealtime(delay);
-        //};
+        timeController.ChangeVarsByTimeScale += ChangeVars;
     }
+    bool addReward = false;
     private void Start()
     {
         startPos = transform.position;
@@ -45,6 +43,7 @@ public class FlappyBirdAgent : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         gameMain.OnGameStarted += Started;
         birdControl.OnDie += ChooseAction;
+        birdControl.OnPipePassed += () => addReward = true;
         if (birdControl.inGame)
             Started();
     }
@@ -61,24 +60,24 @@ public class FlappyBirdAgent : MonoBehaviour
         yield return new WaitWhile(()=> PipeMove.lastPipe == null);
         BirdControl.pipe = PipeMove.lastPipe;
         wfsr = new WaitForSecondsRealtime(delay);
-        while (birdControl.inGame)
+        while (birdControl.inGame || birdControl.dead)
         {
-            ChooseAction();
             yield return wfsr;
+            ChooseAction();
             if (birdControl.dead)
                 break;
         }
-        if (birdControl.dead)
-            Restart();
+        
     }
     void ChooseAction()
     {
         current_state.Clear();
-        double[] distances = GetRayDistances();
+        //double[] distances = GetRayDistances();
         //foreach (var distance in distances) 
         //    AddObservation(distance);
         
         AddObservation(transform.position.y);// bird y pos
+        
         AddObservation(Mathf.Abs(Mathf.Abs(BirdControl.pipe.topPoint.position.x) - Mathf.Abs(transform.position.x)));// pipe distance 
         AddObservation(Mathf.Abs(Mathf.Abs(BirdControl.pipe.topPoint.position.y) - Mathf.Abs(transform.position.y)));// top point distance 
         if(BirdControl.pipe.bottomPoint)
@@ -92,12 +91,17 @@ public class FlappyBirdAgent : MonoBehaviour
         float s_reward = reward;
         if (birdControl.dead)
             s_reward = terminateReward;
+        if (addReward)
+        {
+            addReward = false;
+            s_reward = 2;
+        }
+
         //print("action : " + action);
-        //print("reward : " + reward);
+        print("reward : " + s_reward);
         _Transition.Set(prev_state.ToArray(), action, current_state.ToArray(), s_reward, birdControl.dead);
         Utils.CopyTo(current_state, prev_state);
         action = rLAgent.SelectAction(prev_state.ToArray());
-        print("action : "+ action);
         MakeAction(action);
         rLAgent.Learn(_Transition);
         episodeCount++;
@@ -107,6 +111,9 @@ public class FlappyBirdAgent : MonoBehaviour
             print("maxTimeStep : " + maxEpisodeCount);
             rLAgent.ReplaceTarget();
         }
+        
+        if (birdControl.dead)
+            Restart();
     }
 
     public Transform[] rayPoints;
@@ -140,13 +147,16 @@ public class FlappyBirdAgent : MonoBehaviour
 
     void Restart()
     {
+        Destroy(gameObject);
+
         //ResetAgent();
-        //birdsCount--;
-        //if (birdsCount <= 0)
-        //{
-        //    birdsCount = 0;
-        //    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        //}
+        birdsCount--;
+        if (birdsCount <= 0)
+        {
+            birdsCount = 0;
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            Destroy(gameObject);
+        }
     }
     Vector3 startPos;
     Quaternion startRot;
@@ -171,4 +181,14 @@ public class FlappyBirdAgent : MonoBehaviour
         current_state.Add(observation);
     }
 
+    void ChangeVars(float ts)
+    {
+        delay = startDelay / ts;
+        wfsr = new WaitForSecondsRealtime(delay);
+    }
+    private void OnDestroy()
+    {
+        timeController.ChangeVarsByTimeScale -= ChangeVars;
+
+    }
 }

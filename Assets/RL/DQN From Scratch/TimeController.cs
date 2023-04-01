@@ -5,13 +5,21 @@ using UnityEngine;
 
 public class TimeController : MonoBehaviour
 {
+    public static TimeController me;
     public float timeScale = 1.0f;
     private float fixedTimestep = 0.02f;
 
     public Action<float> ChangeVarsByTimeScale;
     private void Awake()
     {
+        if (me != null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        me = this;
         ChangeVarsByTimeScale = Change;
+        DontDestroyOnLoad(gameObject);
     }
     private void Start()
     {
@@ -23,12 +31,17 @@ public class TimeController : MonoBehaviour
         Time.timeScale = ts;
         Time.fixedDeltaTime = fixedTimestep / timeScale;
     }
-
+    
     private void OnValidate()
     {
         if(Application.isPlaying)
         {
             ChangeVarsByTimeScale?.Invoke(timeScale);
         }
+    }
+    private void OnLevelWasLoaded(int level)
+    {
+        if(me==this)
+            me.ChangeVarsByTimeScale.Invoke(timeScale);
     }
 }

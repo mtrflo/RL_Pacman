@@ -18,6 +18,7 @@ public class SRLAgent : MonoBehaviour
     [Header("ReplayBuffer")]
     public int bufferSize = 500;
     public int batchSize = 50;
+    public int pCount = 1;
     public string version = "test";
     public Network network, targetNetwork;
     public ReplayBuffer<Transition> replayBuffer;
@@ -61,32 +62,36 @@ public class SRLAgent : MonoBehaviour
 
         if (replayBuffer.Size() >= batchSize)
         {
-            Transition[] randomSamples = replayBuffer.GetRandomSamples(batchSize);
-
-            double[][] batchInputs = randomSamples.Select(x => x.state).ToArray();
-            double[][] batchExpectedOutputs = new double[batchInputs.Length][];
-
-            for (int batchIndex = 0; batchIndex < batchSize; batchIndex++)
+            for (int e = 0; e < pCount; e++)
             {
-                Transition sampleTransition = randomSamples[batchIndex];
-                batchInputs[batchIndex] = sampleTransition.state;
 
-                double[] predictedValues = network.Forward(sampleTransition.state);
-                double QEval = predictedValues[sampleTransition.action];
-                double QNext = targetNetwork.Forward(sampleTransition.state_).Max();
-                double QTarget = sampleTransition.reward + gamma * QNext;
-                if (sampleTransition.isDone)
-                    QTarget = sampleTransition.reward;
+                Transition[] randomSamples = replayBuffer.GetRandomSamples(batchSize);
 
-                double[] expectedValues = new double[predictedValues.Length];
-                for (int i = 0; i < predictedValues.Length; i++)
-                    expectedValues[i] = predictedValues[i];// * - (QTarget - QEval);
-                expectedValues[sampleTransition.action] = QTarget;
+                double[][] batchInputs = randomSamples.Select(x => x.state).ToArray();
+                double[][] batchExpectedOutputs = new double[batchInputs.Length][];
 
-                batchExpectedOutputs[batchIndex] = expectedValues;
+                for (int batchIndex = 0; batchIndex < batchSize; batchIndex++)
+                {
+                    Transition sampleTransition = randomSamples[batchIndex];
+                    batchInputs[batchIndex] = sampleTransition.state;
+
+                    double[] predictedValues = network.Forward(sampleTransition.state);
+                    double QEval = predictedValues[sampleTransition.action];
+                    double QNext = targetNetwork.Forward(sampleTransition.state_).Max();
+                    double QTarget = sampleTransition.reward + gamma * QNext;
+                    if (sampleTransition.isDone)
+                        QTarget = sampleTransition.reward;
+
+                    double[] expectedValues = new double[predictedValues.Length];
+                    for (int i = 0; i < predictedValues.Length; i++)
+                        expectedValues[i] = predictedValues[i];// * - (QTarget - QEval);
+                    expectedValues[sampleTransition.action] = QTarget;
+
+                    batchExpectedOutputs[batchIndex] = expectedValues;
+                }
+
+                network.Learn(batchInputs, batchExpectedOutputs);
             }
-
-            network.Learn(batchInputs, batchExpectedOutputs);
         }
     }
 

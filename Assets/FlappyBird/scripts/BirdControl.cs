@@ -25,13 +25,18 @@ public class BirdControl : MonoBehaviour {
     private Sequence birdSequence;
 
 	public Action OnDie;
-
+    public Action OnPipePassed;
 	private Animator animator;
+    private void Awake()
+    {
+        OnDie = () => { };
+        
+        OnPipePassed = () => { };
+    }
     // Use this for initialization
     void Start () {
 
         animator = GetComponent<Animator>();
-        OnDie = () => { };
         float birdOffset = 0.05f;
         float birdTime = 0.3f;
         float birdStartY = transform.position.y;
@@ -82,7 +87,6 @@ public class BirdControl : MonoBehaviour {
             {
                 pipe = other.transform.parent.GetComponent<PipeMove>().nextPipe;
                 //Destroy(other.transform.parent.gameObject);
-                Destroy(gameObject);
             }
             if (!dead)
             {
@@ -105,6 +109,7 @@ public class BirdControl : MonoBehaviour {
         {
             scoreMgr.AddScore();
             pipe = other.transform.parent.GetComponent<PipeMove>().nextPipe;
+            OnPipePassed();
             //AudioSource.PlayClipAtPoint(score, Vector3.zero);
         }
 
@@ -121,12 +126,12 @@ public class BirdControl : MonoBehaviour {
 	{
 		dead = true;
 
-        FlappyBirdAgent.birdsCount--;
-        if (FlappyBirdAgent.birdsCount <= 0)
-        {
-            FlappyBirdAgent.birdsCount = 0;
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        }
+        //FlappyBirdAgent.birdsCount--;
+        //if (FlappyBirdAgent.birdsCount <= 0)
+        //{
+        //    FlappyBirdAgent.birdsCount = 0;
+        //    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        //}
     }
 
     public void ResetComponent()

@@ -15,12 +15,10 @@ public class PipeSpawner : MonoBehaviour {
 
     private void Awake()
     {
+        timeController = TimeController.me;
         startSpawnTime = spawnTime;
-   //     timeController.ChangeVarsByTimeScale += (ts) => { 
-			//spawnTime = startSpawnTime / ts;
-			//wfsr = new WaitForSecondsRealtime(spawnTime);
-   //     };
-    }
+		timeController.ChangeVarsByTimeScale += ChangeVars;
+	}
     void Start ()
 	{
         // Start calling the Spawn function repeatedly after a delay .		
@@ -53,4 +51,15 @@ public class PipeSpawner : MonoBehaviour {
 	{
 		CancelInvoke("Spawn");
 	}
+
+	void ChangeVars(float ts)
+	{
+        spawnTime = startSpawnTime / ts;
+        wfsr = new WaitForSecondsRealtime(spawnTime);
+    }
+    private void OnDestroy()
+    {
+		timeController.ChangeVarsByTimeScale -= ChangeVars;
+
+    }
 }
