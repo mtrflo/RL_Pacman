@@ -83,12 +83,12 @@ public class FlappyBirdAgent : MonoBehaviour
         
         AddObservation(BirdControl.pipe.topPoint.position.x - transform.position.x);// pipe distance 
         AddObservation(Mathf.Abs(Mathf.Abs(BirdControl.pipe.topPoint.position.y) - Mathf.Abs(transform.position.y)));// top point distance 
-        if(BirdControl.pipe.bottomPoint)
-            AddObservation(Mathf.Abs(Mathf.Abs(BirdControl.pipe.bottomPoint.position.y) - Mathf.Abs(transform.position.y)));// bottom point distance 
-
+        AddObservation(Mathf.Abs(Mathf.Abs(BirdControl.pipe.bottomPoint.position.y) - Mathf.Abs(transform.position.y)));// bottom point distance 
+        AddObservation(BirdControl.pipe.bottomPoint.position.y);// bottom point height
         AddObservation(distances[0]);
         AddObservation(distances[1]);
         AddObservation(rb.velocity.y);
+
         //print(current_state.ToCommaSeparatedString());
         if (prev_state.Count == 0)
             Utils.CopyTo(current_state, prev_state);
@@ -113,8 +113,6 @@ public class FlappyBirdAgent : MonoBehaviour
                 print("maxTimeStep : " + maxEpisodeCount);
             }
         }
-        else
-            s_reward += distanceReward;
         //print("action : " + action);
         print("reward : " + s_reward);
         _Transition.Set(prev_state.ToArray(), action, current_state.ToArray(), s_reward, birdControl.dead);
