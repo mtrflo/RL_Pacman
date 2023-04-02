@@ -4,6 +4,7 @@ using UnityEngine;
 using MonoRL;
 using PMT;
 using UnityEngine.SceneManagement;
+using Unity.VisualScripting;
 
 public class FlappyBirdAgent : MonoBehaviour
 {
@@ -20,6 +21,7 @@ public class FlappyBirdAgent : MonoBehaviour
     public static int maxEpisodeCount;
     public int episodeCount;
     public int transitionCount;
+    public static int totalEpisodeCount;
 
     public TimeController timeController;
 
@@ -72,19 +74,21 @@ public class FlappyBirdAgent : MonoBehaviour
     void ChooseAction()
     {
         current_state.Clear();
-        //double[] distances = GetRayDistances();
+        double[] distances = GetRayDistances();
         //foreach (var distance in distances) 
         //    AddObservation(distance);
         
         AddObservation(transform.position.y);// bird y pos
         
-        AddObservation(Mathf.Abs(Mathf.Abs(BirdControl.pipe.topPoint.position.x) - Mathf.Abs(transform.position.x)));// pipe distance 
+        AddObservation(BirdControl.pipe.topPoint.position.x - transform.position.x);// pipe distance 
         AddObservation(Mathf.Abs(Mathf.Abs(BirdControl.pipe.topPoint.position.y) - Mathf.Abs(transform.position.y)));// top point distance 
         if(BirdControl.pipe.bottomPoint)
             AddObservation(Mathf.Abs(Mathf.Abs(BirdControl.pipe.bottomPoint.position.y) - Mathf.Abs(transform.position.y)));// bottom point distance 
-        
-        AddObservation(rb.velocity.y);
 
+        AddObservation(distances[0]);
+        AddObservation(distances[1]);
+        AddObservation(rb.velocity.y);
+        //print(current_state.ToCommaSeparatedString());
         if (prev_state.Count == 0)
             Utils.CopyTo(current_state, prev_state);
 
@@ -105,10 +109,16 @@ public class FlappyBirdAgent : MonoBehaviour
         MakeAction(action);
         rLAgent.Learn(_Transition);
         episodeCount++;
+        totalEpisodeCount++;
         if (maxEpisodeCount < episodeCount)
         {
             maxEpisodeCount = episodeCount;
             print("maxTimeStep : " + maxEpisodeCount);
+        }
+        if (totalEpisodeCount % transitionCount == 0)
+        {
+            print("replace target");
+            print("totalEpisodeCount : " + totalEpisodeCount);
             rLAgent.ReplaceTarget();
         }
         
