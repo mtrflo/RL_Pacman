@@ -155,7 +155,7 @@ public class Transition
     {
 
     }
-    public void Set(double[] state, int action, double[] state_, double reward, bool isDone)
+    public void Set(double[] state, int action, double[] state_, double reward, bool isDone = false)
     {
         if (this.state == null)
             this.state = new double[state.Length];
