@@ -17,7 +17,8 @@ public class FlappyBirdAgent : MonoBehaviour
     private float startDelay;
     public float delay;
 
-    public float reward = 0.1f, terminateReward = -1f, scoreReward = 1;
+    public float reward = 0.1f, terminateReward = -1f, scoreReward = 1, distanceReward = 0f;
+    public int distanceRewardCount = 50;
     public static int maxEpisodeCount;
     public int episodeCount;
     public int transitionCount;
@@ -93,14 +94,27 @@ public class FlappyBirdAgent : MonoBehaviour
             Utils.CopyTo(current_state, prev_state);
 
         float s_reward = reward;
-        if (birdControl.dead)
-            s_reward = terminateReward;
+        
+        
+            
         if (addReward)
         {
             addReward = false;
             s_reward = scoreReward;
         }
-
+        if (birdControl.dead)
+        {
+            s_reward = terminateReward;
+            if (maxEpisodeCount < episodeCount)
+            {
+                maxEpisodeCount = episodeCount;
+                rLAgent.ReplaceTarget();
+                print("replace target");
+                print("maxTimeStep : " + maxEpisodeCount);
+            }
+        }
+        else
+            s_reward += distanceReward;
         //print("action : " + action);
         print("reward : " + s_reward);
         _Transition.Set(prev_state.ToArray(), action, current_state.ToArray(), s_reward, birdControl.dead);
@@ -110,18 +124,22 @@ public class FlappyBirdAgent : MonoBehaviour
         rLAgent.Learn(_Transition);
         episodeCount++;
         totalEpisodeCount++;
-        if (maxEpisodeCount < episodeCount)
-        {
-            maxEpisodeCount = episodeCount;
-            print("maxTimeStep : " + maxEpisodeCount);
-        }
+        //if (maxEpisodeCount < episodeCount)
+        //{
+        //    maxEpisodeCount = episodeCount;
+        //    print("maxTimeStep : " + maxEpisodeCount);
+        //}
         if (totalEpisodeCount % transitionCount == 0)
         {
-            print("replace target");
             print("totalEpisodeCount : " + totalEpisodeCount);
-            rLAgent.ReplaceTarget();
         }
-        
+        if (totalEpisodeCount % distanceRewardCount == 0)
+        {
+            distanceReward += 0.01f;
+        }
+
+
+
         if (birdControl.dead)
             Restart();
     }
