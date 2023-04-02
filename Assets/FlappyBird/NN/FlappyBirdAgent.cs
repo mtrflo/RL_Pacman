@@ -16,7 +16,7 @@ public class FlappyBirdAgent : MonoBehaviour
     private float startDelay;
     public float delay;
 
-    public float reward = 0.1f, terminateReward = -1f;
+    public float reward = 0.1f, terminateReward = -1f, scoreReward = 1;
     public static int maxEpisodeCount;
     public int episodeCount;
     public int transitionCount;
@@ -94,7 +94,7 @@ public class FlappyBirdAgent : MonoBehaviour
         if (addReward)
         {
             addReward = false;
-            s_reward = 2;
+            s_reward = scoreReward;
         }
 
         //print("action : " + action);
