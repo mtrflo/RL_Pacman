@@ -6,6 +6,7 @@ using UnityEngine;
 public class TimeController : MonoBehaviour
 {
     public static TimeController me;
+    [Range(1,12)]
     public float timeScale = 1.0f;
     private float fixedTimestep = 0.02f;
 
