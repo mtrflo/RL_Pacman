@@ -63,15 +63,15 @@ public class PendulumAgent : MonoBehaviour
         {
             angle = 180 + (180 - angle);
         }
-        print("angle : " + angle);
         angle = angle * Mathf.Deg2Rad;
+        print("angle : " + angle);
         //print("angle : " + angle);
         
         
         AddObservation(Mathf.Sin(angle));
         AddObservation(Mathf.Cos(angle));
         //AddObservation(Mathf.Sign(rb.angularVelocity.magnitude));
-        float angvel = rb.angularVelocity.magnitude * Mathf.Sign(rb.angularVelocity.x);
+        float angvel = rb.angularVelocity.magnitude * Mathf.Sign(rb.angularVelocity.z);
         AddObservation(angvel);
 
 
@@ -79,11 +79,11 @@ public class PendulumAgent : MonoBehaviour
             Utils.CopyTo(current_state, prev_state);
 
 
-
-        float s_reward = Mathf.Cos(angle) + 1;
-        s_reward = Mathf.Abs(rb.angularVelocity.magnitude);
+        print("Mathf.Cos(angle) : " + Mathf.Cos(angle));
+        float s_reward = Mathf.Cos(angle);
+        //s_reward = Mathf.Abs(rb.angularVelocity.magnitude);
         //r = -(theta2 + 0.1 * theta_dt2 + 0.001 * torque2)
-        //float torque = Mathf.Lerp(-force, force, action / 10f);
+        //float torque = action == 1 ? -force : force;// Mathf.Lerp(-force, force, action / 10f);
         //float s_reward = -(Mathf.Pow(angle, 2) + 0.1f * Mathf.Pow((lastAngle - angle), 2) + 0.001f * Mathf.Pow(torque, 2)) + 1;
         lastAngle = angle;
 
