@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class PendulumAgent : MonoBehaviour
 {
-    private Rigidbody2D rb;
+    private Rigidbody rb;
     public SRLAgent rLAgent => SRLAgent.me;
 
     public float delay = 1, startDelay;
@@ -28,7 +28,7 @@ public class PendulumAgent : MonoBehaviour
     bool addReward = false;
     private void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
+        rb = GetComponent<Rigidbody>();
         Started();
     }
 
@@ -50,28 +50,41 @@ public class PendulumAgent : MonoBehaviour
 
     }
     float maxrew = -10000;
-    float lastAngle = 180;
+    float lastAngle = 0;
+    
     void ChooseAction()
     {
         current_state.Clear();
         
         Vector3 toPo = (point.position - transform.position).normalized;
         float angle = Vector3.Angle(toPo, Vector3.up);
-        angle = angle * MathF.Sign(point.position.x) * Mathf.Deg2Rad;
+        float sign = MathF.Sign(point.position.x - transform.position.x);
+        if(sign > 0)
+        {
+            angle = 180 + (180 - angle);
+        }
         print("angle : " + angle);
+        angle = angle * Mathf.Deg2Rad;
+        //print("angle : " + angle);
         
         
         AddObservation(Mathf.Sin(angle));
         AddObservation(Mathf.Cos(angle));
-        AddObservation(rb.angularVelocity);
+        //AddObservation(Mathf.Sign(rb.angularVelocity.magnitude));
+        float angvel = rb.angularVelocity.magnitude * Mathf.Sign(rb.angularVelocity.x);
+        AddObservation(angvel);
 
 
         if (prev_state.Count == 0)
             Utils.CopyTo(current_state, prev_state);
 
-        
 
-        float s_reward = Mathf.Cos(angle);
+
+        float s_reward = Mathf.Cos(angle) + 1;
+        s_reward = Mathf.Abs(rb.angularVelocity.magnitude);
+        //r = -(theta2 + 0.1 * theta_dt2 + 0.001 * torque2)
+        //float torque = Mathf.Lerp(-force, force, action / 10f);
+        //float s_reward = -(Mathf.Pow(angle, 2) + 0.1f * Mathf.Pow((lastAngle - angle), 2) + 0.001f * Mathf.Pow(torque, 2)) + 1;
         lastAngle = angle;
 
         print("reward : " + s_reward);
@@ -88,14 +101,20 @@ public class PendulumAgent : MonoBehaviour
             rLAgent.ReplaceTarget();
         }
     }
-
     void MakeAction(int action)
     {
         float torque = force;
+        //0-9
+        //-10 : 10
+        // 0  1  2 3 4 5 6
+        //-10 -2 -1 0 1 2 10
+        //float torque = Mathf.Lerp(-force, force, action / 10f);
+        //print("action : " + action);
+        //print("torque : " + torque);
         if (action == 1)
             torque = -force;
-        
-        rb.AddTorque(torque);
+
+        rb.AddTorque(0, 0, torque);
     }
 
     public void AddObservation(double observation)
