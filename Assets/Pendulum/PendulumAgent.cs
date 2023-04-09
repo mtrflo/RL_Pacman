@@ -11,7 +11,7 @@ public class PendulumAgent : MonoBehaviour
 
     public float delay = 1, startDelay;
     public float reward = 0.1f, terminateReward = -1f, scoreReward = 1, distanceReward = 0f;
-    public TimeController timeController;
+    //public TimeController timeController;
     public int episodeCount, maxEpisodeCount;
     public Transform point;
     public float force;
@@ -19,11 +19,11 @@ public class PendulumAgent : MonoBehaviour
     private void Awake()
     {
         startDelay = delay;
-        timeController = TimeController.me;
+        //timeController = TimeController.me;
         prev_state = new List<double>();
         current_state = new List<double>();
 
-        timeController.ChangeVarsByTimeScale += ChangeVars;
+        //timeController.ChangeVarsByTimeScale += ChangeVars;
     }
     bool addReward = false;
     private void Start()
@@ -129,7 +129,7 @@ public class PendulumAgent : MonoBehaviour
     }
     private void OnDestroy()
     {
-        timeController.ChangeVarsByTimeScale -= ChangeVars;
+        //timeController.ChangeVarsByTimeScale -= ChangeVars;
 
     }
 }
