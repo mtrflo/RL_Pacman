@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class PendulumAgent : MonoBehaviour
 {
-    private Rigidbody rb;
+    public Rigidbody rb;
     public SRLAgent rLAgent => SRLAgent.me;
 
     public float delay = 1, startDelay;
@@ -28,7 +28,6 @@ public class PendulumAgent : MonoBehaviour
     bool addReward = false;
     private void Start()
     {
-        rb = GetComponent<Rigidbody>();
         Started();
     }
 
@@ -104,13 +103,6 @@ public class PendulumAgent : MonoBehaviour
     void MakeAction(int action)
     {
         float torque = force;
-        //0-9
-        //-10 : 10
-        // 0  1  2 3 4 5 6
-        //-10 -2 -1 0 1 2 10
-        //float torque = Mathf.Lerp(-force, force, action / 10f);
-        //print("action : " + action);
-        //print("torque : " + torque);
         if (action == 1)
             torque = -force;
 

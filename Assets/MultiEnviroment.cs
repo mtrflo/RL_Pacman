@@ -27,7 +27,7 @@ public class MultiEnviroment : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             GameObject env_t = Instantiate(env, ins_parent);
-            env_t.transform.Translate((i+1) * space, 0,0);
+            env_t.transform.Translate((i+1) * space, 0,0, Space.World);
         }
     }
 }

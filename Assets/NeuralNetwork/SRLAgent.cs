@@ -56,6 +56,22 @@ public class SRLAgent : MonoBehaviour
         return action;
     }
 
+    public int SelectAction(double[] observation,float _epsilon)
+    {
+        int action = 0;
+        float e = Random.Range(0, 1f);
+
+        if (e > _epsilon)
+        {
+            double[] actionValues = network.Forward(observation);
+            action = actionValues.ToList().IndexOf(actionValues.Max());
+        }
+        else
+            action = Random.Range(0, network.Layers.Last().NodeSize);
+
+        return action;
+    }
+
     public void Learn(Transition transition)
     {
         replayBuffer.Add(transition);
