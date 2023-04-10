@@ -1,3 +1,4 @@
+using NaughtyAttributes;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -39,7 +40,6 @@ public class SRLAgent : MonoBehaviour
         targetNetwork.Init();
         DontDestroyOnLoad(this);
     }
-
     public int SelectAction(double[] observation)
     {
         int action = 0;
@@ -153,6 +153,27 @@ public class SRLAgent : MonoBehaviour
             replayBuffer.maxSize = bufferSize;
         }
     }
+    [Button("Version++")]
+    public void ChangeVersion()
+    {
+        string lcid = version[version.Length - 1].ToString();
+        int iid = 0;
+        if (int.TryParse(lcid, out iid))
+        {
+            version = version.Remove(version.Length - 1);
+            iid++;
+            version += iid;
+        }
+        else
+        {
+            version += "_0";
+        }
+
+    }
+    public bool isNan => Application.isPlaying && Double.IsNaN(network.Layers[0].Weights[0].weigths[0]);
+    [ReadOnly,ShowIf("isNan"), Label("NAAAAAAAAAAAAAAAAAAN!!!!!!!!!!!!!!")]
+    public bool Nannn;
+
 }
 [Serializable]
 public class Transition

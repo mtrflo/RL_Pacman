@@ -20,6 +20,7 @@ public class HeadAgent : MonoBehaviour
     public Rigidbody rb;
     public Rigidbody ballRB;
     public HeadEnv env;
+    public Transform point;
     public float randomRot = 10;
     public float epsilon;
     
@@ -57,24 +58,36 @@ public class HeadAgent : MonoBehaviour
         current_state.Clear();
 
 
-        AddObservation(rb.transform.eulerAngles.x * Mathf.Deg2Rad);
-        AddObservation(rb.transform.eulerAngles.z * Mathf.Deg2Rad);
+        AddObservation(rb.transform.up.normalized.x);
+        AddObservation(rb.transform.up.normalized.x);
+        AddObservation(rb.angularVelocity.x);
+        AddObservation(rb.angularVelocity.y);
+        AddObservation(rb.angularVelocity.z);
         AddObservation(ballRB.velocity.x);
+        AddObservation(ballRB.velocity.y);
         AddObservation(ballRB.velocity.z);
+        AddObservation(ballRB.transform.localPosition.x);
+        AddObservation(ballRB.transform.localPosition.y);
+        AddObservation(ballRB.transform.localPosition.z);
+
 
 
         if (prev_state.Count == 0)
             Utils.CopyTo(current_state, prev_state);
 
-
-        float s_reward = -ballRB.velocity.magnitude;
+        Vector3 center = new Vector3(transform.position.x,0, transform.position.z);
+        Vector3 ballCenter = new Vector3(ballRB.transform.position.x,0, ballRB.transform.position.z);
+        float distance = Vector3.Distance(point.position, ballRB.transform.position);
+        float vel = ballRB.velocity.magnitude;
+        //print("distance : " + distance);
+        float s_reward = 0.1f-0.1f*distance-0.1f*vel;
         
 
         
         _Transition.Set(prev_state.ToArray(), action, current_state.ToArray(), s_reward);
         Utils.CopyTo(current_state, prev_state);
 
-        if (ballRB.transform.position.y < 0.3f)
+        if (ballRB.transform.position.y < 0.5f)
         {
             s_reward = terminateReward;
             _Transition.isDone = true;
@@ -90,7 +103,7 @@ public class HeadAgent : MonoBehaviour
         if (maxrew < s_reward)
         {
             maxrew = s_reward;
-            print("maxrew : " + maxrew);
+            //print("maxrew : " + maxrew);
             rLAgent.ReplaceTarget();
         }
         
