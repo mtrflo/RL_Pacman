@@ -69,7 +69,7 @@ public class HeadAgent : MonoBehaviour
         AddObservation(ballRB.velocity.y);
         AddObservation(ballRB.velocity.z);
         AddObservation(ballRB.transform.localPosition.x);
-        AddObservation(ballRB.transform.localPosition.y);
+        //AddObservation(ballRB.transform.localPosition.y);
         AddObservation(ballRB.transform.localPosition.z);
 
 
@@ -119,7 +119,7 @@ public class HeadAgent : MonoBehaviour
 
         print("reward : " + s_reward);
 
-        if (_Transition.isDone)
+        if (ballRB.transform.position.y < 0.5f)
             Restart();
     }
     void MakeAction(int action)
