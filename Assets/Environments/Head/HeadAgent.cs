@@ -63,7 +63,7 @@ public class HeadAgent : MonoBehaviour
         current_state.Clear();
 
 
-        Vector3 ve = rb.transform.position - ballRB.transform.position;
+        Vector3 ve = ballRB.transform.position - rb.transform.position;
         AddObservation(rb.transform.rotation.x);
         AddObservation(rb.transform.rotation.z);
         AddObservation(ve.x);
