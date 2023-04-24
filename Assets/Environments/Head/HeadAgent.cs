@@ -12,7 +12,8 @@ public class HeadAgent : MonoBehaviour
     public float delay = 1, startDelay;
     public float reward = 0.1f, terminateReward = -1f, scoreReward = 1, distanceReward = 0f;
     //public TimeController timeController;
-    public int episodeCount, maxEpisodeCount;
+    public int stepCount;
+    public static int maxStepCount;
     public float force;
     private Transition _Transition = new Transition();
 
@@ -52,7 +53,7 @@ public class HeadAgent : MonoBehaviour
 
     }
     float maxrew = -10000;
-    float RotT(float er) => er > 270 ? 360 - er : er;
+    float RotT(float er) => er > 270 ? er - 360 : er;
     public bool falled = false;
     public void Lose()
     {
@@ -62,10 +63,16 @@ public class HeadAgent : MonoBehaviour
     {
         current_state.Clear();
 
-
+        //print("x : " + rb.transform.eulerAngles.x);
+        //print("y : " + rb.transform.eulerAngles.y);
+        //print("z : " + rb.transform.eulerAngles.z);
+        //print("x : " + RotT(rb.transform.eulerAngles.x));
+        //print("y : " + RotT(rb.transform.eulerAngles.y));
+        //print("z : " + RotT(rb.transform.eulerAngles.z));
         Vector3 ve = ballRB.transform.position - rb.transform.position;
-        AddObservation(rb.transform.rotation.x);
-        AddObservation(rb.transform.rotation.z);
+        AddObservation(RotT(rb.transform.eulerAngles.x) * Mathf.Deg2Rad);
+        AddObservation(RotT(rb.transform.eulerAngles.y) * Mathf.Deg2Rad);
+        AddObservation(RotT(rb.transform.eulerAngles.z) * Mathf.Deg2Rad);
         AddObservation(ve.x);
         AddObservation(ve.y);
         AddObservation(ve.z);
@@ -83,14 +90,14 @@ public class HeadAgent : MonoBehaviour
         float distance = Vector3.Distance(point.position, ballRB.transform.position);
         float vel = ballRB.velocity.magnitude;
         //print("distance : " + distance);
-        float s_reward = reward;// - 0.1f * distance - 2 * vel;
+        float s_reward = reward - 0.1f * distance - 2 * vel;
 
 
 
         _Transition.Set(prev_state.ToArray(), action, current_state.ToArray(), s_reward);
         Utils.CopyTo(current_state, prev_state);
 
-        if (falled || ballRB.transform.position.y < 0.45f)
+        if (falled || ballRB.transform.position.y < 0.4f)
         {
             s_reward = terminateReward;
             _Transition.isDone = true;
@@ -110,18 +117,23 @@ public class HeadAgent : MonoBehaviour
 
         rLAgent.Learn(_Transition);
 
-        episodeCount++;
-        if (maxrew < s_reward)
+        stepCount++;
+        
+
+        //print("reward : " + s_reward);
+
+        if (falled || ballRB.transform.position.y < 0.4f)
         {
-            maxrew = s_reward;
-            //print("maxrew : " + maxrew);
-            rLAgent.ReplaceTarget();
-        }
+            if (maxStepCount < stepCount)
+            {
+                maxrew = s_reward;
+                print("maxStepCount : " + maxStepCount);
+                maxStepCount = stepCount;
+                rLAgent.ReplaceTarget();
+            }
 
-        print("reward : " + s_reward);
-
-        if (falled || ballRB.transform.position.y < 0.45f)
             Restart();
+        }
     }
     void MakeAction(int action)
     {
