@@ -13,6 +13,8 @@ public class HeadAgent : MonoBehaviour
     public float reward = 0.1f, terminateReward = -1f, scoreReward = 1, distanceReward = 0f;
     //public TimeController timeController;
     public int stepCount;
+    public int replaceStepCount;
+    public static int stepCounter;
     public static int maxStepCount;
     public float force;
     private Transition _Transition = new Transition();
@@ -90,7 +92,7 @@ public class HeadAgent : MonoBehaviour
         float distance = Vector3.Distance(point.position, ballRB.transform.position);
         float vel = ballRB.velocity.magnitude;
         //print("distance : " + distance);
-        float s_reward = reward - 0.1f * distance - 2 * vel;
+        float s_reward = reward - distance - 2 * vel;
 
 
 
@@ -118,20 +120,24 @@ public class HeadAgent : MonoBehaviour
         rLAgent.Learn(_Transition);
 
         stepCount++;
-        
+        stepCounter++;
 
         //print("reward : " + s_reward);
+
+        if (stepCounter%replaceStepCount == 0)
+        {
+            rLAgent.ReplaceTarget();
+        }
+
+        
 
         if (falled || ballRB.transform.position.y < 0.4f)
         {
             if (maxStepCount < stepCount)
             {
-                maxrew = s_reward;
                 print("maxStepCount : " + maxStepCount);
                 maxStepCount = stepCount;
-                rLAgent.ReplaceTarget();
             }
-
             Restart();
         }
     }
