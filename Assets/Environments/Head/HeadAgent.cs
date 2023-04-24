@@ -53,6 +53,11 @@ public class HeadAgent : MonoBehaviour
     }
     float maxrew = -10000;
     float RotT(float er) => er > 270 ? 360 - er : er;
+    public bool falled = false;
+    public void Lose()
+    {
+        falled = true;
+    }
     void ChooseAction()
     {
         current_state.Clear();
@@ -78,14 +83,14 @@ public class HeadAgent : MonoBehaviour
         float distance = Vector3.Distance(point.position, ballRB.transform.position);
         float vel = ballRB.velocity.magnitude;
         //print("distance : " + distance);
-        float s_reward = reward - 0.1f * distance - 2 * vel;
+        float s_reward = reward;// - 0.1f * distance - 2 * vel;
 
 
 
         _Transition.Set(prev_state.ToArray(), action, current_state.ToArray(), s_reward);
         Utils.CopyTo(current_state, prev_state);
 
-        if (ballRB.transform.position.y < 0.5f)
+        if (falled || ballRB.transform.position.y < 0.45f)
         {
             s_reward = terminateReward;
             _Transition.isDone = true;
@@ -115,7 +120,7 @@ public class HeadAgent : MonoBehaviour
 
         print("reward : " + s_reward);
 
-        if (ballRB.transform.position.y < 0.5f)
+        if (falled || ballRB.transform.position.y < 0.45f)
             Restart();
     }
     void MakeAction(int action)
