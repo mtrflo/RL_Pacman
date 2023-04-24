@@ -14,6 +14,7 @@ public class HeadEnv : MonoBehaviour
         myId = id;
         id++;
         head.epsilon = Mathf.Lerp(0f, 1f, 1f* myId / (1f*count) );
+        count = FindObjectOfType<MultiEnviroment>().count;
     }
     public void Restart()
     {
