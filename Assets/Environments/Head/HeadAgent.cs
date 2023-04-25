@@ -99,7 +99,7 @@ public class HeadAgent : MonoBehaviour
         _Transition.Set(prev_state.ToArray(), action, current_state.ToArray(), s_reward);
         Utils.CopyTo(current_state, prev_state);
 
-        if (falled || ballRB.transform.position.y < 0.4f)
+        if (falled || ballRB.transform.position.y < 0.35f)
         {
             s_reward = terminateReward;
             _Transition.isDone = true;
@@ -131,7 +131,7 @@ public class HeadAgent : MonoBehaviour
 
         
 
-        if (falled || ballRB.transform.position.y < 0.4f)
+        if (falled || ballRB.transform.position.y < 0.35f)
         {
             if (maxStepCount < stepCount)
             {
