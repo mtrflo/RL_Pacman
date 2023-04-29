@@ -139,12 +139,12 @@ public class HeadAgent : MonoBehaviour
 
         //print("reward : " + s_reward);
 
-        if (stepCounter%replaceStepCount == 0)
+        if (stepCounter % replaceStepCount == 0)
         {
             rLAgent.ReplaceTarget();
         }
 
-        
+
 
         if (falled || ballRB.transform.position.y < 0.35f)
         {
