@@ -1,3 +1,4 @@
+using MonoRL;
 using NaughtyAttributes;
 using System;
 using System.Collections;
@@ -113,13 +114,25 @@ public class SRLAgent : MonoBehaviour
 
     public void ReplaceTarget()
     {
-        for (int i = 0; i < network.Layers.Count; i++)
+        int mainNetworkLayerCount = network.Layers.Count;
+        int mainNetworkLayerWeightCount = 0;
+        int mainNetworkLayersWeightsWeigthsCount = 0;
+        for (int i = 0; i < mainNetworkLayerCount; i++)
         {
-            for (int j = 0; j < network.Layers[i].Weights.Count; j++)
-                for (int k = 0; k < network.Layers[i].Weights[j].weigths.Count; k++)
-                    targetNetwork.Layers[i].Weights[j].weigths[k] = network.Layers[i].Weights[j].weigths[k];
-
-            network.Layers[i].Biases.CopyTo(targetNetwork.Layers[i].Biases, 0);
+            mainNetworkLayerWeightCount = network.Layers[i].Weights.Count;
+            Layer mainNetworkLayer = network.Layers[i],
+                  targetNetworkLayer = targetNetwork.Layers[i];
+            for (int j = 0; j < mainNetworkLayerWeightCount; j++)
+            {
+                Weights t_weights = targetNetworkLayer.Weights[j], 
+                        m_weights = mainNetworkLayer.Weights[j];
+                mainNetworkLayersWeightsWeigthsCount = mainNetworkLayer.Weights[j].weigths.Count;
+                for (int k = 0; k < mainNetworkLayersWeightsWeigthsCount; k++)
+                {
+                    t_weights.weigths[k] = m_weights.weigths[k];
+                }
+                mainNetworkLayer.Biases.CopyTo(targetNetworkLayer.Biases, 0);
+            }
         }
     }
     private void OnApplicationQuit()

@@ -53,7 +53,6 @@ namespace MonoRL
             Activation = MonoRL.Activation.GetActivationFromType(activationType);
             _GradB = new double[nodeSize];
             _GradW = new double[nodeSize][];
-            Debug.Log("SetNonSerializedData");
             for (int nodeIndex = 0; nodeIndex < nodeSize; nodeIndex++)
                 _GradW[nodeIndex] = new double[inputSize];
         }
@@ -89,6 +88,7 @@ namespace MonoRL
             {
                 for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
                     _GradW[nodeIndex] = new double[InputSize];
+                Debug.Log("gradw");
             }
 
             double[] delta = new double[NodeSize];
@@ -139,7 +139,14 @@ namespace MonoRL
         public void ClearGradients()
         {
             Array.Clear(_GradB, 0, _GradB.Length);
-            Array.Clear(_GradW, 0, _GradW.Length);
+            for (int i = 0; i < NodeSize; i++)
+            {
+                for (int j = 0; j < InputSize; j++)
+                {
+                    _GradW[i][j] = 0;
+                }
+            }
+            //Array.Clear(_GradW, 0, _GradW.Length);
         }
 
         private void UpdateGradients(double[] delta)
