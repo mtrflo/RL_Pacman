@@ -72,6 +72,21 @@ public class HeadAgent : MonoBehaviour
         //print("y : " + RotT(rb.transform.eulerAngles.y));
         //print("z : " + RotT(rb.transform.eulerAngles.z));
         Vector3 ve = ballRB.transform.position - rb.transform.position;
+        AddObservation(rb.transform.rotation.x);
+        AddObservation(rb.transform.rotation.y);
+        AddObservation(rb.transform.rotation.z);
+        AddObservation(rb.transform.rotation.w);
+        AddObservation(rb.angularVelocity.x);
+        AddObservation(rb.angularVelocity.y);
+        AddObservation(rb.angularVelocity.z);
+        AddObservation(ballRB.velocity.x);
+        AddObservation(ballRB.velocity.y);
+        AddObservation(ballRB.velocity.z);
+        AddObservation(ballRB.transform.localPosition.x);
+        AddObservation(ballRB.transform.localPosition.y);
+        AddObservation(ballRB.transform.localPosition.z);
+
+        /*
         AddObservation(RotT(rb.transform.eulerAngles.x) * Mathf.Deg2Rad);
         AddObservation(RotT(rb.transform.eulerAngles.y) * Mathf.Deg2Rad);
         AddObservation(RotT(rb.transform.eulerAngles.z) * Mathf.Deg2Rad);
@@ -81,7 +96,7 @@ public class HeadAgent : MonoBehaviour
         AddObservation(ballRB.velocity.x);
         AddObservation(ballRB.velocity.y);
         AddObservation(ballRB.velocity.z);
-
+        */
 
 
         if (prev_state.Count == 0)
@@ -124,10 +139,10 @@ public class HeadAgent : MonoBehaviour
 
         //print("reward : " + s_reward);
 
-        if (stepCounter%replaceStepCount == 0)
-        {
+        //if (stepCounter%replaceStepCount == 0)
+        //{
             rLAgent.ReplaceTarget();
-        }
+        //}
 
         
 

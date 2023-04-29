@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using Unity.Barracuda;
 using Unity.VisualScripting;
+using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 
 namespace MonoRL
@@ -36,8 +38,12 @@ namespace MonoRL
             Biases = new double[nodeSize];
             _Inputs = new double[inputSize];
             _Outputs = new double[nodeSize];
-            _GradW = new double[nodeSize][];
             _GradB = new double[nodeSize];
+            
+            _GradW = new double[nodeSize][];
+            for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
+                _GradW[nodeIndex] = new double[InputSize];
+            
 
             InitializeWeights();
             InitializeBiases();
@@ -45,36 +51,46 @@ namespace MonoRL
         public void SetNonSerializedData(int inputSize, int nodeSize, Activation.ActivationType activationType)
         {
             Activation = MonoRL.Activation.GetActivationFromType(activationType);
-            _GradW = new double[nodeSize][];
             _GradB = new double[nodeSize];
+            _GradW = new double[nodeSize][];
+            Debug.Log("SetNonSerializedData");
+            for (int nodeIndex = 0; nodeIndex < nodeSize; nodeIndex++)
+                _GradW[nodeIndex] = new double[inputSize];
         }
         public double[] Forward(double[] inputs)
         {
-            double[] calculatedOutputs = new double[NodeSize];
-            for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
-            {
-                calculatedOutputs[nodeIndex] = 0;
-                for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
-                {
-                    calculatedOutputs[nodeIndex] += Weights[nodeIndex].weigths[inputIndex] * inputs[inputIndex];
-                }
-                calculatedOutputs[nodeIndex] += Biases[nodeIndex];
-            }
-
             double[] activatedValues = new double[NodeSize];
-            for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
+            
+            double calcOutput = 0;
+            Weights weights;
+            for (int nodeIndex = 0,inputIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
-                activatedValues[nodeIndex] = Activation.Activate(calculatedOutputs[nodeIndex]);
+                calcOutput = 0;
+                inputIndex = 0;
+                weights = Weights[nodeIndex];
+                for (; inputIndex < InputSize; inputIndex++)
+                {
+                    calcOutput += weights.weigths[inputIndex] * inputs[inputIndex];
+                }
+                calcOutput += Biases[nodeIndex];
+                _Outputs[nodeIndex] = calcOutput;
+                
+                activatedValues[nodeIndex] = Activation.Activate(calcOutput);
             }
 
             inputs.CopyTo(_Inputs, 0);
-            _Outputs = calculatedOutputs;
 
             return activatedValues;
         }
 
         public double[] Backward(double[] deltas)
         {
+            if (_GradW[0] == null)
+            {
+                for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
+                    _GradW[nodeIndex] = new double[InputSize];
+            }
+
             double[] delta = new double[NodeSize];
 
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
@@ -83,13 +99,15 @@ namespace MonoRL
             UpdateGradients(delta);
 
             double[] propagatedDelta = new double[InputSize];
+            double calcPropagatedDelta = 0;
             for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
             {
-                propagatedDelta[inputIndex] = 0;
+                calcPropagatedDelta = 0;
                 for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
                 {
-                    propagatedDelta[inputIndex] += delta[nodeIndex] * Weights[nodeIndex].weigths[inputIndex];
+                    calcPropagatedDelta += delta[nodeIndex] * Weights[nodeIndex].weigths[inputIndex];
                 }
+                propagatedDelta[inputIndex] = calcPropagatedDelta;
             }
 
             return propagatedDelta;
@@ -97,15 +115,21 @@ namespace MonoRL
 
         public void ApplyGradients(double lr, int batchSize)
         {
+            Weights weights;
+            double gradB, weightCalc = 0, gradW = 0;
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
-                double gradB = _GradB[nodeIndex] / batchSize;
+                gradB = _GradB[nodeIndex] / batchSize;
                 Biases[nodeIndex] -= lr * gradB;
-
+                weights = Weights[nodeIndex];
+                
                 for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
                 {
-                    double gradW = _GradW[nodeIndex][inputIndex] / batchSize;
-                    Weights[nodeIndex].weigths[inputIndex] -= lr * gradW;
+                    gradW = _GradW[nodeIndex][inputIndex] / batchSize;
+                    
+                    weightCalc = weights.weigths[inputIndex];
+                    weightCalc -= lr * gradW;
+                    weights.weigths[inputIndex] = weightCalc;
                 }
             }
 
@@ -114,19 +138,21 @@ namespace MonoRL
 
         public void ClearGradients()
         {
-            _GradW = new double[NodeSize][];
-            _GradB = new double[NodeSize];
+            Array.Clear(_GradB, 0, _GradB.Length);
+            Array.Clear(_GradW, 0, _GradW.Length);
         }
 
         private void UpdateGradients(double[] delta)
         {
+            double c_delta = 0;
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
-                _GradB[nodeIndex] += delta[nodeIndex];
-                if (_GradW[nodeIndex] == null)
-                    _GradW[nodeIndex] = new double[InputSize];
+                c_delta = delta[nodeIndex];
+                _GradB[nodeIndex] += c_delta;
                 for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
-                    _GradW[nodeIndex][inputIndex] += delta[nodeIndex] * _Inputs[inputIndex];
+                {
+                    _GradW[nodeIndex][inputIndex] += c_delta * _Inputs[inputIndex];
+                }
             }
         }
 
