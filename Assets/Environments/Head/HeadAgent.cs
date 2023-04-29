@@ -107,7 +107,7 @@ public class HeadAgent : MonoBehaviour
         float distance = Vector3.Distance(point.position, ballRB.transform.position);
         float vel = ballRB.velocity.magnitude;
         //print("distance : " + distance);
-        float s_reward = reward - distance - 2 * vel;
+        float s_reward = reward -( 2 * reward * distance  +  4 * reward * vel);
 
 
 
@@ -139,10 +139,10 @@ public class HeadAgent : MonoBehaviour
 
         //print("reward : " + s_reward);
 
-        //if (stepCounter%replaceStepCount == 0)
-        //{
+        if (stepCounter%replaceStepCount == 0)
+        {
             rLAgent.ReplaceTarget();
-        //}
+        }
 
         
 
@@ -150,8 +150,8 @@ public class HeadAgent : MonoBehaviour
         {
             if (maxStepCount < stepCount)
             {
-                print("maxStepCount : " + maxStepCount);
                 maxStepCount = stepCount;
+                print("maxStepCount : " + maxStepCount);
             }
             Restart();
         }

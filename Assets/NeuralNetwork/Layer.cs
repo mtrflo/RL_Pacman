@@ -4,6 +4,7 @@ using Unity.Barracuda;
 using Unity.VisualScripting;
 using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace MonoRL
 {
@@ -84,30 +85,24 @@ namespace MonoRL
 
         public double[] Backward(double[] deltas)
         {
-            if (_GradW[0] == null)
-            {
-                for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
-                    _GradW[nodeIndex] = new double[InputSize];
-                Debug.Log("gradw");
-            }
-
             double[] delta = new double[NodeSize];
 
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
                 delta[nodeIndex] = deltas[nodeIndex] * Activation.Derivative(_Outputs[nodeIndex]);
 
             UpdateGradients(delta);
-
             double[] propagatedDelta = new double[InputSize];
-            double calcPropagatedDelta = 0;
-            for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
+
+
+            double delta_m = 0;
+            for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
-                calcPropagatedDelta = 0;
-                for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
+                Weights n_weights = Weights[nodeIndex];
+                delta_m = delta[nodeIndex];
+                for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
                 {
-                    calcPropagatedDelta += delta[nodeIndex] * Weights[nodeIndex].weigths[inputIndex];
+                    propagatedDelta[inputIndex] += delta_m * n_weights.weigths[inputIndex];
                 }
-                propagatedDelta[inputIndex] = calcPropagatedDelta;
             }
 
             return propagatedDelta;
