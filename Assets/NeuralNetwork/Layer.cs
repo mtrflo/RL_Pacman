@@ -51,6 +51,7 @@ namespace MonoRL
         }
         public void SetNonSerializedData(int inputSize, int nodeSize, Activation.ActivationType activationType)
         {
+            Debug.Log("Update network");
             Activation = MonoRL.Activation.GetActivationFromType(activationType);
             _GradB = new double[nodeSize];
             _GradW = new double[nodeSize][];

@@ -39,6 +39,7 @@ public class SRLAgent : MonoBehaviour
 
         network.Init();
         targetNetwork.Init();
+        ReplaceTarget();
         DontDestroyOnLoad(this);
     }
     public int SelectAction(double[] observation)
