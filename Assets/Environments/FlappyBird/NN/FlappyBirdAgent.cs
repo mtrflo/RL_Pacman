@@ -113,7 +113,8 @@ public class FlappyBirdAgent : MonoBehaviour
             if (maxEpisodeCount < episodeCount)
             {
                 maxEpisodeCount = episodeCount;
-                print("maxEpisodeCount : " + maxEpisodeCount);
+                Scoring.me.NewScore(maxEpisodeCount);
+                //print("maxEpisodeCount : " + maxEpisodeCount);
             }
         }
         //print("action : " + action);

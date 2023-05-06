@@ -4,16 +4,32 @@ using UnityEngine;
 
 public class Scoring : MonoBehaviour
 {
+    public static Scoring me;
     public List<float> times;
 
     public float maxScore;
     private void Awake()
     {
-        
+        me = this;
+    }
+    private void Start()
+    {
+        StartCoroutine(Tick());
+    }
+    public void NewScore(float score)
+    {
+        if(maxScore < score)
+            maxScore = score;
     }
 
-    public void NewScore()
+    private IEnumerator Tick()
     {
-
+        int timesID = 0;
+        while (timesID < times.Count)
+        {
+            yield return new WaitWhile( ()=>Time.timeSinceLevelLoad < (times[timesID] * 60f) );
+            timesID++;
+            print(timesID + " MaxScore : " + maxScore);
+        }
     }
 }
