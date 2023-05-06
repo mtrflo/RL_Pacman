@@ -13,12 +13,11 @@ public class BirdControl : MonoBehaviour {
     public AudioClip jumpUp;
     public AudioClip hit;
     public AudioClip score;
+    public PipeSpawner pipeSpawner;
 
     public bool inGame = false;
 
 	public bool dead = false;
-
-    public static PipeMove pipe;
 
 	private bool landed = false;
 
@@ -83,11 +82,11 @@ public class BirdControl : MonoBehaviour {
 	{
 		if (other.name == "land" || other.name == "pipe_up" || other.name == "pipe_down")
 		{
-            if (other.name == "pipe_up" || other.name == "pipe_down")
-            {
-                pipe = other.transform.parent.GetComponent<PipeMove>().nextPipe;
-                //Destroy(other.transform.parent.gameObject);
-            }
+            //if (other.name == "pipe_up" || other.name == "pipe_down")
+            //{
+            //    pipe = other.transform.parent.GetComponent<PipeMove>().nextPipe;
+            //    //Destroy(other.transform.parent.gameObject);
+            //}
             if (!dead)
             {
                 animator.SetTrigger("die");
@@ -108,7 +107,7 @@ public class BirdControl : MonoBehaviour {
         if (other.name == "pass_trigger")
         {
             scoreMgr.AddScore();
-            pipe = other.transform.parent.GetComponent<PipeMove>().nextPipe;
+            pipeSpawner.PipePassed();
             OnPipePassed();
             //AudioSource.PlayClipAtPoint(score, Vector3.zero);
         }

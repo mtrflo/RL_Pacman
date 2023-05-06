@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
 
 public class MultiEnviroment : MonoBehaviour
@@ -9,6 +11,7 @@ public class MultiEnviroment : MonoBehaviour
     public GameObject env;
     public Transform ins_parent;
     public float space = 5;
+    public bool3 boo;
     #endregion
 
 
@@ -26,7 +29,11 @@ public class MultiEnviroment : MonoBehaviour
     {
         for (int i = 0; i < count; i++)
         {
-            Instantiate(env, transform.position + new Vector3((i + 1) * space, 0, 0), Quaternion.identity, ins_parent);
+            Vector3 offset = Vector3.one * ((i + 1) * space);
+            offset.x *= boo.x == false ? 0 : 1;
+            offset.y *= boo.y == false ? 0 : 1;
+            offset.z *= boo.z == false ? 0 : 1;
+            Instantiate(env, transform.position + offset, Quaternion.identity, ins_parent);
             //env_t.transform.Translate(, 0,0, Space.World);
         }
     }

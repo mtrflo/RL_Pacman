@@ -6,11 +6,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Unity.VisualScripting;
+using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
 using Random = UnityEngine.Random;
-public class SRLAgent : MonoBehaviour
+public class DQNAgent : MonoBehaviour
 {
-    public static SRLAgent me;
+    public static DQNAgent me;
     [Range(0, 1)]
     public float epsilon = 0.8f;//exploit - explore     0-1
     [Range(0, 1)]
@@ -38,8 +39,9 @@ public class SRLAgent : MonoBehaviour
 
 
         network.Init();
-        targetNetwork.Init();
-        ReplaceTarget();
+
+        targetNetwork = DuplicateNetwork(network);
+        //ReplaceTarget();
         DontDestroyOnLoad(this);
     }
     public int SelectAction(double[] observation)
@@ -184,6 +186,21 @@ public class SRLAgent : MonoBehaviour
         }
 
     }
+
+    private Network DuplicateNetwork(Network network)
+    {
+        Network newNet = new Network();
+        newNet.Layers = new List<Layer>(network.Layers);
+        newNet.LearningRate = network.LearningRate;
+        newNet.hiddenAType = network.hiddenAType;
+        newNet.outputAType = network.outputAType;
+        newNet.layersSize = new int[network.layersSize.Length];
+        network.layersSize.CopyTo(newNet.layersSize, 0);
+        //targetNetwork.Init();
+
+        return newNet;
+    }
+
     public bool isNan => Application.isPlaying && Double.IsNaN(network.Layers[0].Weights[0].weigths[0]);
     [ReadOnly,ShowIf("isNan"), Label("NAAAAAAAAAAAAAAAAAAN!!!!!!!!!!!!!!")]
     public bool Nannn;
@@ -218,4 +235,6 @@ public class Transition
         this.reward = reward;
         this.isDone = isDone;
     }
+
+    
 }

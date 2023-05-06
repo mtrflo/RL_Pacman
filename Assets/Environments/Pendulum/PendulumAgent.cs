@@ -7,7 +7,7 @@ using UnityEngine;
 public class PendulumAgent : MonoBehaviour
 {
     public Rigidbody rb;
-    public SRLAgent rLAgent => SRLAgent.me;
+    public DQNAgent rLAgent => DQNAgent.me;
 
     public float delay = 1, startDelay;
     public float reward = 0.1f, terminateReward = -1f, scoreReward = 1, distanceReward = 0f;

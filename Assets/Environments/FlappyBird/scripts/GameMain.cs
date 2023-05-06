@@ -9,7 +9,6 @@ public class GameMain : MonoBehaviour {
     public GameObject readyPic;
     public GameObject tipPic;
     public GameObject scoreMgr;
-    public GameObject pipeSpawner;
 
     private bool gameStarted = false;
     public Action OnGameStarted;
@@ -38,7 +37,6 @@ public class GameMain : MonoBehaviour {
         tipPic.GetComponent<SpriteRenderer>().material.DOFade(0f, 0.2f);
 
         scoreMgr.GetComponent<ScoreMgr>().SetScore(0);
-        pipeSpawner.GetComponent<PipeSpawner>().StartSpawning();
         OnGameStarted.Invoke();
     }
 }

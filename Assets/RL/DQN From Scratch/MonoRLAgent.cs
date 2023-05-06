@@ -5,7 +5,7 @@ using UnityEngine;
 public class MonoRLAgent : MonoBehaviour
 {
     public static MonoRLAgent me;
-    public SRLAgent rLAgent;
+    public DQNAgent rLAgent;
 
     private void Awake()
     {
