@@ -79,7 +79,7 @@ public class FlappyBirdAgent : MonoBehaviour
     void ChooseAction()
     {
         current_state.Clear();
-        //double[] distances = GetRayDistances();
+        double[] distances = GetRayDistances();
         //foreach (var distance in distances) 
         //    AddObservation(distance);
         Vector3 birdPos = birdControl.transform.position;
@@ -92,11 +92,17 @@ public class FlappyBirdAgent : MonoBehaviour
         //AddObservation(pipeSpawner.lastPipe.bottomPoint.position.y);// bottom point height
         //AddObservation(distances[0]);
         //AddObservation(distances[1]);
-        float leftSign = Mathf.Sign(pipeSpawner.lastPipe.bottomPoint_l.position.x - birdPos.x);
-        AddObservation(leftSign * Vector3.Distance(birdPos, pipeSpawner.lastPipe.bottomPoint_l.position));
+        //float leftSign = Mathf.Sign(pipeSpawner.lastPipe.bottomPoint_l.position.x - birdPos.x);
+        AddObservation(Vector3.Distance(birdPos, pipeSpawner.lastPipe.bottomPoint_l.position));
         AddObservation(Vector3.Distance(birdPos, pipeSpawner.lastPipe.bottomPoint_r.position));
-        AddObservation(leftSign * Vector3.Distance(birdPos, pipeSpawner.lastPipe.topPoint_l.position));
+        AddObservation(Vector3.Distance(birdPos, pipeSpawner.lastPipe.topPoint_l.position));
         AddObservation(Vector3.Distance(birdPos, pipeSpawner.lastPipe.topPoint_r.position));
+        AddObservation(distances[0]);
+        AddObservation(distances[1]);
+        AddObservation(distances[2]);
+        AddObservation(distances[3]);
+        
+
         AddObservation(rb.velocity.y);
 
         //print(current_state.ToCommaSeparatedString());
