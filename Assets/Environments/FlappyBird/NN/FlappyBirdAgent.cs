@@ -83,7 +83,7 @@ public class FlappyBirdAgent : MonoBehaviour
         //foreach (var distance in distances) 
         //    AddObservation(distance);
         Vector3 birdPos = birdControl.transform.position;
-        
+
         //AddObservation(birdControl.transform.localPosition.y);// bird y pos
         //AddObservation(dis);// pipe distance 
         //AddObservation(pipeSpawner.lastPipe.transform.localPosition.y);
@@ -92,9 +92,10 @@ public class FlappyBirdAgent : MonoBehaviour
         //AddObservation(pipeSpawner.lastPipe.bottomPoint.position.y);// bottom point height
         //AddObservation(distances[0]);
         //AddObservation(distances[1]);
-        AddObservation(Vector3.Distance(birdPos, pipeSpawner.lastPipe.bottomPoint_l.position));
+        float leftSign = Mathf.Sign(pipeSpawner.lastPipe.bottomPoint_l.position.x - birdPos.x);
+        AddObservation(leftSign * Vector3.Distance(birdPos, pipeSpawner.lastPipe.bottomPoint_l.position));
         AddObservation(Vector3.Distance(birdPos, pipeSpawner.lastPipe.bottomPoint_r.position));
-        AddObservation(Vector3.Distance(birdPos, pipeSpawner.lastPipe.topPoint_l.position));
+        AddObservation(leftSign * Vector3.Distance(birdPos, pipeSpawner.lastPipe.topPoint_l.position));
         AddObservation(Vector3.Distance(birdPos, pipeSpawner.lastPipe.topPoint_r.position));
         AddObservation(rb.velocity.y);
 
