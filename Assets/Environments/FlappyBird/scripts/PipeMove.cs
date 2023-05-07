@@ -4,7 +4,7 @@ using System.Collections;
 public class PipeMove : MonoBehaviour {
 	public float moveSpeed;
 
-	public Transform topPoint, bottomPoint;
+	public Transform topPoint_l, topPoint_r, bottomPoint_l, bottomPoint_r;
 
     // Use this for initialization
     void Start () {

@@ -85,9 +85,13 @@ public class FlappyBirdAgent : MonoBehaviour
         Vector3 birdPos = birdControl.transform.position;
         
         AddObservation(birdControl.transform.localPosition.y);// bird y pos
-        AddObservation(pipeSpawner.lastPipe.topPoint.position.x - birdPos.x);// pipe distance 
+        print("pipeSpawner.lastPipe.topPoint.position.x : " + pipeSpawner.lastPipe.topPoint_l.position.x);
+        print("birdPos.x  :" + birdPos.x);
+        float dis = pipeSpawner.lastPipe.topPoint_l.position.x - birdPos.x;
+        print("dis : " + dis);
+        AddObservation(dis);// pipe distance 
         //AddObservation(pipeSpawner.lastPipe.transform.localPosition.y);
-        AddObservation(Mathf.Abs(pipeSpawner.lastPipe.topPoint.position.y) - Mathf.Abs(birdPos.y) ) ;// top point distance 
+        AddObservation(Mathf.Abs(pipeSpawner.lastPipe.topPoint_l.position.y) - Mathf.Abs(birdPos.y) ) ;// top point distance 
         AddObservation(Mathf.Abs(pipeSpawner.lastPipe.bottomPoint.position.y) - Mathf.Abs(birdPos.y) );// bottom point distance 
         //AddObservation(pipeSpawner.lastPipe.bottomPoint.position.y);// bottom point height
         AddObservation(distances[0]);
