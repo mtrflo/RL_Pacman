@@ -28,8 +28,8 @@ public class Scoring : MonoBehaviour
         while (timesID < times.Count)
         {
             yield return new WaitWhile( ()=>Time.timeSinceLevelLoad < (times[timesID] * 60f) );
+            print(times[timesID] + " MaxScore : " + maxScore);
             timesID++;
-            print(timesID + " MaxScore : " + maxScore);
         }
     }
 }
