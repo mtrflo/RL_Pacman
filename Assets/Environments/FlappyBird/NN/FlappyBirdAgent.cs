@@ -126,11 +126,7 @@ public class FlappyBirdAgent : MonoBehaviour
                 maxEpisodeCount = episodeCount;
                 Scoring.me.NewScore(maxEpisodeCount);
 
-                //if (totalEpisodeCount % replaceTargetCount == 0)
-                //{
-                    rLAgent.ReplaceTarget();
-                    print("replace");
-                //}
+                
                 print("maxEpisodeCount : " + maxEpisodeCount);
             }
         }
@@ -148,10 +144,10 @@ public class FlappyBirdAgent : MonoBehaviour
         //    maxEpisodeCount = episodeCount;
         //    print("maxTimeStep : " + maxEpisodeCount);
         //}
-        //if (totalEpisodeCount % replaceTargetCount == 0)
-        //{
-        //    rLAgent.ReplaceTarget();
-        //}
+        if (totalEpisodeCount % replaceTargetCount == 0)
+        {
+            rLAgent.ReplaceTarget();
+        }
         if (totalEpisodeCount % distanceRewardCount == 0)
         {
             distanceReward += 0.01f;
