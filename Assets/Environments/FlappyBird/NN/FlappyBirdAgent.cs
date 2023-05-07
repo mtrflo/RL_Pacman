@@ -79,23 +79,23 @@ public class FlappyBirdAgent : MonoBehaviour
     void ChooseAction()
     {
         current_state.Clear();
-        double[] distances = GetRayDistances();
+        //double[] distances = GetRayDistances();
         //foreach (var distance in distances) 
         //    AddObservation(distance);
         Vector3 birdPos = birdControl.transform.position;
         
-        AddObservation(birdControl.transform.localPosition.y);// bird y pos
-        print("pipeSpawner.lastPipe.topPoint.position.x : " + pipeSpawner.lastPipe.topPoint_l.position.x);
-        print("birdPos.x  :" + birdPos.x);
-        float dis = pipeSpawner.lastPipe.topPoint_l.position.x - birdPos.x;
-        print("dis : " + dis);
-        AddObservation(dis);// pipe distance 
+        //AddObservation(birdControl.transform.localPosition.y);// bird y pos
+        //AddObservation(dis);// pipe distance 
         //AddObservation(pipeSpawner.lastPipe.transform.localPosition.y);
-        AddObservation(Mathf.Abs(pipeSpawner.lastPipe.topPoint_l.position.y) - Mathf.Abs(birdPos.y) ) ;// top point distance 
-        AddObservation(Mathf.Abs(pipeSpawner.lastPipe.bottomPoint.position.y) - Mathf.Abs(birdPos.y) );// bottom point distance 
+        //AddObservation(Mathf.Abs(pipeSpawner.lastPipe.topPoint_l.position.y) - Mathf.Abs(birdPos.y) ) ;// top point distance 
+        //AddObservation(Mathf.Abs(pipeSpawner.lastPipe.bottomPoint.position.y) - Mathf.Abs(birdPos.y) );// bottom point distance 
         //AddObservation(pipeSpawner.lastPipe.bottomPoint.position.y);// bottom point height
-        AddObservation(distances[0]);
-        AddObservation(distances[1]);
+        //AddObservation(distances[0]);
+        //AddObservation(distances[1]);
+        AddObservation(Vector3.Distance(birdPos, pipeSpawner.lastPipe.bottomPoint_l.position));
+        AddObservation(Vector3.Distance(birdPos, pipeSpawner.lastPipe.bottomPoint_r.position));
+        AddObservation(Vector3.Distance(birdPos, pipeSpawner.lastPipe.topPoint_l.position));
+        AddObservation(Vector3.Distance(birdPos, pipeSpawner.lastPipe.topPoint_r.position));
         AddObservation(rb.velocity.y);
 
         //print(current_state.ToCommaSeparatedString());
@@ -118,7 +118,13 @@ public class FlappyBirdAgent : MonoBehaviour
             {
                 maxEpisodeCount = episodeCount;
                 Scoring.me.NewScore(maxEpisodeCount);
-                //print("maxEpisodeCount : " + maxEpisodeCount);
+
+                if (maxEpisodeCount < episodeCount)
+                {
+                    maxEpisodeCount = episodeCount;
+                    print("maxTimeStep : " + maxEpisodeCount);
+                }
+                print("maxEpisodeCount : " + maxEpisodeCount);
             }
         }
         //print("action : " + action);
@@ -135,11 +141,10 @@ public class FlappyBirdAgent : MonoBehaviour
         //    maxEpisodeCount = episodeCount;
         //    print("maxTimeStep : " + maxEpisodeCount);
         //}
-        if (totalEpisodeCount % replaceTargetCount == 0)
-        {
-            rLAgent.ReplaceTarget();
-            print("replace target");
-        }
+        //if (totalEpisodeCount % replaceTargetCount == 0)
+        //{
+        //    rLAgent.ReplaceTarget();
+        //}
         if (totalEpisodeCount % distanceRewardCount == 0)
         {
             distanceReward += 0.01f;
