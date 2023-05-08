@@ -8,7 +8,7 @@ using Unity.VisualScripting;
 
 public class FlappyBirdAgent : MonoBehaviour
 {
-    
+
     public static int birdsCount = 0;
     public GameMain gameMain;
     public BirdControl birdControl;
@@ -40,7 +40,7 @@ public class FlappyBirdAgent : MonoBehaviour
 
         startDelay = delay;
         //timeController.ChangeVarsByTimeScale += ChangeVars;
-        
+
     }
     bool addReward = false;
     private void Start()
@@ -64,8 +64,8 @@ public class FlappyBirdAgent : MonoBehaviour
     WaitForSecondsRealtime wfsr;
     IEnumerator ActionMaker()
     {
-        yield return new WaitWhile(()=> pipeSpawner.lastPipe == null);
-        
+        yield return new WaitWhile(() => pipeSpawner.lastPipe == null);
+
         wfsr = new WaitForSecondsRealtime(delay);
         while (birdControl.inGame || birdControl.dead)
         {
@@ -74,7 +74,7 @@ public class FlappyBirdAgent : MonoBehaviour
             if (birdControl.dead)
                 break;
         }
-        
+
     }
     void ChooseAction()
     {
@@ -101,7 +101,7 @@ public class FlappyBirdAgent : MonoBehaviour
         AddObservation(distances[1]);
         AddObservation(distances[2]);
         AddObservation(distances[3]);
-        
+
 
         AddObservation(rb.velocity.y);
 
@@ -110,9 +110,9 @@ public class FlappyBirdAgent : MonoBehaviour
             Utils.CopyTo(current_state, prev_state);
 
         float s_reward = reward;
-        
-        
-            
+
+
+
         if (addReward)
         {
             addReward = false;
@@ -126,7 +126,7 @@ public class FlappyBirdAgent : MonoBehaviour
                 maxEpisodeCount = episodeCount;
                 Scoring.me.NewScore(maxEpisodeCount);
 
-                
+
                 print("maxEpisodeCount : " + maxEpisodeCount);
             }
         }
@@ -144,11 +144,11 @@ public class FlappyBirdAgent : MonoBehaviour
         //    maxEpisodeCount = episodeCount;
         //    print("maxTimeStep : " + maxEpisodeCount);
         //}
-        //if (totalEpisodeCount % replaceTargetCount == 0)
-        //{
-        //    rLAgent.ReplaceTarget();
-        //    print("replace");
-        //}
+        if (totalEpisodeCount % replaceTargetCount == 0)
+        {
+            rLAgent.ReplaceTarget();
+            print("replace");
+        }
         if (totalEpisodeCount % distanceRewardCount == 0)
         {
             distanceReward += 0.01f;
