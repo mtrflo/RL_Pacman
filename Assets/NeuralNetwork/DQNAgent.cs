@@ -41,7 +41,7 @@ public class DQNAgent : MonoBehaviour
         network.Init();
 
         targetNetwork = DuplicateNetwork(network);
-        //ReplaceTarget();
+        ReplaceTarget();
         DontDestroyOnLoad(this);
     }
     public int SelectAction(double[] observation)
@@ -117,6 +117,7 @@ public class DQNAgent : MonoBehaviour
 
     public void ReplaceTarget()
     {
+        print("replace f");
         int mainNetworkLayerCount = network.Layers.Count;
         int mainNetworkLayerWeightCount = 0;
         int mainNetworkLayersWeightsWeigthsCount = 0;
@@ -190,12 +191,13 @@ public class DQNAgent : MonoBehaviour
     private Network DuplicateNetwork(Network network)
     {
         Network newNet = new Network();
-        newNet.Layers = new List<Layer>(network.Layers);
+        newNet.Layers = new List<Layer>();
         newNet.LearningRate = network.LearningRate;
         newNet.hiddenAType = network.hiddenAType;
         newNet.outputAType = network.outputAType;
         newNet.layersSize = new int[network.layersSize.Length];
         network.layersSize.CopyTo(newNet.layersSize, 0);
+        newNet.Init();
         //targetNetwork.Init();
 
         return newNet;

@@ -10,14 +10,17 @@ public class PipeMove : MonoBehaviour {
     void Start () {
 		Rigidbody2D body = transform.GetComponent<Rigidbody2D>();
 		body.velocity = new Vector2(moveSpeed, 0);
-	}
+		StartCoroutine(IEUpdate());
+
+    }
 
 	// Update is called once per frame
-	void Update () {
-		if (transform.position.x <= -0.4) 
-		{
-			Destroy(gameObject);
-		}
+	IEnumerator IEUpdate () {
+		WaitForSeconds wfs = new WaitForSeconds(0.5f);
+		
+		while (transform.position.x >= -0.4f) 
+			yield return wfs;
+		Destroy(gameObject);
 	}
 
 	public void GameOver()

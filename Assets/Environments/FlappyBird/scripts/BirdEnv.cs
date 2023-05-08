@@ -5,6 +5,7 @@ using UnityEngine;
 public class BirdEnv : MonoBehaviour
 {
     public FlappyBirdAgent head;
+    public Vector2 epsRange;
 
     public int count;
     public int myId = 0;
@@ -13,13 +14,14 @@ public class BirdEnv : MonoBehaviour
     {
         myId = id;
         id++;
-        head.epsilon = Mathf.Lerp(0f, 1f, 1f * myId / (1f * count));
         count = FindObjectOfType<MultiEnviroment>().count;
+        
+        head.epsilon = Mathf.Lerp(epsRange.x, epsRange.y, 1f * myId / (1f * count));
     }
     public void Restart()
     {
         FlappyBirdAgent bird = Instantiate(head, transform);
         bird.env = this;
-        bird.epsilon = Mathf.Lerp(0f, 1f, 1f * myId / (1f * count));
+        bird.epsilon = Mathf.Lerp(epsRange.x, epsRange.y, 1f * myId / (1f * count));
     }
 }

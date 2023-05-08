@@ -26,8 +26,10 @@ public class BirdControl : MonoBehaviour {
 	public Action OnDie;
     public Action OnPipePassed;
 	private Animator animator;
+    private Rigidbody2D rb;
     private void Awake()
     {
+        rb = GetComponent<Rigidbody2D>();
         OnDie = () => { };
         
         OnPipePassed = () => { };
@@ -49,7 +51,7 @@ public class BirdControl : MonoBehaviour {
     }
 	
 	// Update is called once per frame
-	void Update () {
+	void FixedUpdate () {
         if (!inGame)
         {
             return;
@@ -66,7 +68,7 @@ public class BirdControl : MonoBehaviour {
 
 		if (!landed)
 		{
-			float v = transform.GetComponent<Rigidbody2D>().velocity.y;
+			float v = rb.velocity.y;
 			
 			float rotate = Mathf.Min(Mathf.Max(-90, v * rotateRate + 60), 30);
 			
@@ -74,7 +76,7 @@ public class BirdControl : MonoBehaviour {
 		}
 		else
 		{
-			transform.GetComponent<Rigidbody2D>().rotation = -90;
+			rb.rotation = -90;
 		}
 	}
 
@@ -97,8 +99,8 @@ public class BirdControl : MonoBehaviour {
 
 			if (other.name == "land")
 			{
-				transform.GetComponent<Rigidbody2D>().gravityScale = 0;
-				transform.GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0);
+                rb.gravityScale = 0;
+                rb.velocity = new Vector2(0, 0);
 
 				landed = true;
 			}
@@ -117,7 +119,7 @@ public class BirdControl : MonoBehaviour {
 
     public void JumpUp()
     {
-        transform.GetComponent<Rigidbody2D>().velocity = new Vector2(0, upSpeed);
+        rb.velocity = new Vector2(0, upSpeed);
         //AudioSource.PlayClipAtPoint(jumpUp, Vector3.zero);
     }
 	
@@ -138,5 +140,10 @@ public class BirdControl : MonoBehaviour {
         animator.ResetTrigger("die");
         dead = false;
         landed = false;
+    }
+
+    private void OnDestroy()
+    {
+        birdSequence.Kill();
     }
 }
