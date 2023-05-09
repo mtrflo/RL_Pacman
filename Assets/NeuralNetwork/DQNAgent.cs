@@ -97,7 +97,7 @@ public class DQNAgent : MonoBehaviour
 
                     double[] predictedValues = network.Forward(sampleTransition.state);
                     double QEval = predictedValues[sampleTransition.action];
-                    double QNext = network.Forward(sampleTransition.state_).Max();
+                    double QNext = targetNetwork.Forward(sampleTransition.state_).Max();
                     double QTarget = sampleTransition.reward + gamma * QNext;
                     if (sampleTransition.isDone)
                         QTarget = sampleTransition.reward;

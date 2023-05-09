@@ -35,6 +35,7 @@ public class FlappyBirdAgent : MonoBehaviour
     {
         //timeController = TimeController.me;
         birdsCount++;
+        distances = new double[rayPoints.Length];
         prev_state = new List<double>();
         current_state = new List<double>();
 
@@ -76,10 +77,11 @@ public class FlappyBirdAgent : MonoBehaviour
         }
 
     }
+    double[] distances;
     void ChooseAction()
     {
         current_state.Clear();
-        double[] distances = GetRayDistances();
+        UpdateRayDistances();
         //foreach (var distance in distances) 
         //    AddObservation(distance);
         Vector3 birdPos = birdControl.transform.position;
@@ -149,10 +151,6 @@ public class FlappyBirdAgent : MonoBehaviour
             rLAgent.ReplaceTarget();
             print("replace");
         }
-        if (totalEpisodeCount % distanceRewardCount == 0)
-        {
-            distanceReward += 0.01f;
-        }
 
 
 
@@ -162,13 +160,10 @@ public class FlappyBirdAgent : MonoBehaviour
     }
 
     public Transform[] rayPoints;
-    double[] GetRayDistances()
+    void UpdateRayDistances()
     {
-        double[] distances = new double[rayPoints.Length];
-
         for (int i = 0; i < distances.Length; i++)
             distances[i] = GetRayLength(rayPoints[i]);
-        return distances;
     }
 
     private double GetRayLength(Transform point)
