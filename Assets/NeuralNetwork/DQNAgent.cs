@@ -1,5 +1,6 @@
 using MonoRL;
 using NaughtyAttributes;
+using PMT;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,6 +10,8 @@ using Unity.VisualScripting;
 using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using Unity.Mathematics;
+
 public class DQNAgent : MonoBehaviour
 {
     public static DQNAgent me;
@@ -22,6 +25,8 @@ public class DQNAgent : MonoBehaviour
     public int bufferSize = 500;
     public int batchSize = 50;
     public int pCount = 1;
+    [Range(0, 1)]
+    public float softUpdateFactor = 0.05f;
     public string version = "test";
     public Network network, targetNetwork;
     public ReplayBuffer<Transition> replayBuffer;
@@ -42,7 +47,7 @@ public class DQNAgent : MonoBehaviour
 
         targetNetwork = DuplicateNetwork(network);
         ReplaceTarget();
-        DontDestroyOnLoad(this);
+        //DontDestroyOnLoad(this);
     }
     public int SelectAction(double[] observation)
     {
@@ -102,11 +107,11 @@ public class DQNAgent : MonoBehaviour
                     if (sampleTransition.isDone)
                         QTarget = sampleTransition.reward;
 
-                    double[] expectedValues = new double[predictedValues.Length];
-                    for (int i = 0; i < predictedValues.Length; i++)
-                        expectedValues[i] = predictedValues[i];// * - (QTarget - QEval);
+                    double[] expectedValues = predictedValues.ToArray();
+                    
+                    
                     expectedValues[sampleTransition.action] = QTarget;
-
+                    
                     batchExpectedOutputs[batchIndex] = expectedValues;
                 }
 
@@ -117,28 +122,68 @@ public class DQNAgent : MonoBehaviour
 
     public void ReplaceTarget()
     {
-        print("replace f");
-        int mainNetworkLayerCount = network.Layers.Count;
-        int mainNetworkLayerWeightCount = 0;
-        int mainNetworkLayersWeightsWeigthsCount = 0;
-        for (int i = 0; i < mainNetworkLayerCount; i++)
+        void CopyUpdate()
         {
-            mainNetworkLayerWeightCount = network.Layers[i].Weights.Count;
-            Layer mainNetworkLayer = network.Layers[i],
-                  targetNetworkLayer = targetNetwork.Layers[i];
-            for (int j = 0; j < mainNetworkLayerWeightCount; j++)
+            int mainNetworkLayerCount = network.Layers.Count;
+            int mainNetworkLayerWeightCount = 0;
+            int mainNetworkLayersWeightsWeigthsCount = 0;
+            for (int i = 0; i < mainNetworkLayerCount; i++)
             {
-                Weights t_weights = targetNetworkLayer.Weights[j], 
-                        m_weights = mainNetworkLayer.Weights[j];
-                mainNetworkLayersWeightsWeigthsCount = mainNetworkLayer.Weights[j].weigths.Count;
-                for (int k = 0; k < mainNetworkLayersWeightsWeigthsCount; k++)
+                mainNetworkLayerWeightCount = network.Layers[i].Weights.Count;
+                Layer mainNetworkLayer = network.Layers[i],
+                      targetNetworkLayer = targetNetwork.Layers[i];
+                for (int j = 0; j < mainNetworkLayerWeightCount; j++)
                 {
-                    t_weights.weigths[k] = m_weights.weigths[k];
+                    Weights t_weights = targetNetworkLayer.Weights[j],
+                            m_weights = mainNetworkLayer.Weights[j];
+                    mainNetworkLayersWeightsWeigthsCount = mainNetworkLayer.Weights[j].weigths.Count;
+                    for (int k = 0; k < mainNetworkLayersWeightsWeigthsCount; k++)
+                    {
+                        t_weights.weigths[k] = m_weights.weigths[k];
+                    }
+                    mainNetworkLayer.Biases.CopyTo(targetNetworkLayer.Biases, 0);
                 }
-                mainNetworkLayer.Biases.CopyTo(targetNetworkLayer.Biases, 0);
             }
         }
+
+        
+
+        void SoftUpdate()
+        {
+            float updateFactor = softUpdateFactor;
+
+            int mainNetworkLayerCount = network.Layers.Count
+            , mainNetworkLayerWeightCount = 0
+            , mainNetworkLayersWeightsWeigthsCount = 0
+            , layerBiasCount = 0;
+
+            
+            for (int i = 0; i < mainNetworkLayerCount; i++)
+            {
+                mainNetworkLayerWeightCount = network.Layers[i].Weights.Count;
+                Layer mainNetworkLayer = network.Layers[i],
+                      targetNetworkLayer = targetNetwork.Layers[i];
+                layerBiasCount = mainNetworkLayer.Biases.Length;
+                for (int j = 0; j < mainNetworkLayerWeightCount; j++)
+                {
+                    Weights t_weights = targetNetworkLayer.Weights[j],
+                            m_weights = mainNetworkLayer.Weights[j];
+                    mainNetworkLayersWeightsWeigthsCount = mainNetworkLayer.Weights[j].weigths.Count;
+                    for (int k = 0; k < mainNetworkLayersWeightsWeigthsCount; k++)
+                        t_weights.weigths[k] = math.lerp(t_weights.weigths[k],m_weights.weigths[k], updateFactor);
+                    
+                    double[] mainNetworkBiases, targetNetworkBiases;
+                    mainNetworkBiases = mainNetworkLayer.Biases;
+                    targetNetworkBiases = targetNetworkLayer.Biases;
+                    for (int bi = 0; bi < layerBiasCount; bi++)
+                        targetNetworkBiases[bi] = math.lerp(targetNetworkBiases[bi], mainNetworkBiases[bi], updateFactor);
+                }
+            }
+        }
+
+        SoftUpdate();
     }
+
     private void OnApplicationQuit()
     {
         SaveNetwork();
