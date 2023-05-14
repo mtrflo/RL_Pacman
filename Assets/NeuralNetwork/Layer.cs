@@ -5,7 +5,7 @@ using Unity.VisualScripting;
 using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 using UnityEngine.Profiling;
-
+using Random = UnityEngine.Random;
 namespace MonoRL
 {
     [Serializable]
@@ -16,7 +16,7 @@ namespace MonoRL
         [SerializeField]
         public int NodeSize;//size
 
-        public List<Weights> Weights;//data
+        public double[] Weights;//data
         public double[] Biases;
         public IActivation Activation;
 
@@ -35,7 +35,7 @@ namespace MonoRL
             InputSize = inputSize;
             NodeSize = nodeSize;
             Activation = MonoRL.Activation.GetActivationFromType(activationType);
-            Weights = new List<Weights>();
+            Weights = new double[nodeSize * inputSize];
             Biases = new double[nodeSize];
             _Inputs = new double[inputSize];
             _Outputs = new double[nodeSize];
@@ -63,15 +63,13 @@ namespace MonoRL
             double[] activatedValues = new double[NodeSize];
             
             double calcOutput = 0;
-            Weights weights;
             for (int nodeIndex = 0,inputIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
                 calcOutput = 0;
                 inputIndex = 0;
-                weights = Weights[nodeIndex];
                 for (; inputIndex < InputSize; inputIndex++)
                 {
-                    calcOutput += weights.weigths[inputIndex] * inputs[inputIndex];
+                    calcOutput += Weights[nodeIndex * InputSize + inputIndex] * inputs[inputIndex];
                 }
                 calcOutput += Biases[nodeIndex];
                 _Outputs[nodeIndex] = calcOutput;
@@ -105,11 +103,10 @@ namespace MonoRL
             double delta_m = 0;
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
-                Weights n_weights = Weights[nodeIndex];
                 delta_m = delta[nodeIndex];
                 for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
                 {
-                    propagatedDelta[inputIndex] += delta_m * n_weights.weigths[inputIndex];
+                    propagatedDelta[inputIndex] += delta_m * Weights[nodeIndex * InputSize + inputIndex];
                 }
             }
 
@@ -118,21 +115,19 @@ namespace MonoRL
 
         public void ApplyGradients(double lr, int batchSize)
         {
-            Weights weights;
             double gradB, weightCalc = 0, gradW = 0;
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
                 gradB = _GradB[nodeIndex] / batchSize;
                 Biases[nodeIndex] -= lr * gradB;
-                weights = Weights[nodeIndex];
                 
                 for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
                 {
                     gradW = _GradW[nodeIndex][inputIndex] / batchSize;
-                    
-                    weightCalc = weights.weigths[inputIndex];
+
+                    weightCalc = Weights[nodeIndex * InputSize + inputIndex];
                     weightCalc -= lr * gradW;
-                    weights.weigths[inputIndex] = weightCalc;
+                    Weights[nodeIndex * InputSize + inputIndex] = weightCalc;
                 }
             }
 
@@ -171,12 +166,9 @@ namespace MonoRL
         private void InitializeWeights()
         {
             float variance = 1.0f / NodeSize;
-            for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
-            {
-                Weights.Add(new Weights());
-                for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
-                    Weights[nodeIndex].weigths.Add(UnityEngine.Random.Range(-Mathf.Sqrt(variance), Mathf.Sqrt(variance)));
-            }
+            float sqrtVar = Mathf.Sqrt(variance);
+            for (int i = 0; i < NodeSize * InputSize; i++)
+                Weights[i] = Random.Range(-sqrtVar, sqrtVar);
         }
 
         private void InitializeBiases()
@@ -186,13 +178,4 @@ namespace MonoRL
         }
     }
 
-}
-[Serializable]
-public class Weights
-{
-    public List<double> weigths;
-    public Weights()
-    {
-        weigths = new List<double>();
-    }
 }

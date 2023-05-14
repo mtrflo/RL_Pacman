@@ -102,7 +102,7 @@ public class DQNAgent : MonoBehaviour
 
                     double[] predictedValues = network.Forward(sampleTransition.state);
                     double QEval = predictedValues[sampleTransition.action];
-                    double QNext = targetNetwork.Forward(sampleTransition.state_).Max();
+                    double QNext = network.Forward(sampleTransition.state_).Max();
                     double QTarget = sampleTransition.reward + gamma * QNext;
                     if (sampleTransition.isDone)
                         QTarget = sampleTransition.reward;
@@ -126,21 +126,13 @@ public class DQNAgent : MonoBehaviour
         {
             int mainNetworkLayerCount = network.Layers.Count;
             int mainNetworkLayerWeightCount = 0;
-            int mainNetworkLayersWeightsWeigthsCount = 0;
             for (int i = 0; i < mainNetworkLayerCount; i++)
             {
-                mainNetworkLayerWeightCount = network.Layers[i].Weights.Count;
                 Layer mainNetworkLayer = network.Layers[i],
                       targetNetworkLayer = targetNetwork.Layers[i];
                 for (int j = 0; j < mainNetworkLayerWeightCount; j++)
                 {
-                    Weights t_weights = targetNetworkLayer.Weights[j],
-                            m_weights = mainNetworkLayer.Weights[j];
-                    mainNetworkLayersWeightsWeigthsCount = mainNetworkLayer.Weights[j].weigths.Count;
-                    for (int k = 0; k < mainNetworkLayersWeightsWeigthsCount; k++)
-                    {
-                        t_weights.weigths[k] = m_weights.weigths[k];
-                    }
+                    mainNetworkLayer.Weights.CopyTo(targetNetworkLayer.Weights, 0);
                     mainNetworkLayer.Biases.CopyTo(targetNetworkLayer.Biases, 0);
                 }
             }
@@ -160,24 +152,20 @@ public class DQNAgent : MonoBehaviour
             
             for (int i = 0; i < mainNetworkLayerCount; i++)
             {
-                mainNetworkLayerWeightCount = network.Layers[i].Weights.Count;
+                mainNetworkLayerWeightCount = network.Layers[i].Weights.Length;
                 Layer mainNetworkLayer = network.Layers[i],
                       targetNetworkLayer = targetNetwork.Layers[i];
                 layerBiasCount = mainNetworkLayer.Biases.Length;
                 for (int j = 0; j < mainNetworkLayerWeightCount; j++)
                 {
-                    Weights t_weights = targetNetworkLayer.Weights[j],
-                            m_weights = mainNetworkLayer.Weights[j];
-                    mainNetworkLayersWeightsWeigthsCount = mainNetworkLayer.Weights[j].weigths.Count;
                     for (int k = 0; k < mainNetworkLayersWeightsWeigthsCount; k++)
-                        t_weights.weigths[k] = math.lerp(t_weights.weigths[k],m_weights.weigths[k], updateFactor);
-                    
-                    double[] mainNetworkBiases, targetNetworkBiases;
-                    mainNetworkBiases = mainNetworkLayer.Biases;
-                    targetNetworkBiases = targetNetworkLayer.Biases;
-                    for (int bi = 0; bi < layerBiasCount; bi++)
-                        targetNetworkBiases[bi] = math.lerp(targetNetworkBiases[bi], mainNetworkBiases[bi], updateFactor);
+                        targetNetworkLayer.Weights[j] = math.lerp(targetNetworkLayer.Weights[j], mainNetworkLayer.Weights[j], updateFactor);
                 }
+                double[] mainNetworkBiases, targetNetworkBiases;
+                mainNetworkBiases = mainNetworkLayer.Biases;
+                targetNetworkBiases = targetNetworkLayer.Biases;
+                for (int bi = 0; bi < layerBiasCount; bi++)
+                    targetNetworkBiases[bi] = math.lerp(targetNetworkBiases[bi], mainNetworkBiases[bi], updateFactor);
             }
         }
 
@@ -248,7 +236,7 @@ public class DQNAgent : MonoBehaviour
         return newNet;
     }
 
-    public bool isNan => Application.isPlaying && Double.IsNaN(network.Layers[0].Weights[0].weigths[0]);
+    public bool isNan => Application.isPlaying && Double.IsNaN(network.Layers[0].Weights[0]);
     [ReadOnly,ShowIf("isNan"), Label("NAAAAAAAAAAAAAAAAAAN!!!!!!!!!!!!!!")]
     public bool Nannn;
 
