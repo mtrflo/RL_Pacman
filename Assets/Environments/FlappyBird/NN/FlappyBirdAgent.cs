@@ -146,11 +146,11 @@ public class FlappyBirdAgent : MonoBehaviour
         //    maxEpisodeCount = episodeCount;
         //    print("maxTimeStep : " + maxEpisodeCount);
         //}
-        if (totalEpisodeCount % replaceTargetCount == 0)
-        {
-            rLAgent.ReplaceTarget();
-            print("replace");
-        }
+        //if (totalEpisodeCount % replaceTargetCount == 0)
+        //{
+        //    rLAgent.ReplaceTarget();
+        //    print("replace");
+        //}
 
 
 

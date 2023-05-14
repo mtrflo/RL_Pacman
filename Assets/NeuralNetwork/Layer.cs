@@ -83,7 +83,14 @@ namespace MonoRL
 
             return activatedValues;
         }
-
+        public double[] ForwardGPU(double[] inputs)
+        {
+            double[] activatedValues = new double[NodeSize];
+            //Weights
+            //inputs
+            //Biases
+            return activatedValues;
+        }
         public double[] Backward(double[] deltas)
         {
             double[] delta = new double[NodeSize];
