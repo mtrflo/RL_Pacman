@@ -87,6 +87,7 @@ namespace MonoRL
             //Weights
             //inputs
             //Biases
+            //s
             return activatedValues;
         }
         public double[] Backward(double[] deltas)
