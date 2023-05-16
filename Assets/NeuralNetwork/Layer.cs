@@ -5,6 +5,7 @@ using Unity.VisualScripting;
 using Unity.VisualScripting.FullSerializer;
 using UnityEngine;
 using UnityEngine.Profiling;
+using UnityEngine.Rendering;
 using Random = UnityEngine.Random;
 namespace MonoRL
 {
@@ -25,12 +26,14 @@ namespace MonoRL
         [SerializeField]
         private double[] _Outputs;
 
+        public ComputeShader forwardCS;
+
         [NonSerialized]
         private double[][] _GradW;
         [NonSerialized]
         private double[] _GradB;
 
-        public Layer(int inputSize, int nodeSize, Activation.ActivationType activationType)
+        public Layer(int inputSize, int nodeSize, Activation.ActivationType activationType, ComputeShader forwardCS)
         {
             InputSize = inputSize;
             NodeSize = nodeSize;
@@ -40,14 +43,16 @@ namespace MonoRL
             _Inputs = new double[inputSize];
             _Outputs = new double[nodeSize];
             _GradB = new double[nodeSize];
-            
+
             _GradW = new double[nodeSize][];
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
                 _GradW[nodeIndex] = new double[InputSize];
-            
+
+            this.forwardCS = forwardCS;
 
             InitializeWeights();
             InitializeBiases();
+            Awake();
         }
         public void SetNonSerializedData(int inputSize, int nodeSize, Activation.ActivationType activationType)
         {
@@ -57,13 +62,32 @@ namespace MonoRL
             _GradW = new double[nodeSize][];
             for (int nodeIndex = 0; nodeIndex < nodeSize; nodeIndex++)
                 _GradW[nodeIndex] = new double[inputSize];
+
+            Awake();
         }
+
+        ComputeBuffer outputBuffer;
+        ComputeBuffer weightBuffer;
+        ComputeBuffer biaseBuffer;
+
+        void Awake()
+        {
+            doublesize = sizeof(double);
+
+            outputBuffer = new ComputeBuffer(_Outputs.Length, doublesize);//outputs
+            weightBuffer = new ComputeBuffer(Weights.Length, doublesize);//weights
+            biaseBuffer = new ComputeBuffer(Biases.Length, doublesize);//biases
+        }
+
         public double[] Forward(double[] inputs)
         {
+            return ForwardGPU(inputs);
+
             double[] activatedValues = new double[NodeSize];
-            
+
+
             double calcOutput = 0;
-            for (int nodeIndex = 0,inputIndex = 0; nodeIndex < NodeSize; nodeIndex++)
+            for (int nodeIndex = 0, inputIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
                 calcOutput = 0;
                 inputIndex = 0;
@@ -73,7 +97,7 @@ namespace MonoRL
                 }
                 calcOutput += Biases[nodeIndex];
                 _Outputs[nodeIndex] = calcOutput;
-                
+
                 activatedValues[nodeIndex] = Activation.Activate(calcOutput);
             }
 
@@ -81,13 +105,54 @@ namespace MonoRL
 
             return activatedValues;
         }
+        int doublesize;
         public double[] ForwardGPU(double[] inputs)
         {
+            
+            //Debug.Log("aa");
             double[] activatedValues = new double[NodeSize];
-            //Weights
-            //inputs
-            //Biases
-            //s
+            ComputeBuffer activatedValueBuffer = new ComputeBuffer(activatedValues.Length, doublesize);//activated values
+            ComputeBuffer inputBuffer = new ComputeBuffer(inputs.Length, doublesize);//inputs
+
+            
+
+            //activatedValueBuffer.SetData(activatedValues);
+            //outputBuffer.SetData(_Outputs);
+            weightBuffer.SetData(Weights);
+            inputBuffer.SetData(inputs);
+            biaseBuffer.SetData(Biases);
+
+            forwardCS.SetBuffer(0, "outputs", outputBuffer);
+            forwardCS.SetBuffer(0, "activatedValues", activatedValueBuffer);
+            forwardCS.SetBuffer(0, "Weights", weightBuffer);
+            forwardCS.SetBuffer(0, "inputs", inputBuffer);
+            forwardCS.SetBuffer(0, "Biases", biaseBuffer);
+            forwardCS.SetInt("InputSize", InputSize);
+
+            forwardCS.Dispatch(0, NodeSize < 10 ? 1 : (NodeSize / 10), 1, 1);
+            activatedValueBuffer.GetData(activatedValues);
+            
+            outputBuffer.GetData(_Outputs);
+            //AsyncGPUReadbackRequest request = AsyncGPUReadback.Request(outputBuffer, 0, 0);
+            //request.
+            //request.completed += op =>
+            //{
+            //    if (op.status == AsyncGPUReadbackStatus.Success)
+            //    {
+            //        result = op.GetData<float>().ToArray();
+            //        Debug.Log("Async GPU readback completed successfully.");
+            //    }
+            //    else
+            //    {
+            //        Debug.LogError("Async GPU readback failed with error: " + op.status);
+            //    }
+            //};
+            //activatedValueBuffer.Release();
+            //outputBuffer.Release();
+
+
+            inputs.CopyTo(_Inputs, 0);
+            
             return activatedValues;
         }
         public double[] Backward(double[] deltas)
@@ -121,7 +186,7 @@ namespace MonoRL
             {
                 gradB = _GradB[nodeIndex] / batchSize;
                 Biases[nodeIndex] -= lr * gradB;
-                
+
                 for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
                 {
                     gradW = _GradW[nodeIndex][inputIndex] / batchSize;

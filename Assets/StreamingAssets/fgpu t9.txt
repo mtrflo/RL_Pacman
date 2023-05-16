@@ -1,0 +1,1 @@
+{"LearningRate":0.0025,"hiddenAType":1,"outputAType":4,"layersSize":[9,64,32,2],"Layers":[],"forwardCS":{"instanceID":24800}}

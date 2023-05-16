@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using MonoRL;
 using Unity.VisualScripting;
 using System.Linq;
+using UnityEngine;
 
 [Serializable]
 public class Network
@@ -15,6 +16,7 @@ public class Network
     public List<Layer> Layers = new List<Layer>();
 
     public ICost Cost;
+    public ComputeShader forwardCS;
     public void Init()
     {
         Cost = new Cost.SquaredError();
@@ -27,9 +29,9 @@ public class Network
             return;
         }
         for (int i = 0; i < layersSize.Length - 2; i++)
-            Layers.Add(new Layer(layersSize[i], layersSize[i + 1], hiddenAType));
+            Layers.Add(new Layer(layersSize[i], layersSize[i + 1], hiddenAType, forwardCS));
 
-        Layers.Add(new Layer(layersSize[layersSize.Length - 2], layersSize[layersSize.Length - 1], outputAType));
+        Layers.Add(new Layer(layersSize[layersSize.Length - 2], layersSize[layersSize.Length - 1], outputAType, forwardCS));
     }
 
     public double[] Forward(double[] inputs)
