@@ -7,6 +7,11 @@ using UnityEngine;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 using Random = UnityEngine.Random;
+using Unity.Jobs;
+using Unity.Burst;
+using Unity.VisualScripting.Antlr3.Runtime;
+using Unity.Collections;
+
 namespace MonoRL
 {
     [Serializable]
@@ -81,7 +86,7 @@ namespace MonoRL
 
         public double[] Forward(double[] inputs)
         {
-            return ForwardGPU(inputs);
+            return ForwardBurst(inputs);
 
             double[] activatedValues = new double[NodeSize];
 
@@ -103,6 +108,27 @@ namespace MonoRL
 
             inputs.CopyTo(_Inputs, 0);
 
+            return activatedValues;
+        }
+        public double[] ForwardBurst(double[] inputs)
+        {
+            double[] activatedValues;
+            NativeArray<double> na_inputs, na_Weights, na_Biases, na__Outputs, na_activatedValues;
+            na_inputs = new NativeArray<double>(inputs, Allocator.Persistent);
+            na_Weights = new NativeArray<double>(Weights, Allocator.Persistent);
+            na_Biases = new NativeArray<double>(Biases, Allocator.Persistent);
+            na__Outputs = new NativeArray<double>(_Outputs, Allocator.Persistent);
+            na_activatedValues = new NativeArray<double>(NodeSize, Allocator.Persistent);
+            ForwardBurst forwardBurst = new ForwardBurst(NodeSize, InputSize, na_activatedValues, inputs, Weights, Biases, _Outputs);
+            forwardBurst.Run();
+
+
+            activatedValues = na_activatedValues.ToArray();
+            na_inputs.Dispose();
+            na_Weights.Dispose();
+            na_Biases.Dispose();
+            na__Outputs.Dispose();
+            na_activatedValues.Dispose();
             return activatedValues;
         }
         int doublesize;
@@ -244,4 +270,44 @@ namespace MonoRL
         }
     }
 
+}
+[BurstCompile]
+public struct ForwardBurst : IJob
+{
+    int NodeSize, InputSize;
+    double[] activatedValues, inputs, Weights, Biases, _Outputs;
+    
+    //public ForwardBurst(int NodeSize,int InputSize, NativeArray<double> activatedValues, NativeArray<double> inputs, NativeArray<double> Weights, NativeArray<double> Biases,NativeArray<double> _Outputs)
+    public ForwardBurst(int NodeSize, int InputSize, NativeArray<double> activatedValues, double[] inputs, double[] Weights, double[] Biases, double[] _Outputs)
+    {
+        this.NodeSize = NodeSize;
+        this.InputSize = InputSize;
+        this.inputs = inputs;
+        this.Weights = Weights;
+        this.Biases = Biases;
+        this._Outputs = _Outputs;
+        this.activatedValues = activatedValues;
+    }
+    public double Activate(double z)
+    {
+        const double a = 0.01;
+        return (z >= 0) ? z : a * z;
+    }
+    public void Execute()
+    {
+        double calcOutput = 0;
+        for (int nodeIndex = 0, inputIndex = 0; nodeIndex < NodeSize; nodeIndex++)
+        {
+            calcOutput = 0;
+            inputIndex = 0;
+            for (; inputIndex < InputSize; inputIndex++)
+            {
+                calcOutput += Weights[nodeIndex * InputSize + inputIndex] * inputs[inputIndex];
+            }
+            calcOutput += Biases[nodeIndex];
+            _Outputs[nodeIndex] = calcOutput;
+
+            activatedValues[nodeIndex] = Activate(calcOutput);
+        }
+    }
 }

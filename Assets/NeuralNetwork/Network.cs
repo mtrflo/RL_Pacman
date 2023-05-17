@@ -11,7 +11,7 @@ public class Network
 {
     public double LearningRate = 0.003;
     public Activation.ActivationType hiddenAType, outputAType;
-    public int[] layersSize;
+    public uint[] layersSize;
 
     public List<Layer> Layers = new List<Layer>();
 
