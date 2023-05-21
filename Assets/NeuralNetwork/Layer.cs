@@ -11,49 +11,46 @@ using Unity.Jobs;
 using Unity.Burst;
 using Unity.VisualScripting.Antlr3.Runtime;
 using Unity.Collections;
+using Unity.Mathematics;
 
 namespace MonoRL
 {
-    [Serializable]
-    public class Layer
+    [BurstCompile][Serializable]
+    public struct Layer : IJob
     {
         [SerializeField]
         public int InputSize;//size
         [SerializeField]
         public int NodeSize;//size
 
-        public double[] Weights;//data
-        public double[] Biases;
+        public NativeArray<double> Weights;//data
+        public NativeArray<double> Biases;
         public IActivation Activation;
 
         [SerializeField]
-        private double[] _Inputs;//data
+        public NativeArray<double> _Inputs;//data
         [SerializeField]
-        private double[] _Outputs;
-
-        public ComputeShader forwardCS;
+        public NativeArray<double> _Outputs;
 
         [NonSerialized]
-        private double[][] _GradW;
+        public NativeArray<double> _GradW;
         [NonSerialized]
-        private double[] _GradB;
-
-        public Layer(int inputSize, int nodeSize, Activation.ActivationType activationType, ComputeShader forwardCS)
+        public NativeArray<double> _GradB;
+        Allocator allo;
+        public Layer(int inputSize, int nodeSize, Activation.ActivationType activationType)
         {
             InputSize = inputSize;
             NodeSize = nodeSize;
             Activation = MonoRL.Activation.GetActivationFromType(activationType);
-            Weights = new double[nodeSize * inputSize];
-            Biases = new double[nodeSize];
-            _Inputs = new double[inputSize];
-            _Outputs = new double[nodeSize];
-            _GradB = new double[nodeSize];
+            allo = Allocator.Persistent;
 
-            _GradW = new double[nodeSize][];
-            for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
-                _GradW[nodeIndex] = new double[InputSize];
+            Weights = new NativeArray<double>(nodeSize * inputSize, allo);
+            Biases = new NativeArray<double>(nodeSize, allo);
+            _Inputs = new NativeArray<double>(inputSize, allo);
+            _Outputs = new NativeArray<double>(nodeSize, allo);
+            _GradB = new NativeArray<double>(nodeSize, allo);
 
-            this.forwardCS = forwardCS;
+            _GradW = new NativeArray<double>(nodeSize * inputSize, allo);
 
             InitializeWeights();
             InitializeBiases();
@@ -63,54 +60,20 @@ namespace MonoRL
         {
             Debug.Log("Update network");
             Activation = MonoRL.Activation.GetActivationFromType(activationType);
-            _GradB = new double[nodeSize];
-            _GradW = new double[nodeSize][];
-            for (int nodeIndex = 0; nodeIndex < nodeSize; nodeIndex++)
-                _GradW[nodeIndex] = new double[inputSize];
+            _GradB = new NativeArray<double>(nodeSize, allo);
+            _GradW = new NativeArray<double>(nodeSize * inputSize, allo);
 
             Awake();
         }
-
-        ComputeBuffer outputBuffer;
-        ComputeBuffer weightBuffer;
-        ComputeBuffer biaseBuffer;
-
-        public NativeArray<double> na_inputs, na_Weights, na_Biases, na__Outputs, na_activatedValues;
-        ForwardBurst forwardBurst;
-        static JobHandle lastJobHandle;
         void Awake()
         {
-            doublesize = sizeof(double);
-
-            outputBuffer = new ComputeBuffer(_Outputs.Length, doublesize);//outputs
-            weightBuffer = new ComputeBuffer(Weights.Length, doublesize);//weights
-            biaseBuffer = new ComputeBuffer(Biases.Length, doublesize);//biases
-
-            Allocator alc = Allocator.Persistent;
-            na_inputs = new NativeArray<double>(InputSize, alc);
-            na_Weights = new NativeArray<double>(Weights.Length, alc);
-            na_Biases = new NativeArray<double>(Biases.Length, alc);
-            na__Outputs = new NativeArray<double>(_Outputs.Length, alc);
-            na_activatedValues = new NativeArray<double>(NodeSize, alc);
             
-            forwardBurst = new ForwardBurst();
-            forwardBurst.NodeSize = NodeSize;
-            forwardBurst.InputSize = InputSize;
-            forwardBurst.activatedValues = na_activatedValues;
-            forwardBurst._Outputs = na__Outputs;
-            forwardBurst.Weights = na_Weights;
-            forwardBurst.inputs = na_inputs;
-            forwardBurst.Biases = na_Biases;
 
         }
 
-        public double[] Forward(double[] inputs)
+        public NativeArray<double> Forward(NativeArray<double> inputs)
         {
-            return ForwardBurst(inputs);
-
-            double[] activatedValues = new double[NodeSize];
-
-
+            NativeArray<double> activatedValues = new NativeArray<double>(NodeSize, allo);
             double calcOutput = 0;
             for (int nodeIndex = 0, inputIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
@@ -126,98 +89,33 @@ namespace MonoRL
                 activatedValues[nodeIndex] = Activation.Activate(calcOutput);
             }
 
-            inputs.CopyTo(_Inputs, 0);
-
+            inputs.CopyTo(_Inputs);
+            inputs.Dispose();
             return activatedValues;
         }
-        public double[] ForwardBurst(double[] inputs)
+        public NativeArray<double> Backward(NativeArray<double> deltas)
         {
-            double[] activatedValues;
-
-            na_inputs.CopyFrom(inputs);
-            na_Weights.CopyFrom(Weights);
-            na_Biases.CopyFrom(Biases);
-
-
-            JobHandle jobHandle = forwardBurst.Schedule(NodeSize, 128 * 128);
-            jobHandle.Complete();
-
-            activatedValues = na_activatedValues.ToArray();
-            _Outputs = na__Outputs.ToArray();
-            inputs.CopyTo(_Inputs, 0);
-            return activatedValues;
-        }
-        int doublesize;
-        public double[] ForwardGPU(double[] inputs)
-        {
-
-            //Debug.Log("aa");
-            double[] activatedValues = new double[NodeSize];
-            ComputeBuffer activatedValueBuffer = new ComputeBuffer(activatedValues.Length, doublesize);//activated values
-            ComputeBuffer inputBuffer = new ComputeBuffer(inputs.Length, doublesize);//inputs
-
-
-
-            //activatedValueBuffer.SetData(activatedValues);
-            //outputBuffer.SetData(_Outputs);
-            weightBuffer.SetData(Weights);
-            inputBuffer.SetData(inputs);
-            biaseBuffer.SetData(Biases);
-
-            forwardCS.SetBuffer(0, "outputs", outputBuffer);
-            forwardCS.SetBuffer(0, "activatedValues", activatedValueBuffer);
-            forwardCS.SetBuffer(0, "Weights", weightBuffer);
-            forwardCS.SetBuffer(0, "inputs", inputBuffer);
-            forwardCS.SetBuffer(0, "Biases", biaseBuffer);
-            forwardCS.SetInt("InputSize", InputSize);
-
-            forwardCS.Dispatch(0, NodeSize < 10 ? 1 : (NodeSize / 10), 1, 1);
-            activatedValueBuffer.GetData(activatedValues);
-
-            outputBuffer.GetData(_Outputs);
-            //AsyncGPUReadbackRequest request = AsyncGPUReadback.Request(outputBuffer, 0, 0);
-            //request.
-            //request.completed += op =>
-            //{
-            //    if (op.status == AsyncGPUReadbackStatus.Success)
-            //    {
-            //        result = op.GetData<float>().ToArray();
-            //        Debug.Log("Async GPU readback completed successfully.");
-            //    }
-            //    else
-            //    {
-            //        Debug.LogError("Async GPU readback failed with error: " + op.status);
-            //    }
-            //};
-            //activatedValueBuffer.Release();
-            //outputBuffer.Release();
-
-
-            inputs.CopyTo(_Inputs, 0);
-
-            return activatedValues;
-        }
-        public double[] Backward(double[] deltas)
-        {
-            double[] delta = new double[NodeSize];
-
+            NativeArray<double> delta = new NativeArray<double>(NodeSize,Allocator.TempJob), delta2 = new NativeArray<double>(NodeSize, Allocator.TempJob);
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
                 delta[nodeIndex] = deltas[nodeIndex] * Activation.Derivative(_Outputs[nodeIndex]);
+            delta.CopyTo(delta2);
+            deltas.Dispose();
 
-            UpdateGradients(delta);
-            double[] propagatedDelta = new double[InputSize];
+            UpdateGradients(new NativeArray<double>(delta, Allocator.TempJob));
+            NativeArray<double> propagatedDelta = new NativeArray<double>(InputSize,allo);
 
 
             double delta_m = 0;
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
-                delta_m = delta[nodeIndex];
+                delta_m = delta2[nodeIndex];
                 for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
                 {
                     propagatedDelta[inputIndex] += delta_m * Weights[nodeIndex * InputSize + inputIndex];
                 }
             }
-
+            delta.Dispose();
+            delta2.Dispose();
             return propagatedDelta;
         }
 
@@ -231,7 +129,7 @@ namespace MonoRL
 
                 for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
                 {
-                    gradW = _GradW[nodeIndex][inputIndex] / batchSize;
+                    gradW = _GradW[nodeIndex * InputSize + inputIndex] / batchSize;
 
                     weightCalc = Weights[nodeIndex * InputSize + inputIndex];
                     weightCalc -= lr * gradW;
@@ -244,18 +142,11 @@ namespace MonoRL
 
         public void ClearGradients()
         {
-            Array.Clear(_GradB, 0, _GradB.Length);
-            for (int i = 0; i < NodeSize; i++)
-            {
-                for (int j = 0; j < InputSize; j++)
-                {
-                    _GradW[i][j] = 0;
-                }
-            }
-            //Array.Clear(_GradW, 0, _GradW.Length);
+            _GradB = new NativeArray<double>(NodeSize, allo);
+            _GradW = new NativeArray<double>(NodeSize * InputSize, allo);
         }
 
-        private void UpdateGradients(double[] delta)
+        private void UpdateGradients(NativeArray<double> delta)
         {
             double c_delta = 0;
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
@@ -264,9 +155,10 @@ namespace MonoRL
                 _GradB[nodeIndex] += c_delta;
                 for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
                 {
-                    _GradW[nodeIndex][inputIndex] += c_delta * _Inputs[inputIndex];
+                    _GradW[nodeIndex * InputSize + inputIndex] += c_delta * _Inputs[inputIndex];
                 }
             }
+            delta.Dispose();
         }
 
 
@@ -274,7 +166,8 @@ namespace MonoRL
         private void InitializeWeights()
         {
             float variance = 1.0f / NodeSize;
-            float sqrtVar = Mathf.Sqrt(variance);
+            
+            float sqrtVar = math.sqrt(variance);
             for (int i = 0; i < NodeSize * InputSize; i++)
                 Weights[i] = Random.Range(-sqrtVar, sqrtVar);
         }
@@ -283,6 +176,11 @@ namespace MonoRL
         {
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
                 Biases[nodeIndex] = 0;
+        }
+
+        public void Execute()
+        {
+            
         }
     }
 
