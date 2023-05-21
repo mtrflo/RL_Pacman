@@ -84,7 +84,7 @@ namespace MonoRL
             outputBuffer = new ComputeBuffer(_Outputs.Length, doublesize);//outputs
             weightBuffer = new ComputeBuffer(Weights.Length, doublesize);//weights
             biaseBuffer = new ComputeBuffer(Biases.Length, doublesize);//biases
-            
+
             Allocator alc = Allocator.Persistent;
             na_inputs = new NativeArray<double>(InputSize, alc);
             na_Weights = new NativeArray<double>(Weights.Length, alc);
@@ -132,37 +132,32 @@ namespace MonoRL
             na_Weights.CopyFrom(Weights);
             na_Biases.CopyFrom(Biases);
             na__Outputs.CopyFrom(_Outputs);
-            
-            
+
+
 
             forwardBurst.Weights = na_Weights;
             forwardBurst.inputs = na_inputs;
             forwardBurst.Biases = na_Biases;
             forwardBurst._Outputs = na__Outputs;
-            
-            JobHandle jobHandle = forwardBurst.Schedule();
+
+            JobHandle jobHandle = forwardBurst.Schedule(NodeSize, 64);
             jobHandle.Complete();
-            
+
             activatedValues = na_activatedValues.ToArray();
             _Outputs = na__Outputs.ToArray();
             inputs.CopyTo(_Inputs, 0);
-            //na_inputs.Dispose();
-            //na_Weights.Dispose();
-            //na_Biases.Dispose();
-            //na__Outputs.Dispose();
-            //na_activatedValues.Dispose();
             return activatedValues;
         }
         int doublesize;
         public double[] ForwardGPU(double[] inputs)
         {
-            
+
             //Debug.Log("aa");
             double[] activatedValues = new double[NodeSize];
             ComputeBuffer activatedValueBuffer = new ComputeBuffer(activatedValues.Length, doublesize);//activated values
             ComputeBuffer inputBuffer = new ComputeBuffer(inputs.Length, doublesize);//inputs
 
-            
+
 
             //activatedValueBuffer.SetData(activatedValues);
             //outputBuffer.SetData(_Outputs);
@@ -179,7 +174,7 @@ namespace MonoRL
 
             forwardCS.Dispatch(0, NodeSize < 10 ? 1 : (NodeSize / 10), 1, 1);
             activatedValueBuffer.GetData(activatedValues);
-            
+
             outputBuffer.GetData(_Outputs);
             //AsyncGPUReadbackRequest request = AsyncGPUReadback.Request(outputBuffer, 0, 0);
             //request.
@@ -200,7 +195,7 @@ namespace MonoRL
 
 
             inputs.CopyTo(_Inputs, 0);
-            
+
             return activatedValues;
         }
         public double[] Backward(double[] deltas)
@@ -294,33 +289,33 @@ namespace MonoRL
 
 }
 [BurstCompile]
-public struct ForwardBurst : IJob
+public struct ForwardBurst : IJobParallelFor
 {
     public int NodeSize, InputSize;
 
     public NativeArray<double> activatedValues, _Outputs;
     [ReadOnly]
-    public NativeArray<double>  inputs, Weights, Biases;
+    public NativeArray<double> inputs, Weights, Biases;
     public double Activate(double z)
     {
         const double a = 0.01;
         return (z >= 0) ? z : a * z;
     }
-    public void Execute()
+    public void Execute(int i)
     {
         double calcOutput = 0;
-        for (int nodeIndex = 0, inputIndex = 0; nodeIndex < NodeSize; nodeIndex++)
-        {
-            calcOutput = 0;
-            inputIndex = 0;
-            for (; inputIndex < InputSize; inputIndex++)
-            {
-                calcOutput += Weights[nodeIndex * InputSize + inputIndex] * inputs[inputIndex];
-            }
-            calcOutput += Biases[nodeIndex];
-            _Outputs[nodeIndex] = calcOutput;
+        int nodeIndex = i, inputIndex = 0;
 
-            activatedValues[nodeIndex] = Activate(calcOutput);
+        calcOutput = 0;
+        inputIndex = 0;
+        for (; inputIndex < InputSize; inputIndex++)
+        {
+            calcOutput += Weights[nodeIndex * InputSize + inputIndex] * inputs[inputIndex];
         }
+        calcOutput += Biases[nodeIndex];
+        _Outputs[nodeIndex] = calcOutput;
+
+        activatedValues[nodeIndex] = Activate(calcOutput);
+
     }
 }
