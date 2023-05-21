@@ -77,6 +77,7 @@ namespace MonoRL
 
         public NativeArray<double> na_inputs, na_Weights, na_Biases, na__Outputs, na_activatedValues;
         ForwardBurst forwardBurst;
+        static JobHandle lastJobHandle;
         void Awake()
         {
             doublesize = sizeof(double);
@@ -91,10 +92,15 @@ namespace MonoRL
             na_Biases = new NativeArray<double>(Biases.Length, alc);
             na__Outputs = new NativeArray<double>(_Outputs.Length, alc);
             na_activatedValues = new NativeArray<double>(NodeSize, alc);
+            
             forwardBurst = new ForwardBurst();
-            forwardBurst.activatedValues = na_activatedValues;
             forwardBurst.NodeSize = NodeSize;
             forwardBurst.InputSize = InputSize;
+            forwardBurst.activatedValues = na_activatedValues;
+            forwardBurst._Outputs = na__Outputs;
+            forwardBurst.Weights = na_Weights;
+            forwardBurst.inputs = na_inputs;
+            forwardBurst.Biases = na_Biases;
 
         }
 
@@ -131,16 +137,9 @@ namespace MonoRL
             na_inputs.CopyFrom(inputs);
             na_Weights.CopyFrom(Weights);
             na_Biases.CopyFrom(Biases);
-            na__Outputs.CopyFrom(_Outputs);
 
 
-
-            forwardBurst.Weights = na_Weights;
-            forwardBurst.inputs = na_inputs;
-            forwardBurst.Biases = na_Biases;
-            forwardBurst._Outputs = na__Outputs;
-
-            JobHandle jobHandle = forwardBurst.Schedule(NodeSize, 64);
+            JobHandle jobHandle = forwardBurst.Schedule(NodeSize, 128 * 128);
             jobHandle.Complete();
 
             activatedValues = na_activatedValues.ToArray();
@@ -296,9 +295,9 @@ public struct ForwardBurst : IJobParallelFor//a
     public NativeArray<double> activatedValues, _Outputs;
     [ReadOnly]
     public NativeArray<double> inputs, Weights, Biases;
+    const double a = 0.01;
     public double Activate(double z)
     {
-        const double a = 0.01;
         return (z >= 0) ? z : a * z;
     }
     public void Execute(int i)

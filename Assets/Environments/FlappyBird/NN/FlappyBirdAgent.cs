@@ -86,6 +86,7 @@ public class FlappyBirdAgent : MonoBehaviour
         //    AddObservation(distance);
         Vector3 birdPos = birdControl.transform.position;
 
+        /*
         //AddObservation(birdControl.transform.localPosition.y);// bird y pos
         //AddObservation(dis);// pipe distance 
         //AddObservation(pipeSpawner.lastPipe.transform.localPosition.y);
@@ -95,6 +96,7 @@ public class FlappyBirdAgent : MonoBehaviour
         //AddObservation(distances[0]);
         //AddObservation(distances[1]);
         //float leftSign = Mathf.Sign(pipeSpawner.lastPipe.bottomPoint_l.position.x - birdPos.x);
+        */
         AddObservation(Vector3.Distance(birdPos, pipeSpawner.lastPipe.bottomPoint_l.position));
         AddObservation(Vector3.Distance(birdPos, pipeSpawner.lastPipe.bottomPoint_r.position));
         AddObservation(Vector3.Distance(birdPos, pipeSpawner.lastPipe.topPoint_l.position));
@@ -127,7 +129,6 @@ public class FlappyBirdAgent : MonoBehaviour
             {
                 maxEpisodeCount = episodeCount;
                 Scoring.me.NewScore(maxEpisodeCount);
-
 
                 print("maxEpisodeCount : " + maxEpisodeCount);
             }
