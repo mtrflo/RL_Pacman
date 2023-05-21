@@ -289,7 +289,7 @@ namespace MonoRL
 
 }
 [BurstCompile]
-public struct ForwardBurst : IJobParallelFor
+public struct ForwardBurst : IJobParallelFor//a
 {
     public int NodeSize, InputSize;
 
