@@ -301,17 +301,6 @@ public struct ForwardBurst : IJob
     public NativeArray<double> activatedValues, _Outputs;
     [ReadOnly]
     public NativeArray<double>  inputs, Weights, Biases;
-    //public ForwardBurst(int NodeSize,int InputSize, NativeArray<double> activatedValues, NativeArray<double> inputs, NativeArray<double> Weights, NativeArray<double> Biases,NativeArray<double> _Outputs)
-    //public ForwardBurst(int NodeSize, int InputSize, NativeArray<double> activatedValues, NativeArray<double> inputs, NativeArray<double> Weights, NativeArray<double> Biases, NativeArray<double> _Outputs)
-    //{
-    //    this.NodeSize = NodeSize;
-    //    this.InputSize = InputSize;
-    //    this.inputs = inputs;
-    //    this.Weights = Weights;
-    //    this.Biases = Biases;
-    //    this._Outputs = _Outputs;
-    //    this.activatedValues = activatedValues;
-    //}
     public double Activate(double z)
     {
         const double a = 0.01;
