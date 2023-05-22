@@ -11,6 +11,7 @@ using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using Unity.Mathematics;
+using Unity.VisualScripting.Antlr3.Runtime;
 
 public class DQNAgent : MonoBehaviour
 {
@@ -122,6 +123,7 @@ public class DQNAgent : MonoBehaviour
 
     public void ReplaceTarget()
     {
+        /*
         void CopyUpdate()
         {
             int mainNetworkLayerCount = network.Layers.Count;
@@ -170,6 +172,7 @@ public class DQNAgent : MonoBehaviour
         }
 
         SoftUpdate();
+        */
     }
 
     private void OnApplicationQuit()
@@ -244,20 +247,21 @@ public class DQNAgent : MonoBehaviour
     {
         foreach (var layer in network.Layers)
         {
-            
-            layer.na_inputs.Dispose();
-            layer.na_Weights.Dispose();
-            layer.na_Biases.Dispose();
-            layer.na__Outputs.Dispose();
-            layer.na_activatedValues.Dispose();
+            layer.Weights.Dispose();
+            layer.Biases.Dispose();
+            layer._Inputs.Dispose();
+            layer._Outputs.Dispose();
+            layer._GradB.Dispose();
+            layer._GradW.Dispose();
         }
         foreach (var layer in targetNetwork.Layers)
         {
-            layer.na_inputs.Dispose();
-            layer.na_Weights.Dispose();
-            layer.na_Biases.Dispose();
-            layer.na__Outputs.Dispose();
-            layer.na_activatedValues.Dispose();
+            layer.Weights.Dispose();
+            layer.Biases.Dispose();
+            layer._Inputs.Dispose();
+            layer._Outputs.Dispose();
+            layer._GradB.Dispose();
+            layer._GradW.Dispose();
         }
     }
 
