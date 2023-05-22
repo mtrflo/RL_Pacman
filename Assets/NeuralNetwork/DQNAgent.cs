@@ -258,6 +258,7 @@ public class DQNAgent : MonoBehaviour
             layer.na_Biases.Dispose();
             layer.na__Outputs.Dispose();
             layer.na_activatedValues.Dispose();
+            //
         }
     }
 

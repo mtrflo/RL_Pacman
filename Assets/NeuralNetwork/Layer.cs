@@ -148,6 +148,7 @@ namespace MonoRL
             return activatedValues;
         }
         int doublesize;
+        //
         public double[] ForwardGPU(double[] inputs)
         {
 

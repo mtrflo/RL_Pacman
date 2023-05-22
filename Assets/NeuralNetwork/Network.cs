@@ -70,5 +70,6 @@ public class Network
 
         for (int i = Layers.Count - 1; i >= 0; i--)
             Layers[i].ApplyGradients(LearningRate, batchSize);
+        //
     }
 }
