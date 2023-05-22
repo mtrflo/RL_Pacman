@@ -37,7 +37,6 @@ namespace MonoRL
         private double[][] _GradW;
         [NonSerialized]
         private double[] _GradB;
-
         public Layer(int inputSize, int nodeSize, Activation.ActivationType activationType, ComputeShader forwardCS)
         {
             InputSize = inputSize;
@@ -103,7 +102,7 @@ namespace MonoRL
             forwardBurst.Biases = na_Biases;
 
         }
-
+        //
         public double[] Forward(double[] inputs)
         {
             return ForwardBurst(inputs);
@@ -130,6 +129,7 @@ namespace MonoRL
 
             return activatedValues;
         }
+        //
         public double[] ForwardBurst(double[] inputs)
         {
             double[] activatedValues;
@@ -148,6 +148,7 @@ namespace MonoRL
             return activatedValues;
         }
         int doublesize;
+        //
         public double[] ForwardGPU(double[] inputs)
         {
 
@@ -197,6 +198,7 @@ namespace MonoRL
 
             return activatedValues;
         }
+        //
         public double[] Backward(double[] deltas)
         {
             double[] delta = new double[NodeSize];
@@ -287,7 +289,7 @@ namespace MonoRL
     }
 
 }
-[BurstCompile]
+    [BurstCompile]
 public struct ForwardBurst : IJobParallelFor//a
 {
     public int NodeSize, InputSize;

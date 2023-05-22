@@ -12,6 +12,7 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 using Unity.Mathematics;
 
+
 public class DQNAgent : MonoBehaviour
 {
     public static DQNAgent me;
@@ -260,7 +261,6 @@ public class DQNAgent : MonoBehaviour
             layer.na_activatedValues.Dispose();
         }
     }
-
 }
 [Serializable]
 public class Transition

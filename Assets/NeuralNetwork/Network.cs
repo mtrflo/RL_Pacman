@@ -5,7 +5,6 @@ using MonoRL;
 using Unity.VisualScripting;
 using System.Linq;
 using UnityEngine;
-
 [Serializable]
 public class Network
 {
@@ -17,6 +16,7 @@ public class Network
 
     public ICost Cost;
     public ComputeShader forwardCS;
+    
     public void Init()
     {
         Cost = new Cost.SquaredError();
@@ -32,6 +32,7 @@ public class Network
             Layers.Add(new Layer(layersSize[i], layersSize[i + 1], hiddenAType, forwardCS));
 
         Layers.Add(new Layer(layersSize[layersSize.Length - 2], layersSize[layersSize.Length - 1], outputAType, forwardCS));
+        //
     }
 
     public double[] Forward(double[] inputs)
@@ -41,6 +42,7 @@ public class Network
         for (int i = 0; i < Layers.Count; i++)
             calc_inputs = Layers[i].Forward(calc_inputs);
         return calc_inputs;
+        //
     }
 
     public void Backward(double[] inputs, double[] expectedOutputs)
@@ -54,6 +56,7 @@ public class Network
 
         for (int i = Layers.Count - 1; i >= 0; i--)
             deltas = Layers[i].Backward(deltas);
+        //
     }
 
     public void Learn(double[][] batchInputs, double[][] batchExpectedOutputs)
@@ -70,5 +73,7 @@ public class Network
 
         for (int i = Layers.Count - 1; i >= 0; i--)
             Layers[i].ApplyGradients(LearningRate, batchSize);
+        //
     }
+    
 }
