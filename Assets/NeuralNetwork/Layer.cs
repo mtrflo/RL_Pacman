@@ -217,7 +217,7 @@ namespace MonoRL
                     propagatedDelta[inputIndex] += delta_m * Weights[nodeIndex * InputSize + inputIndex];
                 }
             }
-
+            //
             return propagatedDelta;
         }
 
