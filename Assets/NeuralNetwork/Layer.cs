@@ -39,10 +39,10 @@ namespace MonoRL
         Allocator allo;
         public Layer(int inputSize, int nodeSize, Activation.ActivationType activationType)
         {
+            allo = Allocator.Persistent;
             InputSize = inputSize;
             NodeSize = nodeSize;
             Activation = MonoRL.Activation.GetActivationFromType(activationType);
-            allo = Allocator.Persistent;
 
             Weights = new NativeArray<double>(nodeSize * inputSize, allo);
             Biases = new NativeArray<double>(nodeSize, allo);
@@ -58,6 +58,8 @@ namespace MonoRL
         }
         public void SetNonSerializedData(int inputSize, int nodeSize, Activation.ActivationType activationType)
         {
+            allo = Allocator.Persistent;
+
             Debug.Log("Update network");
             Activation = MonoRL.Activation.GetActivationFromType(activationType);
             _GradB = new NativeArray<double>(nodeSize, allo);
@@ -142,6 +144,8 @@ namespace MonoRL
 
         public void ClearGradients()
         {
+            _GradB.Dispose();
+            _GradW.Dispose();
             _GradB = new NativeArray<double>(NodeSize, allo);
             _GradW = new NativeArray<double>(NodeSize * InputSize, allo);
         }
