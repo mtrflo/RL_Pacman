@@ -35,9 +35,9 @@ public class FlappyBirdAgent : MonoBehaviour
     {
         //timeController = TimeController.me;
         birdsCount++;
-        distances = new double[rayPoints.Length];
-        prev_state = new List<double>();
-        current_state = new List<double>();
+        distances = new float[rayPoints.Length];
+        prev_state = new List<float>();
+        current_state = new List<float>();
 
         startDelay = delay;
         //timeController.ChangeVarsByTimeScale += ChangeVars;
@@ -61,7 +61,7 @@ public class FlappyBirdAgent : MonoBehaviour
         StartCoroutine(ActionMaker());
     }
     int action;
-    List<double> prev_state, current_state;
+    List<float> prev_state, current_state;
     WaitForSecondsRealtime wfsr;
     IEnumerator ActionMaker()
     {
@@ -77,7 +77,7 @@ public class FlappyBirdAgent : MonoBehaviour
         }
 
     }
-    double[] distances;
+    float[] distances;
     void ChooseAction()
     {
         current_state.Clear();
@@ -167,9 +167,9 @@ public class FlappyBirdAgent : MonoBehaviour
             distances[i] = GetRayLength(rayPoints[i]);
     }
 
-    private double GetRayLength(Transform point)
+    private float GetRayLength(Transform point)
     {
-        double dstns = -1;
+        float dstns = -1;
         RaycastHit2D hit = Physics2D.Raycast(point.transform.position, point.right, 10, ~LayerMask.GetMask("bird"));
         if (hit.collider != null)
         {
@@ -220,7 +220,7 @@ public class FlappyBirdAgent : MonoBehaviour
         StartCoroutine(ActionMaker());
     }
 
-    public void AddObservation(double observation)
+    public void AddObservation(float observation)
     {
         current_state.Add(observation);
     }

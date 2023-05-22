@@ -3,9 +3,9 @@ namespace MonoRL
 
 	public interface ICost
 	{
-		double CostFunction(double predictedOutput, double expectedOutput);
+		float CostFunction(float predictedOutput, float expectedOutput);
 
-		double CostDerivative(double predictedOutput, double expectedOutput);
+		float CostDerivative(float predictedOutput, float expectedOutput);
 
 		Cost.CostType CostFunctionType();
 	}

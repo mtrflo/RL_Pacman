@@ -22,35 +22,35 @@ namespace MonoRL
         [SerializeField]
         public int NodeSize;//size
 
-        public double[] Weights;//data
-        public double[] Biases;
+        public float[] Weights;//data
+        public float[] Biases;
         public IActivation Activation;
 
         [SerializeField]
-        private double[] _Inputs;//data
+        private float[] _Inputs;//data
         [SerializeField]
-        private double[] _Outputs;
+        private float[] _Outputs;
 
         public ComputeShader forwardCS;
 
         [NonSerialized]
-        private double[][] _GradW;
+        private float[][] _GradW;
         [NonSerialized]
-        private double[] _GradB;
+        private float[] _GradB;
         public Layer(int inputSize, int nodeSize, Activation.ActivationType activationType, ComputeShader forwardCS)
         {
             InputSize = inputSize;
             NodeSize = nodeSize;
             Activation = MonoRL.Activation.GetActivationFromType(activationType);
-            Weights = new double[nodeSize * inputSize];
-            Biases = new double[nodeSize];
-            _Inputs = new double[inputSize];
-            _Outputs = new double[nodeSize];
-            _GradB = new double[nodeSize];
+            Weights = new float[nodeSize * inputSize];
+            Biases = new float[nodeSize];
+            _Inputs = new float[inputSize];
+            _Outputs = new float[nodeSize];
+            _GradB = new float[nodeSize];
 
-            _GradW = new double[nodeSize][];
+            _GradW = new float[nodeSize][];
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
-                _GradW[nodeIndex] = new double[InputSize];
+                _GradW[nodeIndex] = new float[InputSize];
 
             this.forwardCS = forwardCS;
 
@@ -62,10 +62,10 @@ namespace MonoRL
         {
             Debug.Log("Update network");
             Activation = MonoRL.Activation.GetActivationFromType(activationType);
-            _GradB = new double[nodeSize];
-            _GradW = new double[nodeSize][];
+            _GradB = new float[nodeSize];
+            _GradW = new float[nodeSize][];
             for (int nodeIndex = 0; nodeIndex < nodeSize; nodeIndex++)
-                _GradW[nodeIndex] = new double[inputSize];
+                _GradW[nodeIndex] = new float[inputSize];
 
             Awake();
         }
@@ -74,23 +74,23 @@ namespace MonoRL
         ComputeBuffer weightBuffer;
         ComputeBuffer biaseBuffer;
 
-        public NativeArray<double> na_inputs, na_Weights, na_Biases, na__Outputs, na_activatedValues;
+        public NativeArray<float> na_inputs, na_Weights, na_Biases, na__Outputs, na_activatedValues;
         ForwardBurst forwardBurst;
         static JobHandle lastJobHandle;
         void Awake()
         {
-            doublesize = sizeof(double);
+            floatsize = sizeof(float);
 
-            outputBuffer = new ComputeBuffer(_Outputs.Length, doublesize);//outputs
-            weightBuffer = new ComputeBuffer(Weights.Length, doublesize);//weights
-            biaseBuffer = new ComputeBuffer(Biases.Length, doublesize);//biases
+            outputBuffer = new ComputeBuffer(_Outputs.Length, floatsize);//outputs
+            weightBuffer = new ComputeBuffer(Weights.Length, floatsize);//weights
+            biaseBuffer = new ComputeBuffer(Biases.Length, floatsize);//biases
 
             Allocator alc = Allocator.Persistent;
-            na_inputs = new NativeArray<double>(InputSize, alc);
-            na_Weights = new NativeArray<double>(Weights.Length, alc);
-            na_Biases = new NativeArray<double>(Biases.Length, alc);
-            na__Outputs = new NativeArray<double>(_Outputs.Length, alc);
-            na_activatedValues = new NativeArray<double>(NodeSize, alc);
+            na_inputs = new NativeArray<float>(InputSize, alc);
+            na_Weights = new NativeArray<float>(Weights.Length, alc);
+            na_Biases = new NativeArray<float>(Biases.Length, alc);
+            na__Outputs = new NativeArray<float>(_Outputs.Length, alc);
+            na_activatedValues = new NativeArray<float>(NodeSize, alc);
             
             forwardBurst = new ForwardBurst();
             forwardBurst.NodeSize = NodeSize;
@@ -103,14 +103,14 @@ namespace MonoRL
 
         }
         //
-        public double[] Forward(double[] inputs)
+        public float[] Forward(float[] inputs)
         {
             //return ForwardBurst(inputs);
 
-            double[] activatedValues = new double[NodeSize];
+            float[] activatedValues = new float[NodeSize];
 
 
-            double calcOutput = 0;
+            float calcOutput = 0;
             for (int nodeIndex = 0, inputIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
                 calcOutput = 0;
@@ -130,16 +130,16 @@ namespace MonoRL
             return activatedValues;
         }
         //
-        public double[] ForwardBurst(double[] inputs)
+        public float[] ForwardBurst(float[] inputs)
         {
-            double[] activatedValues;
+            float[] activatedValues;
 
             na_inputs.CopyFrom(inputs);
             na_Weights.CopyFrom(Weights);
             na_Biases.CopyFrom(Biases);
 
 
-            JobHandle jobHandle = forwardBurst.Schedule(NodeSize, 128 * 128);
+            JobHandle jobHandle = forwardBurst.Schedule(NodeSize, 10);
             jobHandle.Complete();
 
             activatedValues = na_activatedValues.ToArray();
@@ -147,15 +147,15 @@ namespace MonoRL
             inputs.CopyTo(_Inputs, 0);
             return activatedValues;
         }
-        int doublesize;
+        int floatsize;
         //
-        public double[] ForwardGPU(double[] inputs)
+        public float[] ForwardGPU(float[] inputs)
         {
 
             //Debug.Log("aa");
-            double[] activatedValues = new double[NodeSize];
-            ComputeBuffer activatedValueBuffer = new ComputeBuffer(activatedValues.Length, doublesize);//activated values
-            ComputeBuffer inputBuffer = new ComputeBuffer(inputs.Length, doublesize);//inputs
+            float[] activatedValues = new float[NodeSize];
+            ComputeBuffer activatedValueBuffer = new ComputeBuffer(activatedValues.Length, floatsize);//activated values
+            ComputeBuffer inputBuffer = new ComputeBuffer(inputs.Length, floatsize);//inputs
 
 
 
@@ -199,18 +199,18 @@ namespace MonoRL
             return activatedValues;
         }
         //
-        public double[] Backward(double[] deltas)
+        public float[] Backward(float[] deltas)
         {
-            double[] delta = new double[NodeSize];
+            float[] delta = new float[NodeSize];
 
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
                 delta[nodeIndex] = deltas[nodeIndex] * Activation.Derivative(_Outputs[nodeIndex]);
 
             UpdateGradients(delta);
-            double[] propagatedDelta = new double[InputSize];
+            float[] propagatedDelta = new float[InputSize];
 
 
-            double delta_m = 0;
+            float delta_m = 0;
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
                 delta_m = delta[nodeIndex];
@@ -223,9 +223,9 @@ namespace MonoRL
             return propagatedDelta;
         }
 
-        public void ApplyGradients(double lr, int batchSize)
+        public void ApplyGradients(float lr, int batchSize)
         {
-            double gradB, weightCalc = 0, gradW = 0;
+            float gradB, weightCalc = 0, gradW = 0;
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
                 gradB = _GradB[nodeIndex] / batchSize;
@@ -257,9 +257,9 @@ namespace MonoRL
             //Array.Clear(_GradW, 0, _GradW.Length);
         }
 
-        private void UpdateGradients(double[] delta)
+        private void UpdateGradients(float[] delta)
         {
-            double c_delta = 0;
+            float c_delta = 0;
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
                 c_delta = delta[nodeIndex];
@@ -294,17 +294,17 @@ public struct ForwardBurst : IJobParallelFor//a
 {
     public int NodeSize, InputSize;
 
-    public NativeArray<double> activatedValues, _Outputs;
+    public NativeArray<float> activatedValues, _Outputs;
     [ReadOnly]
-    public NativeArray<double> inputs, Weights, Biases;
-    const double a = 0.01;
-    public double Activate(double z)
+    public NativeArray<float> inputs, Weights, Biases;
+    const float a = 0.01f;
+    public float Activate(float z)
     {
         return (z >= 0) ? z : a * z;
     }
     public void Execute(int i)
     {
-        double calcOutput = 0;
+        float calcOutput = 0;
         int nodeIndex = i, inputIndex = 0;
 
         calcOutput = 0;

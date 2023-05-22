@@ -42,7 +42,7 @@ public class HeadAgent : MonoBehaviour
         StartCoroutine(ActionMaker());
     }
     int action;
-    List<double> prev_state = new List<double>(), current_state = new List<double>();
+    List<float> prev_state = new List<float>(), current_state = new List<float>();
     WaitForSecondsRealtime wfsr;
     IEnumerator ActionMaker()
     {
@@ -171,7 +171,7 @@ public class HeadAgent : MonoBehaviour
         rb.AddTorque(x, 0, z);
     }
 
-    public void AddObservation(double observation)
+    public void AddObservation(float observation)
     {
         current_state.Add(observation);
     }

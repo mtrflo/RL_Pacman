@@ -50,14 +50,14 @@ public class DQNAgent : MonoBehaviour
         ReplaceTarget();
         //DontDestroyOnLoad(this);
     }
-    public int SelectAction(double[] observation)
+    public int SelectAction(float[] observation)
     {
         int action = 0;
         float e = Random.Range(0, 1f);
 
         if (e > epsilon)
         {
-            double[] actionValues = network.Forward(observation);
+            float[] actionValues = network.Forward(observation);
             action = actionValues.ToList().IndexOf(actionValues.Max());
         }
         else
@@ -66,14 +66,14 @@ public class DQNAgent : MonoBehaviour
         return action;
     }
 
-    public int SelectAction(double[] observation,float _epsilon)
+    public int SelectAction(float[] observation,float _epsilon)
     {
         int action = 0;
         float e = Random.Range(0, 1f);
 
         if (e > _epsilon)
         {
-            double[] actionValues = network.Forward(observation);
+            float[] actionValues = network.Forward(observation);
             action = actionValues.ToList().IndexOf(actionValues.Max());
         }
         else
@@ -93,22 +93,22 @@ public class DQNAgent : MonoBehaviour
 
                 Transition[] randomSamples = replayBuffer.GetRandomSamples(batchSize);
 
-                double[][] batchInputs = randomSamples.Select(x => x.state).ToArray();
-                double[][] batchExpectedOutputs = new double[batchInputs.Length][];
+                float[][] batchInputs = randomSamples.Select(x => x.state).ToArray();
+                float[][] batchExpectedOutputs = new float[batchInputs.Length][];
 
                 for (int batchIndex = 0; batchIndex < batchSize; batchIndex++)
                 {
                     Transition sampleTransition = randomSamples[batchIndex];
                     batchInputs[batchIndex] = sampleTransition.state;
 
-                    double[] predictedValues = network.Forward(sampleTransition.state);
-                    double QEval = predictedValues[sampleTransition.action];
-                    double QNext = network.Forward(sampleTransition.state_).Max();
-                    double QTarget = sampleTransition.reward + gamma * QNext;
+                    float[] predictedValues = network.Forward(sampleTransition.state);
+                    float QEval = predictedValues[sampleTransition.action];
+                    float QNext = network.Forward(sampleTransition.state_).Max();
+                    float QTarget = sampleTransition.reward + gamma * QNext;
                     if (sampleTransition.isDone)
                         QTarget = sampleTransition.reward;
 
-                    double[] expectedValues = predictedValues.ToArray();
+                    float[] expectedValues = predictedValues.ToArray();
                     
                     
                     expectedValues[sampleTransition.action] = QTarget;
@@ -162,7 +162,7 @@ public class DQNAgent : MonoBehaviour
                     for (int k = 0; k < mainNetworkLayersWeightsWeigthsCount; k++)
                         targetNetworkLayer.Weights[j] = math.lerp(targetNetworkLayer.Weights[j], mainNetworkLayer.Weights[j], updateFactor);
                 }
-                double[] mainNetworkBiases, targetNetworkBiases;
+                float[] mainNetworkBiases, targetNetworkBiases;
                 mainNetworkBiases = mainNetworkLayer.Biases;
                 targetNetworkBiases = targetNetworkLayer.Biases;
                 for (int bi = 0; bi < layerBiasCount; bi++)
@@ -237,7 +237,7 @@ public class DQNAgent : MonoBehaviour
         return newNet;
     }
 
-    public bool isNan => Application.isPlaying && Double.IsNaN(network.Layers[0].Weights[0]);
+    public bool isNan => Application.isPlaying && float.IsNaN(network.Layers[0].Weights[0]);
     [ReadOnly,ShowIf("isNan"), Label("NAAAAAAAAAAAAAAAAAAN!!!!!!!!!!!!!!")]
     public bool Nannn;
 
@@ -266,12 +266,12 @@ public class DQNAgent : MonoBehaviour
 [Serializable]
 public class Transition
 {
-    public double[] state;
+    public float[] state;
     public int action;
-    public double[] state_;
-    public double reward;
+    public float[] state_;
+    public float reward;
     public bool isDone;
-    public Transition(double[] state, int action, double[] state_, double reward, bool isDone)
+    public Transition(float[] state, int action, float[] state_, float reward, bool isDone)
     {
         Set(state, action, state_, reward, isDone);
         this.isDone = isDone;
@@ -280,12 +280,12 @@ public class Transition
     {
 
     }
-    public void Set(double[] state, int action, double[] state_, double reward, bool isDone = false)
+    public void Set(float[] state, int action, float[] state_, float reward, bool isDone = false)
     {
         if (this.state == null)
-            this.state = new double[state.Length];
+            this.state = new float[state.Length];
         if (this.state_ == null)
-            this.state_ = new double[state_.Length];
+            this.state_ = new float[state_.Length];
         state.CopyTo(this.state, 0);
         this.action = action;
         state_.CopyTo(this.state_, 0);

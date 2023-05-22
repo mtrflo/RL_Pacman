@@ -3,9 +3,9 @@ namespace MonoRL
 
     public interface IActivation
     {
-        double Activate(double z);
+        float Activate(float z);
 
-        double Derivative(double z);
+        float Derivative(float z);
 
         Activation.ActivationType GetActivationType();
     }

@@ -20,8 +20,8 @@ public class PendulumAgent : MonoBehaviour
     {
         startDelay = delay;
         //timeController = TimeController.me;
-        prev_state = new List<double>();
-        current_state = new List<double>();
+        prev_state = new List<float>();
+        current_state = new List<float>();
 
         //timeController.ChangeVarsByTimeScale += ChangeVars;
     }
@@ -36,7 +36,7 @@ public class PendulumAgent : MonoBehaviour
         StartCoroutine(ActionMaker());
     }
     int action;
-    List<double> prev_state, current_state;
+    List<float> prev_state, current_state;
     WaitForSecondsRealtime wfsr;
     IEnumerator ActionMaker()
     {
@@ -109,7 +109,7 @@ public class PendulumAgent : MonoBehaviour
         rb.AddTorque(0, 0, torque);
     }
 
-    public void AddObservation(double observation)
+    public void AddObservation(float observation)
     {
         current_state.Add(observation);
     }

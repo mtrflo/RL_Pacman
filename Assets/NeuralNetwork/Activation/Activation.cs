@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using Unity.Mathematics;
+using UnityEngine;
 using static System.Math;
 namespace MonoRL
 {
@@ -38,12 +40,12 @@ namespace MonoRL
 
         public readonly struct ReLU : IActivation
         {
-            public double Activate(double z)
+            public float Activate(float z)
             {
                 return Max(0, z);
             }
 
-            public double Derivative(double z)
+            public float Derivative(float z)
             {
                 return (z > 0) ? 1 : 0;
             }
@@ -56,12 +58,12 @@ namespace MonoRL
 
         public readonly struct Linear : IActivation
         {
-            public double Activate(double z)
+            public float Activate(float z)
             {
                 return z;
             }
 
-            public double Derivative(double z)
+            public float Derivative(float z)
             {
                 return 1;
             }
@@ -74,14 +76,14 @@ namespace MonoRL
 
         public readonly struct Sigmoid : IActivation
         {
-            public double Activate(double z)
+            public float Activate(float z)
             {
-                return 1.0 / (1 + Exp(-z));
+                return 1.0f / (1 + math.exp(-z));
             }
 
-            public double Derivative(double z)
+            public float Derivative(float z)
             {
-                double a = Activate(z);
+                float a = Activate(z);
                 return a * (1 - a);
             }
 
@@ -94,16 +96,16 @@ namespace MonoRL
 
         public readonly struct TanH : IActivation
         {
-            public double Activate(double z)
+            public float Activate(float z)
             {
-                double e2 = Exp(2 * z);
+                float e2 = math.exp(2 * z);
                 return (e2 - 1) / (e2 + 1);
             }
 
-            public double Derivative(double z)
+            public float Derivative(float z)
             {
-                double e2 = Exp(2 * z);
-                double t = (e2 - 1) / (e2 + 1);
+                float e2 = math.exp(2 * z);
+                float t = (e2 - 1) / (e2 + 1);
                 return 1 - t * t;
             }
 
@@ -115,13 +117,13 @@ namespace MonoRL
 
         public readonly struct LReLU : IActivation
         {
-            private const double a = 0.01;
-            public double Activate(double z)
+            private const float a = 0.01f;
+            public float Activate(float z)
             {
                 return (z >= 0) ? z : a * z;
             }
 
-            public double Derivative(double z)
+            public float Derivative(float z)
             {
                 return (z >= 0) ? 1 : a;
             }

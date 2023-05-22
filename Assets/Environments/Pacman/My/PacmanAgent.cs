@@ -21,9 +21,9 @@ public class PacmanAgent : MonoBehaviour
 
 
     //Transition
-    double[] state;
+    float[] state;
     int action;
-    double[] state_;
+    float[] state_;
     float reward;
     //
 
@@ -32,7 +32,7 @@ public class PacmanAgent : MonoBehaviour
     void Step()
     {
         //state
-        double[] state_ = ConvertMapToVector(pacMapGenerator.cur_map);
+        float[] state_ = ConvertMapToVector(pacMapGenerator.cur_map);
         reward = DPacManController.reward;
 
 
@@ -80,12 +80,12 @@ public class PacmanAgent : MonoBehaviour
         DPacManController.MoveToSide(to.x, to.y);
     }
 
-    private double[] ConvertMapToVector(List<List<int>> map)
+    private float[] ConvertMapToVector(List<List<int>> map)
     {
         int mapWidth = map.Count,
             mapHeight = map[0].Count;
         ;
-        double[] vector = new double[mapWidth * mapHeight];
+        float[] vector = new float[mapWidth * mapHeight];
         for (int i = 0; i < mapWidth; i++)
         {
             for (int j = 0; j < mapHeight; j++)

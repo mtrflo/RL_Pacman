@@ -8,7 +8,7 @@ using UnityEngine;
 [Serializable]
 public class Network
 {
-    public double LearningRate = 0.003;
+    public float LearningRate = 0.003f;
     public Activation.ActivationType hiddenAType, outputAType;
     public int[] layersSize;
 
@@ -35,9 +35,9 @@ public class Network
         //
     }
 
-    public double[] Forward(double[] inputs)
+    public float[] Forward(float[] inputs)
     {
-        double[] calc_inputs = new double[inputs.Length];
+        float[] calc_inputs = new float[inputs.Length];
         inputs.CopyTo(calc_inputs, 0);
         for (int i = 0; i < Layers.Count; i++)
             calc_inputs = Layers[i].Forward(calc_inputs);
@@ -45,11 +45,11 @@ public class Network
         //
     }
 
-    public void Backward(double[] inputs, double[] expectedOutputs)
+    public void Backward(float[] inputs, float[] expectedOutputs)
     {
         Layer outputLayer = Layers[Layers.Count - 1];
-        double[] deltas = new double[outputLayer.NodeSize];
-        double[] output = Forward(inputs);
+        float[] deltas = new float[outputLayer.NodeSize];
+        float[] output = Forward(inputs);
 
         for (int i = 0; i < outputLayer.NodeSize; i++)
             deltas[i] = Cost.CostDerivative(output[i], expectedOutputs[i]);
@@ -59,14 +59,14 @@ public class Network
         //
     }
 
-    public void Learn(double[][] batchInputs, double[][] batchExpectedOutputs)
+    public void Learn(float[][] batchInputs, float[][] batchExpectedOutputs)
     {
         int batchSize = batchInputs.Length;
 
         for (int batchIndex = 0; batchIndex < batchSize; batchIndex++)
         {
-            double[] inputs = batchInputs[batchIndex];
-            double[] expectedOutputs = batchExpectedOutputs[batchIndex];
+            float[] inputs = batchInputs[batchIndex];
+            float[] expectedOutputs = batchExpectedOutputs[batchIndex];
 
             Backward(inputs, expectedOutputs);
         }

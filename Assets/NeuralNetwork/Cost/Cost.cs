@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Security.Principal;
 using Unity.VisualScripting.FullSerializer;
+using UnityEngine;
 
 namespace MonoRL
 {
@@ -31,12 +32,12 @@ namespace MonoRL
 
         public class DistanceError : ICost
         {
-            public double CostFunction(double a, double y)
+            public float CostFunction(float a, float y)
             {
                 return a - y;
             }
 
-            public double CostDerivative(double a, double y)
+            public float CostDerivative(float a, float y)
             {
                 return 1;
             }
@@ -49,14 +50,14 @@ namespace MonoRL
 
         public class SquaredError : ICost
         {
-            public double CostFunction(double a, double y)
+            public float CostFunction(float a, float y)
             {
                 //UnityEngine.Debug.Log("CostFunction : " + Math.Pow(a - y, 2));
 
-                return Math.Pow(a - y, 2);
+                return Mathf.Pow(a - y, 2);
             }
 
-            public double CostDerivative(double a, double y)
+            public float CostDerivative(float a, float y)
             {
                 //UnityEngine.Debug.Log("CostDerivative : " + (2 * (a - y)));
                 return 2*(a - y);
