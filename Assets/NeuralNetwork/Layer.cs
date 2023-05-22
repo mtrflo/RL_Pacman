@@ -105,7 +105,7 @@ namespace MonoRL
         //
         public double[] Forward(double[] inputs)
         {
-            return ForwardBurst(inputs);
+            //return ForwardBurst(inputs);
 
             double[] activatedValues = new double[NodeSize];
 
