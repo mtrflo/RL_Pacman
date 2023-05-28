@@ -11,9 +11,6 @@ using Unity.Jobs;
 using Unity.Burst;
 using Unity.VisualScripting.Antlr3.Runtime;
 using Unity.Collections;
-using MathNet.Numerics;
-using MathNet.Numerics.LinearAlgebra;
-using MathNet.Numerics.LinearAlgebra.Complex;
 
 namespace MonoRL
 {
@@ -80,8 +77,6 @@ namespace MonoRL
         public NativeArray<float> na_inputs, na_Weights, na_Biases, na__Outputs, na_activatedValues;
         ForwardBurst forwardBurst;
         static JobHandle lastJobHandle;
-        Matrix<float> M_inputs;
-        Matrix<float> M_weights;
         void Awake()
         {
             floatsize = sizeof(float);
@@ -105,7 +100,6 @@ namespace MonoRL
             forwardBurst.Weights = na_Weights;
             forwardBurst.inputs = na_inputs;
             forwardBurst.Biases = na_Biases;
-            M_weights = Matrix<float>.Build.Dense(1, Weights.Length, Weights);
         }
         //
         public float[] Forward(float[] inputs)
@@ -113,12 +107,6 @@ namespace MonoRL
             //return ForwardBurst(inputs);
             float[] activatedValues = new float[NodeSize];
             
-            M_inputs = Matrix<float>.Build.Dense(inputs.Length, 1, inputs);
-            Matrix<float> mul = M_inputs.Multiply(M_weights);
-            
-            //Debug.Log(M_inputs.ToString());
-            //Debug.Log(M_weights.ToString());
-            Debug.Log(mul.ColumnCount);
             float calcOutput = 0;
             for (int nodeIndex = 0, inputIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
@@ -133,7 +121,6 @@ namespace MonoRL
 
                 activatedValues[nodeIndex] = Activation.Activate(calcOutput);
             }
-            mul.ToArray();
             inputs.CopyTo(_Inputs, 0);
 
             return activatedValues;
