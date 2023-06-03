@@ -61,6 +61,7 @@ public class Network
 
     public void Learn(float[][] batchInputs, float[][] batchExpectedOutputs)
     {
+        
         int batchSize = batchInputs.Length;
 
         for (int batchIndex = 0; batchIndex < batchSize; batchIndex++)

@@ -104,7 +104,7 @@ namespace MonoRL
         //
         public float[] Forward(float[] inputs)
         {
-            //return ForwardBurst(inputs);
+            return ForwardBurst(inputs);
             float[] activatedValues = new float[NodeSize];
             
             float calcOutput = 0;
@@ -135,7 +135,8 @@ namespace MonoRL
             na_Biases.CopyFrom(Biases);
 
 
-            JobHandle jobHandle = forwardBurst.Schedule(NodeSize, 10);
+            JobHandle jobHandle = forwardBurst.Schedule(NodeSize, 100);
+            
             jobHandle.Complete();
 
             activatedValues = na_activatedValues.ToArray();
