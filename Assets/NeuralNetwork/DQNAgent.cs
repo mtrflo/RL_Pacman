@@ -93,15 +93,15 @@ public class DQNAgent : MonoBehaviour
 
                 Transition[] randomSamples = replayBuffer.GetRandomSamples(batchSize);
 
-                float[][] batchInputs = randomSamples.Select(x => x.state).ToArray();
+                float[][] batchInputs = randomSamples.Select(x => x.prev_state).ToArray();
                 float[][] batchExpectedOutputs = new float[batchInputs.Length][];
 
                 for (int batchIndex = 0; batchIndex < batchSize; batchIndex++)
                 {
                     Transition sampleTransition = randomSamples[batchIndex];
-                    batchInputs[batchIndex] = sampleTransition.state;
+                    batchInputs[batchIndex] = sampleTransition.prev_state;
 
-                    float[] predictedValues = network.Forward(sampleTransition.state);
+                    float[] predictedValues = network.Forward(sampleTransition.prev_state);
                     float QEval = predictedValues[sampleTransition.action];
                     float QNext = network.Forward(sampleTransition.state_).Max();
                     float QTarget = sampleTransition.reward + gamma * QNext;
@@ -266,7 +266,7 @@ public class DQNAgent : MonoBehaviour
 [Serializable]
 public class Transition
 {
-    public float[] state;
+    public float[] prev_state;
     public int action;
     public float[] state_;
     public float reward;
@@ -282,11 +282,11 @@ public class Transition
     }
     public void Set(float[] state, int action, float[] state_, float reward, bool isDone = false)
     {
-        if (this.state == null)
-            this.state = new float[state.Length];
+        if (this.prev_state == null)
+            this.prev_state = new float[state.Length];
         if (this.state_ == null)
             this.state_ = new float[state_.Length];
-        state.CopyTo(this.state, 0);
+        state.CopyTo(this.prev_state, 0);
         this.action = action;
         state_.CopyTo(this.state_, 0);
         this.reward = reward;

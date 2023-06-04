@@ -104,7 +104,7 @@ namespace MonoRL
         //
         public float[] Forward(float[] inputs)
         {
-            return ForwardBurst(inputs);
+            //return ForwardBurst(inputs);
             float[] activatedValues = new float[NodeSize];
             
             float calcOutput = 0;
