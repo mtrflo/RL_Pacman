@@ -2,35 +2,18 @@
 //  - replace A2C advantage estimator with GAE
 //  - apply entropy bonus
 //  - apply Adam optimizer to neural network
+//  - implement learning rate annealing
 //  - implement vectorized environment approach to speed up the training
-//  - implement epoch and batch
+//  - implement epoch, batch and mini-batch
+// use orthogonal layer initialization method for weights and constant method for biases
 
 using System;
 
 namespace PPO;
 
-class Transition
-{
-    public float[] State { get; set; }
-    public int Action { get; set; }
-    public float Reward { get; set; }
-    public float[] NextState { get; set; }
-    public bool Done { get; set; }
-
-    public Transition(float[] state, int action, float reward, float[] nextState, bool done)
-    {
-        State = state;
-        Action = action;
-        Reward = reward;
-        NextState = nextState;
-        Done = done;
-    }
-}
-
-
 public class NeuralNetwork
 {
-    public float Forward(float[] state) { }
+    public float[] Forward(float[] state) { }
 
     public float[] Backward(float[] state, float loss) { }
 }
@@ -48,8 +31,10 @@ abstract class Agent
 
     public int ChooseAction(float[] state) { }
 
-    public void Learn(List<Transition> transitions) { }
+    public void Learn(Trajectory trajectory) { }
 }
+
+
 
 class PPOAgent : Agent
 {
@@ -58,13 +43,15 @@ class PPOAgent : Agent
 
     public float valueCoefficient = 0.5;
 
+    // GAE
+    public float gaeLambda = 0.95;
 
-    public override Learn(List<Transition> transitions)
+    public override Learn(Trajectory trajectory)
     {
-        for (int i = 0; i < transitions; i++)
-        {
-            Transition transition = transitions[i];
+        float[] advantages = CalculateAdvantages(transitions);
 
+        foreach (var transition in transitions)
+        {
             float[] state = transition.State;
             int action = transition.Action;
             float reward = transition.Reward;
@@ -78,7 +65,8 @@ class PPOAgent : Agent
 
             // calculate loss for value network
             float value = valueNetwork.Forward(state);
-            float targetValue = reward + discountFactor * valueNetwork.Forward(nextState);
+            float nextValue = valueNetwork.Forward(nextState);
+            float targetValue = reward + discountFactor * nextValue;
             float valueLoss = MathF.Pow((value - targetValue), 2) / 2; // MSE
 
             // calculate total loss
@@ -88,13 +76,34 @@ class PPOAgent : Agent
         }
     }
 
-    private float CalculateAdvantage(float[] state, float reward, float[] nextState, float[] done)
+    private (int value, float logProb, float entropy, float value) GetActionAndValue(float[] state, int? action = null)
     {
+        float[] logits = policyNetwork.Forward(state);
+        Categorical probs = new Categorical(logits);
+        if (!action.HasValue)
+        {
+            action = probs.Sample();
+        }
+        float logProb = probs.LogProb(action.Value);
+        float entropy = probs.Entropy();
         float value = valueNetwork.Forward(state);
-        float nextValue = valueNetwork.Forward(nextState);
-        float advantage = reward + discountFactor * nextValue - value;
+        return (action.Value, logProb, entropy, value);
+    }
 
-        return advantage;
+    // GAE
+    private float[] CalculateAdvantages(List<Transition> transitions)
+    {
+        var advantages = new float[transitions.Count];
+        var lastAdvantage = 0;
+
+        for (int t = transitions.Count - 1; t >= 0; t++)
+        {
+            var transition = transitions[t];
+            var delta = transition.Reward + discountFactor * valueNetwork.Forward(transition.NextState) * (1 - transition.Done) * lastAdvantage - valueNetwork.Forward(transition.State);
+            advantages[t] = lastAdvantage = delta + discountFactor * gaeLambda * (1 - transition.Done) * lastAdvantage;
+        }
+
+        return advantages;
     }
 
     private void UpdateNetworks(float[] state, int action, float loss) { }
