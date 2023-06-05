@@ -30,8 +30,12 @@ public class KickerAgent : MonoBehaviour
     public int episodeCount;
     public static int totalEpisodeCount;
     public Arena arena;
+    public EnvCon envcon;
+
     void Start()
     {
+        epsilon = envcon.epsilon;
+        env = envcon.kickOutEnv;
         arena.OnExit += (go) =>
         {
             isPlaying = false;
@@ -63,7 +67,7 @@ public class KickerAgent : MonoBehaviour
     void ChooseAction()
     {
         float s_reward = isPlaying ? reward : (win ? win_reward : term_reward);
-
+        print("win , "+ win);
         current_state.Clear();
 
         AddObservation(
@@ -88,7 +92,7 @@ public class KickerAgent : MonoBehaviour
         episodeCount++;
         totalEpisodeCount++;
 
-        print(s_reward);
+        print("s_reward : "+s_reward);
         if (!isPlaying)
             Restart();
 
