@@ -21,7 +21,7 @@ public class KickerAgent : MonoBehaviour
 
 
     public bool IsAgent = true;
-    public float speed; // speed of the bot movement
+    public float speed, bounce = 10; // speed of the bot movement
     public Rigidbody rb;
     public Rigidbody enemyRB;
     public bool isPlaying = true;
@@ -149,5 +149,19 @@ public class KickerAgent : MonoBehaviour
     void Restart()
     {
         env.Restart();
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            
+            //print("-rb.velocity  : " + (-rb.velocity));
+            //print("collision.impulse : " + collision.impulse);
+            Vector3 dir = rb.transform.position - enemyRB.transform.position;
+            rb.AddForce(dir * rb.velocity.magnitude * speed * bounce);
+            //rb.AddForce(-collision.impulse * 300);
+            
+        }
     }
 }
