@@ -1,0 +1,23 @@
+{
+  "prompt_text": "american basket ball orange surface with fine details, high resolution",
+  "patch": {
+    "ext": "png",
+    "dtype": "uint8",
+    "width": 512,
+    "height": 512,
+    "url": "https://static-dev.withpoly.com/v3/textures/patches/2060dddb-b26c-48c6-b609-45f9f66831f3.png",
+    "patch_id": "9KHPjAwBpZ"
+  },
+  "seamless_prompt_text": "american basket ball orange surface with fine details, high resolution",
+  "seamless_patch_scale": 0.77,
+  "upscale_prompt_text": "american basket ball orange surface with fine details, high resolution",
+  "upscale_resolution": 2048,
+  "is_seamless": true,
+  "pbr_mode": "polished",
+  "pbr_generate_color": false,
+  "pbr_generate_normal": true,
+  "pbr_generate_height": true,
+  "pbr_generate_ao": true,
+  "pbr_generate_roughness": true,
+  "pbr_generate_metallic": false
+}

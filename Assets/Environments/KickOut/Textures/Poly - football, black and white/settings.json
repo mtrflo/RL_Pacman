@@ -1,0 +1,23 @@
+{
+  "prompt_text": "football, black and white",
+  "patch": {
+    "ext": "png",
+    "dtype": "uint8",
+    "width": 512,
+    "height": 512,
+    "url": "https://static-dev.withpoly.com/v3-voronoi/textures/patches/2d42143e-8a41-419b-82b9-ad3bb0625942.png",
+    "patch_id": "ZP6pyE7Duw"
+  },
+  "seamless_prompt_text": "football, black and white",
+  "seamless_patch_scale": 1.24,
+  "upscale_prompt_text": "football, black and white",
+  "upscale_resolution": 4096,
+  "is_seamless": true,
+  "pbr_mode": "shiny",
+  "pbr_generate_color": true,
+  "pbr_generate_normal": true,
+  "pbr_generate_height": true,
+  "pbr_generate_ao": true,
+  "pbr_generate_roughness": true,
+  "pbr_generate_metallic": false
+}

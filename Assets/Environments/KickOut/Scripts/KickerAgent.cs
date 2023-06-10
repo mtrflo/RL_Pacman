@@ -159,7 +159,8 @@ public class KickerAgent : MonoBehaviour
             //print("-rb.velocity  : " + (-rb.velocity));
             //print("collision.impulse : " + collision.impulse);
             Vector3 dir = rb.transform.position - enemyRB.transform.position;
-            rb.AddForce(dir * rb.velocity.magnitude * speed * bounce);
+            rb.velocity = collision.rigidbody.velocity;
+            rb.AddForce(dir * ( rb.velocity.magnitude + collision.rigidbody.velocity.magnitude ) * speed * bounce);
             //rb.AddForce(-collision.impulse * 300);
             
         }
