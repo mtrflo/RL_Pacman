@@ -32,8 +32,11 @@ public class KickerAgent : MonoBehaviour
     public Arena arena;
     public EnvCon envcon;
 
+    float network_lr;
+
     void Start()
     {
+        network_lr = rLAgent.network.LearningRate;
         epsilon = envcon.epsilon;
         env = envcon.kickOutEnv;
         arena.OnExit += (go) =>
@@ -55,10 +58,7 @@ public class KickerAgent : MonoBehaviour
         while (true)
         {
             yield return wfsr;
-            if (IsAgent)
                 ChooseAction();
-            else
-                PlayerChooseAction();
             if (!isPlaying)
                 break;
         }
@@ -86,8 +86,12 @@ public class KickerAgent : MonoBehaviour
 
         _Transition.Set(prev_state.ToArray(), action, current_state.ToArray(), s_reward, win);
         Utils.CopyTo(current_state, prev_state);
-        action = rLAgent.SelectAction(prev_state.ToArray(), epsilon);
+        action = IsAgent ? rLAgent.SelectAction(prev_state.ToArray(), epsilon) : PlayerChooseAction();
         MakeAction(action);
+        //if (IsAgent)
+        //    rLAgent.network.LearningRate = network_lr;
+        //else
+        //    rLAgent.network.LearningRate = network_lr * 10;
         rLAgent.Learn(_Transition);
         episodeCount++;
         totalEpisodeCount++;
@@ -97,19 +101,19 @@ public class KickerAgent : MonoBehaviour
             Restart();
 
     }
-    void PlayerChooseAction()
+    int PlayerChooseAction()
     {
-        int action = -1;
+        int action = 0;
         if (Input.GetKey(KeyCode.LeftArrow))
-            action = 0;
-        if (Input.GetKey(KeyCode.RightArrow))
             action = 1;
-        if (Input.GetKey(KeyCode.DownArrow))
+        if (Input.GetKey(KeyCode.RightArrow))
             action = 2;
-        if (Input.GetKey(KeyCode.UpArrow))
+        if (Input.GetKey(KeyCode.DownArrow))
             action = 3;
-        MakeAction(action);
-
+        if (Input.GetKey(KeyCode.UpArrow))
+            action = 4;
+        //MakeAction(action);
+        return action;
         if (!isPlaying)
             Restart();
     }
@@ -119,14 +123,13 @@ public class KickerAgent : MonoBehaviour
         float vertical = 0.0f;
         switch (i)
         {
-
-            case 0:
-                horizontal = -1.0f; break;
             case 1:
-                horizontal = 1.0f; break;
+                horizontal = -1.0f; break;
             case 2:
-                vertical = -1.0f; break;
+                horizontal = 1.0f; break;
             case 3:
+                vertical = -1.0f; break;
+            case 4:
                 vertical = 1.0f; break;
         }
 
@@ -143,6 +146,10 @@ public class KickerAgent : MonoBehaviour
     //}
     public void AddObservation(params float[] observation)
     {
+        for (int i = 0; i < observation.Length; i++)
+        {
+            observation[i] = observation[i] / 10;
+        }
         current_state.AddRange(observation);
     }
 
@@ -155,14 +162,13 @@ public class KickerAgent : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            
             //print("-rb.velocity  : " + (-rb.velocity));
             //print("collision.impulse : " + collision.impulse);
             Vector3 dir = rb.transform.position - enemyRB.transform.position;
-            rb.velocity = collision.rigidbody.velocity;
-            rb.AddForce(dir * ( rb.velocity.magnitude + collision.rigidbody.velocity.magnitude ) * speed * bounce);
+            //rb.velocity = collision.rigidbody.velocity;
+            //rb.AddForce(dir * ( rb.velocity.magnitude + collision.rigidbody.velocity.magnitude ) * speed * bounce);
+            rb.AddForce(collision.impulse * bounce);
             //rb.AddForce(-collision.impulse * 300);
-            
         }
     }
 }
