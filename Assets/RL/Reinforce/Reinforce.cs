@@ -53,15 +53,15 @@ class CategoricalDistribution
 public class Reinforce : MonoBehaviour
 {
     public static Reinforce me;
-    public Network network;
 
     [Range(0, 1)]
     public float discountFactor = 0.99f;
-    public float learningRate = 0.0001f;
     public int trajectoryLength = 100;
 
     public string version = "test";
 
+    public Network network;
+    
     private void Awake()
     {
         if (me != null)
@@ -86,11 +86,22 @@ public class Reinforce : MonoBehaviour
     public int SampleAction(float[] state)
     {
         float[] actionProbs = network.Forward(state);
-        CategoricalDistribution catDist = new CategoricalDistribution(actionProbs);
+        float[] sm_actionProbs = GetActionProbs(actionProbs);
+        CategoricalDistribution catDist = new CategoricalDistribution(sm_actionProbs);
         return catDist.Sample();
     }
+    public float[] GetActionProbs(float[] inputs)
+    {
+        float expSum = 0;
+        float[] probs = new float[inputs.Length];
+        for (int i = 0; i < inputs.Length; i++)
+            expSum += Mathf.Exp(inputs[i]);
+        for (int i = 0; i < inputs.Length; i++)
+            probs[i] = Mathf.Exp(inputs[i]) / expSum;
 
-   
+        return probs;
+    }
+
 
 
 
@@ -105,8 +116,10 @@ public class Reinforce : MonoBehaviour
             G += MathF.Pow(discountFactor, k) * transition.reward;
 
             float[] actionProbs = network.Forward(transition.prev_state);
-            CategoricalDistribution categoricalDist = new CategoricalDistribution(actionProbs);
-            float logProb = categoricalDist.LogProb(transition.action);
+            float[] sm_actionProbs = GetActionProbs(actionProbs);
+            CategoricalDistribution catDist = new CategoricalDistribution(sm_actionProbs);
+            
+            float logProb = catDist.LogProb(transition.action);
             float loss = -logProb * G;
 
             network.Backward(transition.action, loss);
