@@ -158,17 +158,17 @@ public class KickerAgent : MonoBehaviour
         env.Restart();
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            //print("-rb.velocity  : " + (-rb.velocity));
-            //print("collision.impulse : " + collision.impulse);
-            Vector3 dir = rb.transform.position - enemyRB.transform.position;
-            //rb.velocity = collision.rigidbody.velocity;
-            //rb.AddForce(dir * ( rb.velocity.magnitude + collision.rigidbody.velocity.magnitude ) * speed * bounce);
-            //rb.AddForce(collision.impulse * bounce);
-            //rb.AddForce(-collision.impulse * 300);
-        }
-    }
+    //private void OnCollisionEnter(Collision collision)
+    //{
+    //    if (collision.gameObject.CompareTag("Player"))
+    //    {
+    //        //print("-rb.velocity  : " + (-rb.velocity));
+    //        //print("collision.impulse : " + collision.impulse);
+    //        Vector3 dir = rb.transform.position - enemyRB.transform.position;
+    //        //rb.velocity = collision.rigidbody.velocity;
+    //        //rb.AddForce(dir * ( rb.velocity.magnitude + collision.rigidbody.velocity.magnitude ) * speed * bounce);
+    //        //rb.AddForce(collision.impulse * bounce);
+    //        //rb.AddForce(-collision.impulse * 300);
+    //    }
+    //}
 }
