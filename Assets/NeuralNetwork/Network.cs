@@ -59,6 +59,20 @@ public class Network
         //
     }
 
+    public void Backward(int action, float loss)
+    {
+        Layer outputLayer = Layers[Layers.Count - 1];
+        float[] deltas = new float[outputLayer.NodeSize];
+
+        for (int i = 0; i < outputLayer.NodeSize; i++)
+            deltas[i] = 0;
+        deltas[action] = loss;
+
+        for (int i = Layers.Count - 1; i >= 0; i--)
+            deltas = Layers[i].Backward(deltas);
+        //
+    }
+
     public void Learn(float[][] batchInputs, float[][] batchExpectedOutputs)
     {
         

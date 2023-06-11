@@ -2,15 +2,17 @@ using PMT;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.MLAgents;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.XR;
 
 public class KickerAgent : MonoBehaviour
 {
     public float delay;
     WaitForSecondsRealtime wfsr;
     private Transition _Transition = new Transition();
-    public DQNAgent rLAgent => DQNAgent.me;
+    public Reinforce RLAlg => Reinforce.me;
     public float epsilon;
     public int teamID;
 
@@ -36,7 +38,7 @@ public class KickerAgent : MonoBehaviour
 
     void Start()
     {
-        network_lr = rLAgent.network.LearningRate;
+        network_lr = RLAlg.network.LearningRate;
         epsilon = envcon.epsilon;
         env = envcon.kickOutEnv;
         arena.OnExit += (go) =>
@@ -64,6 +66,7 @@ public class KickerAgent : MonoBehaviour
         }
 
     }
+    List<Transition> transitions;
     void ChooseAction()
     {
         float s_reward = isPlaying ? reward : (win ? win_reward : term_reward);
@@ -84,15 +87,22 @@ public class KickerAgent : MonoBehaviour
         if (prev_state.Count == 0)
             Utils.CopyTo(current_state, prev_state);
 
-        _Transition.Set(prev_state.ToArray(), action, current_state.ToArray(), s_reward, win);
+        _Transition.Set(prev_state.ToArray(), action, current_state.ToArray(), s_reward, isPlaying);
         Utils.CopyTo(current_state, prev_state);
-        action = IsAgent ? rLAgent.SelectAction(prev_state.ToArray(), epsilon) : PlayerChooseAction();
+        action = IsAgent ? RLAlg.SampleAction(prev_state.ToArray()) : PlayerChooseAction();
         MakeAction(action);
         //if (IsAgent)
         //    rLAgent.network.LearningRate = network_lr;
         //else
         //    rLAgent.network.LearningRate = network_lr * 10;
-        rLAgent.Learn(_Transition);
+
+        if (transitions.Count < RLAlg.trajectoryLength)
+            transitions.Add(_Transition);
+        else
+        {
+            RLAlg.Learn(transitions.ToArray());
+            transitions.Clear();
+        }
         episodeCount++;
         totalEpisodeCount++;
 
@@ -101,6 +111,7 @@ public class KickerAgent : MonoBehaviour
             Restart();
 
     }
+
     int PlayerChooseAction()
     {
         int action = 0;
