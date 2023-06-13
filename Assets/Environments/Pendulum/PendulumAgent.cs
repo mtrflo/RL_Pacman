@@ -1,13 +1,15 @@
+using MathNet.Numerics.Distributions;
 using PMT;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PendulumAgent : MonoBehaviour
 {
     public Rigidbody rb;
-    public DQNAgent rLAgent => DQNAgent.me;
+    public Reinforce RLAlg => Reinforce.me;
 
     public float delay = 1, startDelay;
     public float reward = 0.1f, terminateReward = -1f, scoreReward = 1, distanceReward = 0f;
@@ -28,6 +30,7 @@ public class PendulumAgent : MonoBehaviour
     bool addReward = false;
     private void Start()
     {
+        transitions = new List<Transition>();
         Started();
     }
 
@@ -63,7 +66,7 @@ public class PendulumAgent : MonoBehaviour
             angle = 180 + (180 - angle);
         }
         angle = angle * Mathf.Deg2Rad;
-        print("angle : " + angle);
+        //print("angle : " + angle);
         //print("angle : " + angle);
         
         
@@ -78,7 +81,7 @@ public class PendulumAgent : MonoBehaviour
             Utils.CopyTo(current_state, prev_state);
 
 
-        print("Mathf.Cos(angle) : " + Mathf.Cos(angle));
+        //print("Mathf.Cos(angle) : " + Mathf.Cos(angle));
         float s_reward = Mathf.Cos(angle);
         //s_reward = Mathf.Abs(rb.angularVelocity.magnitude);
         //r = -(theta2 + 0.1 * theta_dt2 + 0.001 * torque2)
@@ -86,20 +89,40 @@ public class PendulumAgent : MonoBehaviour
         //float s_reward = -(Mathf.Pow(angle, 2) + 0.1f * Mathf.Pow((lastAngle - angle), 2) + 0.001f * Mathf.Pow(torque, 2)) + 1;
         lastAngle = angle;
 
-        print("reward : " + s_reward);
+        //print("reward : " + s_reward);
         _Transition.Set(prev_state.ToArray(), action, current_state.ToArray(), s_reward);
         Utils.CopyTo(current_state, prev_state);
-        action = rLAgent.SelectAction(prev_state.ToArray());
+        action = RLAlg.SampleAction(prev_state.ToArray());
         MakeAction(action);
-        rLAgent.Learn(_Transition);
+        Learn();
         episodeCount++;
-        if (maxrew < s_reward)
-        {
-            maxrew = s_reward;
-            print("maxrew : " + maxrew);
-            rLAgent.ReplaceTarget();
-        }
+        //if (maxrew < s_reward)
+        //{
+        //    maxrew = s_reward;
+        //    print("maxrew : " + maxrew);
+        //    RLAlg.ReplaceTarget();
+        //}
     }
+
+    List<Transition> transitions;
+    int tCounter;
+    bool trs = false;
+    void Learn()
+    {
+        transitions.Add(_Transition);
+        tCounter++;
+
+        if (tCounter == RLAlg.trajectoryLength)
+        {
+            RLAlg.Learn(transitions.ToArray());
+
+            tCounter = 0;
+            trs = true;
+        }
+        if (trs)
+            transitions.RemoveAt(0);
+    }
+
     void MakeAction(int action)
     {
         float torque = force;

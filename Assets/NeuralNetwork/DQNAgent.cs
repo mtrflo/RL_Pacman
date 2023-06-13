@@ -50,6 +50,10 @@ public class DQNAgent : MonoBehaviour
         ReplaceTarget();
         //DontDestroyOnLoad(this);
     }
+    private void Start()
+    {
+        
+    }
     public int SelectAction(float[] observation)
     {
         int action = 0;

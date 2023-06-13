@@ -86,20 +86,20 @@ namespace MonoRL
             biaseBuffer = new ComputeBuffer(Biases.Length, floatsize);//biases
 
             Allocator alc = Allocator.Persistent;
-            na_inputs = new NativeArray<float>(InputSize, alc);
-            na_Weights = new NativeArray<float>(Weights.Length, alc);
-            na_Biases = new NativeArray<float>(Biases.Length, alc);
-            na__Outputs = new NativeArray<float>(_Outputs.Length, alc);
-            na_activatedValues = new NativeArray<float>(NodeSize, alc);
+            //na_inputs = new NativeArray<float>(InputSize, alc);
+            //na_Weights = new NativeArray<float>(Weights.Length, alc);
+            //na_Biases = new NativeArray<float>(Biases.Length, alc);
+            //na__Outputs = new NativeArray<float>(_Outputs.Length, alc);
+            //na_activatedValues = new NativeArray<float>(NodeSize, alc);
             
-            forwardBurst = new ForwardBurst();
-            forwardBurst.NodeSize = NodeSize;
-            forwardBurst.InputSize = InputSize;
-            forwardBurst.activatedValues = na_activatedValues;
-            forwardBurst._Outputs = na__Outputs;
-            forwardBurst.Weights = na_Weights;
-            forwardBurst.inputs = na_inputs;
-            forwardBurst.Biases = na_Biases;
+            //forwardBurst = new ForwardBurst();
+            //forwardBurst.NodeSize = NodeSize;
+            //forwardBurst.InputSize = InputSize;
+            //forwardBurst.activatedValues = na_activatedValues;
+            //forwardBurst._Outputs = na__Outputs;
+            //forwardBurst.Weights = na_Weights;
+            //forwardBurst.inputs = na_inputs;
+            //forwardBurst.Biases = na_Biases;
         }
         //
         public float[] Forward(float[] inputs)

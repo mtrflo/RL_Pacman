@@ -2,6 +2,7 @@ using PMT;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.MLAgents;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -38,6 +39,7 @@ public class KickerAgent : MonoBehaviour
 
     void Start()
     {
+        transitions = new List<Transition>();
         network_lr = RLAlg.network.LearningRate;
         epsilon = envcon.epsilon;
         env = envcon.kickOutEnv;
@@ -66,11 +68,11 @@ public class KickerAgent : MonoBehaviour
         }
 
     }
-    List<Transition> transitions;
+    
     void ChooseAction()
     {
         float s_reward = isPlaying ? reward : (win ? win_reward : term_reward);
-        print("win , "+ win);
+        //print("win , "+ win);
         current_state.Clear();
 
         AddObservation(
@@ -91,27 +93,41 @@ public class KickerAgent : MonoBehaviour
         Utils.CopyTo(current_state, prev_state);
         action = IsAgent ? RLAlg.SampleAction(prev_state.ToArray()) : PlayerChooseAction();
         MakeAction(action);
-        //if (IsAgent)
-        //    rLAgent.network.LearningRate = network_lr;
-        //else
-        //    rLAgent.network.LearningRate = network_lr * 10;
 
-        if (transitions.Count < RLAlg.trajectoryLength)
-            transitions.Add(_Transition);
-        else
-        {
-            RLAlg.Learn(transitions.ToArray());
-            transitions.Clear();
-        }
+
+        Learn();
+
+
         episodeCount++;
         totalEpisodeCount++;
 
-        print("s_reward : "+s_reward);
+        //print("s_reward : "+s_reward);
         if (!isPlaying)
             Restart();
 
     }
+    List<Transition> transitions;
+    int tCounter;
+    bool trs = false;
+    void Learn()
+    {
+        transitions.Add(_Transition);
+        tCounter++;
+        if (!isPlaying && tCounter != RLAlg.trajectoryLength)
+        {
+            tCounter = RLAlg.trajectoryLength;
+            //print("t != tl");
+        }
+        if (tCounter == RLAlg.trajectoryLength)
+        {
+            RLAlg.Learn(transitions.ToArray());
 
+            tCounter = 0;
+            trs = true;
+        }
+        if (trs)
+            transitions.RemoveAt(0);
+    }
     int PlayerChooseAction()
     {
         int action = 0;
