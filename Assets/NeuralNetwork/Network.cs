@@ -16,7 +16,7 @@ public class Network
 
     public ICost Cost;
     public ComputeShader forwardCS;
-    
+
     public void Init()
     {
         Cost = new Cost.SquaredError();
@@ -70,12 +70,15 @@ public class Network
 
         for (int i = Layers.Count - 1; i >= 0; i--)
             deltas = Layers[i].Backward(deltas);
+
+        for (int i = Layers.Count - 1; i >= 0; i--)
+            Layers[i].ApplyGradients(LearningRate, 1);
         //
     }
 
     public void Learn(float[][] batchInputs, float[][] batchExpectedOutputs)
     {
-        
+
         int batchSize = batchInputs.Length;
 
         for (int batchIndex = 0; batchIndex < batchSize; batchIndex++)
@@ -90,5 +93,5 @@ public class Network
             Layers[i].ApplyGradients(LearningRate, batchSize);
         //
     }
-    
+
 }
