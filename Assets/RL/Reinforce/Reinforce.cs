@@ -126,7 +126,12 @@ public class Reinforce : MonoBehaviour
         }
     }
 
-    #region SaveLoad
+
+    public bool isNan => Application.isPlaying && float.IsNaN(network.Layers[0].Weights[0]);
+    [ReadOnly, ShowIf("isNan"), Label("NAAAAAAAAAAAAAAAAAAN!!!!!!!!!!!!!!")]
+    public bool Nannn;
+
+    #region SaveLoad Network
     private void OnApplicationQuit()
     {
         SaveNetwork();
