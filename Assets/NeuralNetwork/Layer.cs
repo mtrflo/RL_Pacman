@@ -146,7 +146,7 @@ namespace MonoRL
         }
         int floatsize;
         //
-        public async float[] ForwardGPU(float[] inputs)
+        public float[] ForwardGPU(float[] inputs)
         {
 
             //Debug.Log("aa");
