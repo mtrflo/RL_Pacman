@@ -247,24 +247,24 @@ public class DQNAgent : MonoBehaviour
 
     private void OnDestroy()
     {
-        foreach (var layer in network.Layers)
-        {
+        //foreach (var layer in network.Layers)
+        //{
             
-            layer.na_inputs.Dispose();
-            layer.na_Weights.Dispose();
-            layer.na_Biases.Dispose();
-            layer.na__Outputs.Dispose();
-            layer.na_activatedValues.Dispose();
-        }
-        foreach (var layer in targetNetwork.Layers)
-        {
-            layer.na_inputs.Dispose();
-            layer.na_Weights.Dispose();
-            layer.na_Biases.Dispose();
-            layer.na__Outputs.Dispose();
-            layer.na_activatedValues.Dispose();
-            //
-        }
+        //    layer.na_inputs.Dispose();
+        //    layer.na_Weights.Dispose();
+        //    layer.na_Biases.Dispose();
+        //    layer.na__Outputs.Dispose();
+        //    layer.na_activatedValues.Dispose();
+        //}
+        //foreach (var layer in targetNetwork.Layers)
+        //{
+        //    layer.na_inputs.Dispose();
+        //    layer.na_Weights.Dispose();
+        //    layer.na_Biases.Dispose();
+        //    layer.na__Outputs.Dispose();
+        //    layer.na_activatedValues.Dispose();
+        //    //
+        //}
     }
 }
 [Serializable]

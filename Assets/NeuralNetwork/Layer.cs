@@ -146,7 +146,7 @@ namespace MonoRL
         }
         int floatsize;
         //
-        public float[] ForwardGPU(float[] inputs)
+        public async float[] ForwardGPU(float[] inputs)
         {
 
             //Debug.Log("aa");
@@ -173,8 +173,7 @@ namespace MonoRL
             activatedValueBuffer.GetData(activatedValues);
 
             outputBuffer.GetData(_Outputs);
-            //AsyncGPUReadbackRequest request = AsyncGPUReadback.Request(outputBuffer, 0, 0);
-            //request.
+            //var req = AsyncGPUReadback.Request(outputBuffer, 0, 0);
             //request.completed += op =>
             //{
             //    if (op.status == AsyncGPUReadbackStatus.Success)

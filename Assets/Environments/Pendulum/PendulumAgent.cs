@@ -18,6 +18,7 @@ public class PendulumAgent : MonoBehaviour
     public Transform point;
     public float force;
     private Transition _Transition = new Transition();
+    public bool greedy = false;
     private void Awake()
     {
         startDelay = delay;
@@ -93,9 +94,10 @@ public class PendulumAgent : MonoBehaviour
         //print("reward : " + s_reward);
         _Transition.Set(prev_state.ToArray(), action, current_state.ToArray(), s_reward);
         Utils.CopyTo(current_state, prev_state);
-        action = RLAlg.SampleAction(prev_state.ToArray());
+        action = greedy ? RLAlg.ChooseAction(prev_state.ToArray()) : RLAlg.SampleAction(prev_state.ToArray());
         MakeAction(action);
-        Learn();
+        if(!greedy)
+            Learn();
         episodeCount++;
         //if (maxrew < s_reward)
         //{

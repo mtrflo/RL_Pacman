@@ -80,6 +80,7 @@ public class Reinforce : MonoBehaviour
     {
         float[] actionValues = network.Forward(state);
         int action = actionValues.ToList().IndexOf(actionValues.Max());
+        print("ChooseAction : " + action);
         return action;
     }
 
@@ -120,9 +121,12 @@ public class Reinforce : MonoBehaviour
             CategoricalDistribution catDist = new CategoricalDistribution(sm_actionProbs);
             
             float logProb = catDist.LogProb(transition.action);
-            float loss = -logProb * G;
+            float loss = logProb * G;
 
-            network.Backward(transition.action, loss / 10000);
+            network.Backward(transition.action, loss);
+
+            //Debug.Log("transition.action : " + transition.action);
+            Debug.Log("loss : " + loss);
         }
     }
 
