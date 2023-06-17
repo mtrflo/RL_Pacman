@@ -5,7 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
-
+using Random = UnityEngine.Random;
 public class PendulumAgent : MonoBehaviour
 {
     public Rigidbody rb;
@@ -43,6 +43,7 @@ public class PendulumAgent : MonoBehaviour
     WaitForSecondsRealtime wfsr;
     IEnumerator ActionMaker()
     {
+        yield return new WaitForSeconds(Random.Range(0, 2f));
         wfsr = new WaitForSecondsRealtime(delay);
         while (true)
         {
