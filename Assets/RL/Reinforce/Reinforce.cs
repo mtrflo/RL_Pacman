@@ -122,7 +122,7 @@ public class Reinforce : MonoBehaviour
             float logProb = catDist.LogProb(transition.action);
             float loss = -logProb * G;
 
-            network.Backward(transition.action, loss);
+            network.Backward(transition.action, loss / 10000);
         }
     }
 
