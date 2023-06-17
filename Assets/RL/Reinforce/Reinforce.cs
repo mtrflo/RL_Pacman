@@ -123,10 +123,10 @@ public class Reinforce : MonoBehaviour
             float logProb = catDist.LogProb(transition.action);
             float loss = logProb * G;
 
-            network.Backward(transition.action, loss);
+            network.BackwardGPU(this,transition.action, loss);
 
             //Debug.Log("transition.action : " + transition.action);
-            Debug.Log("loss : " + loss);
+            //Debug.Log("loss : " + loss);
         }
     }
 

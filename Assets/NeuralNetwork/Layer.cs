@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections;
 using Unity.Barracuda;
 using Unity.VisualScripting;
 using Unity.VisualScripting.FullSerializer;
@@ -11,6 +11,8 @@ using Unity.Jobs;
 using Unity.Burst;
 using Unity.VisualScripting.Antlr3.Runtime;
 using Unity.Collections;
+using UnityEditor.PackageManager.Requests;
+using System.Numerics;
 
 namespace MonoRL
 {
@@ -31,13 +33,13 @@ namespace MonoRL
         [SerializeField]
         private float[] _Outputs;
 
-        public ComputeShader forwardCS;
+        public ComputeShader forwardCS, applyGradsCS;
 
         [NonSerialized]
-        private float[][] _GradW;
+        private float[] _GradW;
         [NonSerialized]
         private float[] _GradB;
-        public Layer(int inputSize, int nodeSize, Activation.ActivationType activationType, ComputeShader forwardCS)
+        public Layer(int inputSize, int nodeSize, Activation.ActivationType activationType, ComputeShader forwardCS, ComputeShader applyGradsCS)
         {
             InputSize = inputSize;
             NodeSize = nodeSize;
@@ -48,12 +50,10 @@ namespace MonoRL
             _Outputs = new float[nodeSize];
             _GradB = new float[nodeSize];
 
-            _GradW = new float[nodeSize][];
-            for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
-                _GradW[nodeIndex] = new float[InputSize];
+            _GradW = new float[nodeSize * inputSize];
 
             this.forwardCS = forwardCS;
-
+            this.applyGradsCS = applyGradsCS;
             InitializeWeights();
             InitializeBiases();
             Awake();
@@ -63,9 +63,7 @@ namespace MonoRL
             Debug.Log("Update network");
             Activation = MonoRL.Activation.GetActivationFromType(activationType);
             _GradB = new float[nodeSize];
-            _GradW = new float[nodeSize][];
-            for (int nodeIndex = 0; nodeIndex < nodeSize; nodeIndex++)
-                _GradW[nodeIndex] = new float[inputSize];
+            _GradW = new float[nodeSize * inputSize];
 
             Awake();
         }
@@ -73,7 +71,8 @@ namespace MonoRL
         ComputeBuffer outputBuffer;
         ComputeBuffer weightBuffer;
         ComputeBuffer biaseBuffer;
-
+        ComputeBuffer _GradB_buffer;
+        ComputeBuffer _GradW_buffer;
         public NativeArray<float> na_inputs, na_Weights, na_Biases, na__Outputs, na_activatedValues;
         ForwardBurst forwardBurst;
         static JobHandle lastJobHandle;
@@ -84,8 +83,9 @@ namespace MonoRL
             outputBuffer = new ComputeBuffer(_Outputs.Length, floatsize);//outputs
             weightBuffer = new ComputeBuffer(Weights.Length, floatsize);//weights
             biaseBuffer = new ComputeBuffer(Biases.Length, floatsize);//biases
-
-            Allocator alc = Allocator.Persistent;
+            _GradB_buffer = new ComputeBuffer(_GradB.Length, floatsize);
+            _GradW_buffer = new ComputeBuffer(_GradW.Length, floatsize);
+            //Allocator alc = Allocator.Persistent;
             //na_inputs = new NativeArray<float>(InputSize, alc);
             //na_Weights = new NativeArray<float>(Weights.Length, alc);
             //na_Biases = new NativeArray<float>(Biases.Length, alc);
@@ -146,9 +146,8 @@ namespace MonoRL
         }
         int floatsize;
         //
-        public float[] ForwardGPU(float[] inputs)
+        public System.Collections.IEnumerator ForwardGPU(float[] inputs, Action<float[]> complete)
         {
-
             //Debug.Log("aa");
             float[] activatedValues = new float[NodeSize];
             ComputeBuffer activatedValueBuffer = new ComputeBuffer(activatedValues.Length, floatsize);//activated values
@@ -172,27 +171,17 @@ namespace MonoRL
             forwardCS.Dispatch(0, NodeSize < 10 ? 1 : (NodeSize / 10), 1, 1);
             activatedValueBuffer.GetData(activatedValues);
 
-            outputBuffer.GetData(_Outputs);
-            //var req = AsyncGPUReadback.Request(outputBuffer, 0, 0);
-            //request.completed += op =>
-            //{
-            //    if (op.status == AsyncGPUReadbackStatus.Success)
-            //    {
-            //        result = op.GetData<float>().ToArray();
-            //        Debug.Log("Async GPU readback completed successfully.");
-            //    }
-            //    else
-            //    {
-            //        Debug.LogError("Async GPU readback failed with error: " + op.status);
-            //    }
-            //};
-            //activatedValueBuffer.Release();
-            //outputBuffer.Release();
+            //outputBuffer.GetData(_Outputs);
+            var request = AsyncGPUReadback.Request(outputBuffer, 0, 0);
+            yield return new WaitUntil(() => request.done);
+            NativeArray<float> na = request.GetData<float>();
+            na.CopyTo(_Outputs);
+            complete.Invoke(_Outputs);
 
 
             inputs.CopyTo(_Inputs, 0);
 
-            return activatedValues;
+            //return activatedValues;
         }
         //
         public float[] Backward(float[] deltas)
@@ -229,7 +218,7 @@ namespace MonoRL
 
                 for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
                 {
-                    gradW = _GradW[nodeIndex][inputIndex] / batchSize;
+                    gradW = _GradW[nodeIndex * InputSize + inputIndex] / batchSize;
 
                     weightCalc = Weights[nodeIndex * InputSize + inputIndex];
                     weightCalc -= lr * gradW;
@@ -240,17 +229,50 @@ namespace MonoRL
             ClearGradients();
         }
 
+        public IEnumerator ApplyGradientsGPU(float lr, int batchSize)
+        {
+            //Debug.Log("aa");
+            float[] activatedValues = new float[NodeSize];
+            
+
+
+
+            //activatedValueBuffer.SetData(activatedValues);
+            //outputBuffer.SetData(_Outputs);
+            biaseBuffer.SetData(Biases);
+            weightBuffer.SetData(Weights);
+            _GradB_buffer.SetData(_GradB);
+            _GradW_buffer.SetData(_GradW);
+
+            applyGradsCS.SetBuffer(0, "Biases", biaseBuffer);
+            applyGradsCS.SetBuffer(0, "Weights", weightBuffer);
+            applyGradsCS.SetBuffer(0, "_GradB", _GradB_buffer);
+            applyGradsCS.SetBuffer(0, "_GradW", _GradW_buffer);
+            applyGradsCS.SetInt("InputSize", InputSize);
+            applyGradsCS.SetInt("batchSize", batchSize);
+            applyGradsCS.SetFloat("lr", lr);
+            
+            applyGradsCS.Dispatch(0, NodeSize < 10 ? 1 : (NodeSize / 10), 1, 1);
+            
+            var requestb = AsyncGPUReadback.Request(biaseBuffer);
+            yield return new WaitUntil(() => requestb.done);
+            NativeArray<float> nab = requestb.GetData<float>();
+            nab.CopyTo(Biases);
+
+            var requestw = AsyncGPUReadback.Request(weightBuffer);
+            yield return new WaitUntil(() => requestw.done);
+            NativeArray<float> naw = requestw.GetData<float>();
+            naw.CopyTo(Weights);
+
+            naw.Dispose();
+            nab.Dispose();
+            ClearGradients();
+        }
+
         public void ClearGradients()
         {
             Array.Clear(_GradB, 0, _GradB.Length);
-            for (int i = 0; i < NodeSize; i++)
-            {
-                for (int j = 0; j < InputSize; j++)
-                {
-                    _GradW[i][j] = 0;
-                }
-            }
-            //Array.Clear(_GradW, 0, _GradW.Length);
+            Array.Clear(_GradW, 0, _GradW.Length);
         }
 
         private void UpdateGradients(float[] delta)
@@ -262,7 +284,7 @@ namespace MonoRL
                 _GradB[nodeIndex] += c_delta;
                 for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
                 {
-                    _GradW[nodeIndex][inputIndex] += c_delta * _Inputs[inputIndex];
+                    _GradW[nodeIndex * InputSize + inputIndex] += c_delta * _Inputs[inputIndex];
                 }
             }
         }

@@ -1,0 +1,35 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+RWStructuredBuffer<float> Biases;
+RWStructuredBuffer<float> Weights;
+StructuredBuffer<float> _GradB;
+StructuredBuffer<float> _GradW;
+int InputSize, batchSize;
+float lr;
+
+[numthreads(10,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    // TODO: insert actual code here!
+
+    //Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
+    
+
+    float gradB = 0, weightCalc = 0, gradW = 0;
+    int nodeIndex = id.x;
+    //for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
+    //{
+    gradB = _GradB[nodeIndex] / batchSize;
+    Biases[nodeIndex] -= lr * gradB;
+
+    for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
+    {
+        gradW = _GradW[nodeIndex * InputSize + inputIndex] / batchSize;
+
+        weightCalc = Weights[nodeIndex * InputSize + inputIndex];
+        weightCalc -= lr * gradW;
+        Weights[nodeIndex * InputSize + inputIndex] = weightCalc;
+    }
+    //}
+}

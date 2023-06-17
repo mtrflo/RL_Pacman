@@ -5,6 +5,9 @@ using MonoRL;
 using Unity.VisualScripting;
 using System.Linq;
 using UnityEngine;
+using System.Collections;
+using UnityEditor.PackageManager.Requests;
+
 [Serializable]
 public class Network
 {
@@ -15,7 +18,7 @@ public class Network
     public List<Layer> Layers = new List<Layer>();
 
     public ICost Cost;
-    public ComputeShader forwardCS;
+    public ComputeShader forwardCS, applyGradsCS;
 
     public void Init()
     {
@@ -29,9 +32,9 @@ public class Network
             return;
         }
         for (int i = 0; i < layersSize.Length - 2; i++)
-            Layers.Add(new Layer(layersSize[i], layersSize[i + 1], hiddenAType, forwardCS));
+            Layers.Add(new Layer(layersSize[i], layersSize[i + 1], hiddenAType, forwardCS, applyGradsCS));
 
-        Layers.Add(new Layer(layersSize[layersSize.Length - 2], layersSize[layersSize.Length - 1], outputAType, forwardCS));
+        Layers.Add(new Layer(layersSize[layersSize.Length - 2], layersSize[layersSize.Length - 1], outputAType, forwardCS, applyGradsCS));
         //
     }
 
@@ -42,6 +45,24 @@ public class Network
         for (int i = 0; i < Layers.Count; i++)
             calc_inputs = Layers[i].Forward(calc_inputs);
         return calc_inputs;
+        //
+    }
+
+    public IEnumerator ForwardGPU(MonoBehaviour mono,float[] inputs, Action<float[]> complete)
+    {
+        float[] calc_inputs = new float[inputs.Length];
+        inputs.CopyTo(calc_inputs, 0);
+        for (int i = 0; i < Layers.Count; i++)
+        {
+            bool done = false;
+            mono.StartCoroutine(Layers[i].ForwardGPU(calc_inputs,(cdata) =>
+            { 
+                calc_inputs = cdata;
+                done = true;
+            }));
+            yield return new WaitUntil(() => done);
+        }
+        complete.Invoke(calc_inputs);
         //
     }
 
@@ -73,6 +94,23 @@ public class Network
 
         for (int i = Layers.Count - 1; i >= 0; i--)
             Layers[i].ApplyGradients(LearningRate, 1);
+        //
+    }
+
+    public void BackwardGPU(MonoBehaviour mono, int action, float loss)
+    {
+        Layer outputLayer = Layers[Layers.Count - 1];
+        float[] deltas = new float[outputLayer.NodeSize];
+
+        for (int i = 0; i < outputLayer.NodeSize; i++)
+            deltas[i] = 0;
+        deltas[action] = loss;
+
+        for (int i = Layers.Count - 1; i >= 0; i--)
+            deltas = Layers[i].Backward(deltas);
+
+        for (int i = Layers.Count - 1; i >= 0; i--)
+            mono.StartCoroutine(Layers[i].ApplyGradientsGPU(LearningRate, 1));
         //
     }
 
