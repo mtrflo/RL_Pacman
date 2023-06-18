@@ -41,7 +41,20 @@ namespace MonoRL
         private float[] _GradW;
         [NonSerialized]
         private float[] _GradB;
-        
+
+        [NonSerialized]
+        public ComputeBuffer
+            outputBuffer,
+            weightBuffer,
+            biaseBuffer,
+            _GradB_buffer,
+             _GradW_buffer;
+
+        [NonSerialized]
+        public NativeArray<float> na_inputs, na_Weights, na_Biases, na__Outputs, na_activatedValues;
+        ForwardBurst forwardBurst;
+        static JobHandle lastJobHandle;
+
         public Layer(int inputSize, int nodeSize, float lr, Activation.ActivationType activationType, ComputeShader forwardCS, ComputeShader applyGradsCS)
         {
             InputSize = inputSize;
@@ -72,19 +85,11 @@ namespace MonoRL
             Awake();
         }
 
-        public ComputeBuffer outputBuffer;
-        public ComputeBuffer weightBuffer;
-        public ComputeBuffer biaseBuffer;
-        public ComputeBuffer _GradB_buffer;
-        public ComputeBuffer _GradW_buffer;
-        public NativeArray<float> na_inputs, na_Weights, na_Biases, na__Outputs, na_activatedValues;
-        ForwardBurst forwardBurst;
-        static JobHandle lastJobHandle;
         void Awake()
         {
             floatsize = sizeof(float);
 
-            outputBuffer = new ComputeBuffer(_Outputs.Length, floatsize);//outputs
+            //outputBuffer = new ComputeBuffer(_Outputs.Length, floatsize);//outputs
             weightBuffer = new ComputeBuffer(Weights.Length, floatsize);//weights
             biaseBuffer = new ComputeBuffer(Biases.Length, floatsize);//biases
             _GradB_buffer = new ComputeBuffer(_GradB.Length, floatsize);
@@ -105,6 +110,10 @@ namespace MonoRL
             //forwardBurst.Weights = na_Weights;
             //forwardBurst.inputs = na_inputs;
             //forwardBurst.Biases = na_Biases;
+        }
+        public void CreateNewBuffers()
+        {
+
         }
         //
         public float[] Forward(float[] inputs)
@@ -234,16 +243,23 @@ namespace MonoRL
             ClearGradients();
         }
         bool lrset = false;
+        AsyncGPUReadbackRequest requestb,requestw;
         public IEnumerator ApplyGradientsGPU(float lr, int batchSize)
         {
-            //Debug.Log("aa");
-            float[] activatedValues = new float[NodeSize];
+            //yield return new WaitUntil(() => requestb.done);
+            //yield return new WaitUntil(() => requestw.done);
 
 
+            //biaseBuffer.Release();
+            //weightBuffer.Release();
+            //_GradB_buffer.Release();
+            //_GradW_buffer.Release();
 
-
-            //activatedValueBuffer.SetData(activatedValues);
-            //outputBuffer.SetData(_Outputs);
+            //outputBuffer = new ComputeBuffer(_Outputs.Length, floatsize);//outputs
+            //weightBuffer = new ComputeBuffer(Weights.Length, floatsize);//weights
+            //biaseBuffer = new ComputeBuffer(Biases.Length, floatsize);//biases
+            //_GradB_buffer = new ComputeBuffer(_GradB.Length, floatsize);
+            //_GradW_buffer = new ComputeBuffer(_GradW.Length, floatsize);
 
 
             biaseBuffer.SetData(Biases);
@@ -261,22 +277,20 @@ namespace MonoRL
                 applyGradsCS.SetFloat("lr", lr);
                 lrset = true;
             }
+
+            //applyGradsCS.Dispatch(0, NodeSize < 10 ? 1 : (NodeSize / 10), 1, 1);
             
-            applyGradsCS.Dispatch(0, NodeSize < 10 ? 1 : (NodeSize / 10), 1, 1);
-            
-            var requestb = AsyncGPUReadback.Request(biaseBuffer);
-            
+            requestb = AsyncGPUReadback.Request(biaseBuffer);
             yield return new WaitUntil(() => requestb.done);
             NativeArray<float> nab = requestb.GetData<float>();
             nab.CopyTo(Biases);
-            
-            var requestw = AsyncGPUReadback.Request(weightBuffer);
+            nab.Dispose();
+
+            requestw = AsyncGPUReadback.Request(weightBuffer);
             yield return new WaitUntil(() => requestw.done);
             NativeArray<float> naw = requestw.GetData<float>();
             naw.CopyTo(Weights);
-
             naw.Dispose();
-            nab.Dispose();
 
 
             ClearGradients();

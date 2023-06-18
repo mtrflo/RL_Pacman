@@ -11,7 +11,8 @@ using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using Unity.Mathematics;
-
+using UnityEngine.UI;
+using System.Security.Cryptography;
 
 public class DQNAgent : MonoBehaviour
 {
@@ -243,16 +244,7 @@ public class DQNAgent : MonoBehaviour
 
     private void OnDestroy()
     {
-        foreach (var layer in network.Layers)
-        {
-
-            layer._GradB_buffer.Release();
-            layer._GradW_buffer.Release();
-            layer.biaseBuffer.Release();
-            layer.outputBuffer.Release();
-            layer.weightBuffer.Release();
-            
-        }
+        DisposeBuffer();
         //foreach (var layer in network.Layers)
         //{
 
@@ -271,6 +263,24 @@ public class DQNAgent : MonoBehaviour
         //    layer.na_activatedValues.Dispose();
         //    //
         //}
+    }
+    [Button("Dispose")]
+    public void DisposeBuffer()
+    {
+        foreach (var layer in network.Layers)
+        {
+            layer._GradB_buffer.Dispose();
+            layer._GradW_buffer.Dispose();
+            layer.biaseBuffer.Dispose();
+            layer.outputBuffer.Dispose();
+            layer.weightBuffer.Dispose();
+            //layer._GradB_buffer.Release();
+            //layer._GradW_buffer.Release();
+            //layer.biaseBuffer.Release();
+            //layer.outputBuffer.Release();
+            //layer.weightBuffer.Release();
+
+        }
     }
 }
 [Serializable]
