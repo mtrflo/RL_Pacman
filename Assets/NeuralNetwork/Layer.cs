@@ -41,7 +41,7 @@ namespace MonoRL
         private float[] _GradW;
         [NonSerialized]
         private float[] _GradB;
-        
+
         public Layer(int inputSize, int nodeSize, float lr, Activation.ActivationType activationType, ComputeShader forwardCS, ComputeShader applyGradsCS)
         {
             InputSize = inputSize;
@@ -111,7 +111,7 @@ namespace MonoRL
         {
             //return ForwardBurst(inputs);
             float[] activatedValues = new float[NodeSize];
-            
+
             float calcOutput = 0;
             for (int nodeIndex = 0, inputIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
@@ -141,7 +141,7 @@ namespace MonoRL
 
 
             JobHandle jobHandle = forwardBurst.Schedule(NodeSize, 100);
-            
+
             jobHandle.Complete();
 
             activatedValues = na_activatedValues.ToArray();
@@ -261,15 +261,15 @@ namespace MonoRL
                 applyGradsCS.SetFloat("lr", lr);
                 lrset = true;
             }
-            
+
             applyGradsCS.Dispatch(0, NodeSize < 10 ? 1 : (NodeSize / 10), 1, 1);
-            
+
             var requestb = AsyncGPUReadback.Request(biaseBuffer);
-            
+
             yield return new WaitUntil(() => requestb.done);
             NativeArray<float> nab = requestb.GetData<float>();
             nab.CopyTo(Biases);
-            
+
             var requestw = AsyncGPUReadback.Request(weightBuffer);
             yield return new WaitUntil(() => requestw.done);
             NativeArray<float> naw = requestw.GetData<float>();
@@ -314,13 +314,15 @@ namespace MonoRL
 
         private void InitializeBiases()
         {
+            float variance = 1.0f / NodeSize;
+            float sqrtVar = Mathf.Sqrt(variance);
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
-                Biases[nodeIndex] = 0;
+                Biases[nodeIndex] = Random.Range(-sqrtVar, sqrtVar);
         }
     }
 
 }
-    [BurstCompile]
+[BurstCompile]
 public struct ForwardBurst : IJobParallelFor//a
 {
     public int NodeSize, InputSize;
