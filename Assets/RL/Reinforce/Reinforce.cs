@@ -79,6 +79,21 @@ public class Reinforce : MonoBehaviour
     {
 
     }
+    public int SelectAction(float[] observation, float _epsilon)
+    {
+        int action = 0;
+        float e = UnityEngine.Random.Range(0, 1f);
+        if (e > _epsilon)
+        {
+            action = ChooseAction(observation);
+        }
+        else
+            //action = SampleAction(observation);
+            action = UnityEngine.Random.Range(0, network.Layers.Last().NodeSize);
+
+        return action;
+    }
+
     public int ChooseAction(float[] state)
     {
         float[] actionValues = network.Forward(state);
@@ -112,11 +127,13 @@ public class Reinforce : MonoBehaviour
     public void Learn(Transition[] transitions)
     {
         float[] G = new float[trajectoryLength];
-        G[trajectoryLength - 1] = transitions[trajectoryLength - 1].reward;
-        for (int k = trajectoryLength - 2; k >= 0; k--)
+        for (int t = 0; t < trajectoryLength; t++)
         {
-            Transition transition = transitions[k];
-            G[k] = transition.reward + MathF.Pow(discountFactor, k) * G[k + 1];
+            G[t] = 0;
+            for (int k = t; k < trajectoryLength; k++)
+            {
+                G[t] += MathF.Pow(discountFactor, k - t) * transitions[k].reward;
+            }
         }
 
 
@@ -128,10 +145,11 @@ public class Reinforce : MonoBehaviour
             float[] sm_actionProbs = GetActionProbs(actionProbs);
             CategoricalDistribution catDist = new CategoricalDistribution(sm_actionProbs);
 
-            float logProb = catDist.LogProb(transition.action);
+            //float logProb = catDist.LogProb(transition.action);
+            float logProb = sm_actionProbs[transition.action];
             float loss = -logProb * (G[t] / trajectoryLength);
 
-            network.BackwardGPU(this, transition.action, loss / 100);
+            network.Backward(transition.action, loss);
 
             //Debug.Log("transition.action : " + transition.action);
             //Debug.Log("loss : " + loss);

@@ -75,13 +75,13 @@ public class PendulumAgent : MonoBehaviour
         angle = angle * Mathf.Deg2Rad;
         //print("angle : " + angle);
         //print("angle : " + angle);
-        
-        
-        AddObservation(Mathf.Sin(angle));
-        AddObservation(Mathf.Cos(angle));
+
+
+        AddObservation(Mathf.Sin(angle) / Mathf.PI * 2);
+        AddObservation(Mathf.Cos(angle) / Mathf.PI * 2);
         //AddObservation(Mathf.Sign(rb.angularVelocity.magnitude));
         float angvel = rb.angularVelocity.magnitude * Mathf.Sign(rb.angularVelocity.z);
-        AddObservation(angvel);
+        AddObservation(angvel / 4);
 
 
         if (prev_state.Count == 0)
@@ -99,11 +99,10 @@ public class PendulumAgent : MonoBehaviour
         //print("reward : " + s_reward);
         _Transition.Set(prev_state.ToArray(), action, current_state.ToArray(), s_reward);
         Utils.CopyTo(current_state, prev_state);
-        action = greedy ? RLAlg.ChooseAction(prev_state.ToArray()) : RLAlg.SampleAction(prev_state.ToArray());
-        //action = RLAlg.SelectAction(current_state.ToArray(), epsilon);
+        action = RLAlg.SelectAction(current_state.ToArray(), epsilon);
         MakeAction(action);
-        if (!greedy)
-            Learn();
+        //if (!greedy)
+        Learn();
         //RLAlg.Learn(this,_Transition);
         episodeCount++;
         //if (maxrew < s_reward)
