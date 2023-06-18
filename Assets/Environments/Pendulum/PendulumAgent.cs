@@ -9,8 +9,8 @@ using Random = UnityEngine.Random;
 public class PendulumAgent : MonoBehaviour
 {
     public Rigidbody rb;
-    //public Reinforce RLAlg => Reinforce.me;
-    public DQNAgent RLAlg => DQNAgent.me;
+    public Reinforce RLAlg => Reinforce.me;
+    //public DQNAgent RLAlg => DQNAgent.me;
 
     public float delay = 1, startDelay;
     public float reward = 0.1f, terminateReward = -1f, scoreReward = 1, distanceReward = 0f;
@@ -99,12 +99,12 @@ public class PendulumAgent : MonoBehaviour
         //print("reward : " + s_reward);
         _Transition.Set(prev_state.ToArray(), action, current_state.ToArray(), s_reward);
         Utils.CopyTo(current_state, prev_state);
-        //action = greedy ? RLAlg.ChooseAction(prev_state.ToArray()) : RLAlg.SampleAction(prev_state.ToArray());
-        action = RLAlg.SelectAction(current_state.ToArray(), epsilon);
+        action = greedy ? RLAlg.ChooseAction(prev_state.ToArray()) : RLAlg.SampleAction(prev_state.ToArray());
+        //action = RLAlg.SelectAction(current_state.ToArray(), epsilon);
         MakeAction(action);
-        //if(!greedy)
-        //    Learn();
-        RLAlg.Learn(this,_Transition);
+        if (!greedy)
+            Learn();
+        //RLAlg.Learn(this,_Transition);
         episodeCount++;
         //if (maxrew < s_reward)
         //{
@@ -119,18 +119,18 @@ public class PendulumAgent : MonoBehaviour
     bool trs = false;
     void Learn()
     {
-        //transitions.Add(_Transition);
-        //tCounter++;
+        transitions.Add(_Transition);
+        tCounter++;
 
-        //if (tCounter == RLAlg.trajectoryLength)
-        //{
-        //    RLAlg.Learn(transitions.ToArray());
+        if (tCounter == RLAlg.trajectoryLength)
+        {
+            RLAlg.Learn(transitions.ToArray());
 
-        //    tCounter = 0;
-        //    trs = true;
-        //}
-        //if (trs)
-        //    transitions.RemoveAt(0);
+            tCounter = 0;
+            trs = true;
+        }
+        if (trs)
+            transitions.RemoveAt(0);
     }
 
     void MakeAction(int action)

@@ -95,7 +95,7 @@ namespace MonoRL
             _GradB_buffer = new ComputeBuffer(_GradB.Length, floatsize);
             _GradW_buffer = new ComputeBuffer(_GradW.Length, floatsize);
 
-            //Allocator alc = Allocator.Persistent;
+            Allocator alc = Allocator.Persistent;
             //na_inputs = new NativeArray<float>(InputSize, alc);
             //na_Weights = new NativeArray<float>(Weights.Length, alc);
             //na_Biases = new NativeArray<float>(Biases.Length, alc);
@@ -278,19 +278,19 @@ namespace MonoRL
                 lrset = true;
             }
 
-            //applyGradsCS.Dispatch(0, NodeSize < 10 ? 1 : (NodeSize / 10), 1, 1);
+            applyGradsCS.Dispatch(0, NodeSize < 10 ? 1 : (NodeSize / 10), 1, 1);
             
             requestb = AsyncGPUReadback.Request(biaseBuffer);
             yield return new WaitUntil(() => requestb.done);
-            NativeArray<float> nab = requestb.GetData<float>();
-            nab.CopyTo(Biases);
-            nab.Dispose();
+            NativeArray<float> b = requestb.GetData<float>();
+            b.CopyTo(Biases);
+            b.Dispose();
 
             requestw = AsyncGPUReadback.Request(weightBuffer);
             yield return new WaitUntil(() => requestw.done);
-            NativeArray<float> naw = requestw.GetData<float>();
-            naw.CopyTo(Weights);
-            naw.Dispose();
+            NativeArray<float> w = requestw.GetData<float>();
+            w.CopyTo(Weights);
+            w.Dispose();
 
 
             ClearGradients();

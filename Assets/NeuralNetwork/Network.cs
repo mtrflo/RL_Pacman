@@ -128,8 +128,8 @@ public class Network
 
         for (int i = Layers.Count - 1; i >= 0; i--)
         {
-            Layers[i].ApplyGradients(LearningRate, 1);
-            //mono.StartCoroutine(Layers[i].ApplyGradientsGPU(LearningRate, 1));
+            //Layers[i].ApplyGradients(LearningRate, 1);
+            mono.StartCoroutine(Layers[i].ApplyGradientsGPU(LearningRate, 1));
         }
         //
     }
