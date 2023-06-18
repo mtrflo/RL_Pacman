@@ -75,7 +75,10 @@ public class Reinforce : MonoBehaviour
 
         network.Init();
     }
-
+    private void Start()
+    {
+        
+    }
     public int ChooseAction(float[] state) 
     {
         float[] actionValues = network.Forward(state);

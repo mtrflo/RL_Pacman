@@ -32,6 +32,8 @@ namespace MonoRL
         private float[] _Inputs;//data
         [SerializeField]
         private float[] _Outputs;
+        [SerializeField]
+        private float lr;
 
         public ComputeShader forwardCS, applyGradsCS;
 
@@ -39,7 +41,8 @@ namespace MonoRL
         private float[] _GradW;
         [NonSerialized]
         private float[] _GradB;
-        public Layer(int inputSize, int nodeSize, Activation.ActivationType activationType, ComputeShader forwardCS, ComputeShader applyGradsCS)
+        
+        public Layer(int inputSize, int nodeSize, float lr, Activation.ActivationType activationType, ComputeShader forwardCS, ComputeShader applyGradsCS)
         {
             InputSize = inputSize;
             NodeSize = nodeSize;
@@ -54,6 +57,7 @@ namespace MonoRL
 
             this.forwardCS = forwardCS;
             this.applyGradsCS = applyGradsCS;
+            this.lr = lr;
             InitializeWeights();
             InitializeBiases();
             Awake();
@@ -85,13 +89,14 @@ namespace MonoRL
             biaseBuffer = new ComputeBuffer(Biases.Length, floatsize);//biases
             _GradB_buffer = new ComputeBuffer(_GradB.Length, floatsize);
             _GradW_buffer = new ComputeBuffer(_GradW.Length, floatsize);
+
             //Allocator alc = Allocator.Persistent;
             //na_inputs = new NativeArray<float>(InputSize, alc);
             //na_Weights = new NativeArray<float>(Weights.Length, alc);
             //na_Biases = new NativeArray<float>(Biases.Length, alc);
             //na__Outputs = new NativeArray<float>(_Outputs.Length, alc);
             //na_activatedValues = new NativeArray<float>(NodeSize, alc);
-            
+
             //forwardBurst = new ForwardBurst();
             //forwardBurst.NodeSize = NodeSize;
             //forwardBurst.InputSize = InputSize;
@@ -249,8 +254,7 @@ namespace MonoRL
             applyGradsCS.SetBuffer(0, "_GradB", _GradB_buffer);
             applyGradsCS.SetBuffer(0, "_GradW", _GradW_buffer);
             applyGradsCS.SetInt("InputSize", InputSize);
-            applyGradsCS.SetInt("batchSize", batchSize);
-            applyGradsCS.SetFloat("lr", lr);
+            
             
             applyGradsCS.Dispatch(0, NodeSize < 10 ? 1 : (NodeSize / 10), 1, 1);
             

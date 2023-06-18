@@ -32,12 +32,15 @@ public class Network
             return;
         }
         for (int i = 0; i < layersSize.Length - 2; i++)
-            Layers.Add(new Layer(layersSize[i], layersSize[i + 1], hiddenAType, forwardCS, applyGradsCS));
+            Layers.Add(new Layer(layersSize[i], layersSize[i + 1],LearningRate, hiddenAType, forwardCS, applyGradsCS));
 
-        Layers.Add(new Layer(layersSize[layersSize.Length - 2], layersSize[layersSize.Length - 1], outputAType, forwardCS, applyGradsCS));
+        Layers.Add(new Layer(layersSize[layersSize.Length - 2], layersSize[layersSize.Length - 1], LearningRate, outputAType, forwardCS, applyGradsCS));
         //
     }
-
+    public void Start()
+    {
+        applyGradsCS.SetFloat("lr", LearningRate);
+    }
     public float[] Forward(float[] inputs)
     {
         float[] calc_inputs = new float[inputs.Length];
@@ -114,7 +117,7 @@ public class Network
         //
     }
 
-    public void Learn(float[][] batchInputs, float[][] batchExpectedOutputs)
+    public void Learn(MonoBehaviour mono, float[][] batchInputs, float[][] batchExpectedOutputs)
     {
 
         int batchSize = batchInputs.Length;
@@ -128,7 +131,9 @@ public class Network
         }
 
         for (int i = Layers.Count - 1; i >= 0; i--)
-            Layers[i].ApplyGradients(LearningRate, batchSize);
+        {
+            mono.StartCoroutine(Layers[i].ApplyGradientsGPU(LearningRate, 1));
+        }
         //
     }
 

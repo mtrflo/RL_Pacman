@@ -139,7 +139,7 @@ public class FlappyBirdAgent : MonoBehaviour
         Utils.CopyTo(current_state, prev_state);
         action = rLAgent.SelectAction(prev_state.ToArray(), epsilon);
         MakeAction(action);
-        rLAgent.Learn(_Transition);
+        rLAgent.Learn(this,_Transition);
         episodeCount++;
         totalEpisodeCount++;
         //if (maxEpisodeCount < episodeCount)

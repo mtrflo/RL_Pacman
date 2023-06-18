@@ -5,7 +5,7 @@ RWStructuredBuffer<float> Biases;
 RWStructuredBuffer<float> Weights;
 StructuredBuffer<float> _GradB;
 StructuredBuffer<float> _GradW;
-int InputSize, batchSize;
+int InputSize;
 float lr;
 
 [numthreads(10,1,1)]
@@ -20,12 +20,12 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     int nodeIndex = id.x;
     //for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
     //{
-    gradB = _GradB[nodeIndex] / batchSize;
+    gradB = _GradB[nodeIndex];
     Biases[nodeIndex] -= lr * gradB;
 
     for (int inputIndex = 0; inputIndex < InputSize; inputIndex++)
     {
-        gradW = _GradW[nodeIndex * InputSize + inputIndex] / batchSize;
+        gradW = _GradW[nodeIndex * InputSize + inputIndex];
 
         weightCalc = Weights[nodeIndex * InputSize + inputIndex];
         weightCalc -= lr * gradW;

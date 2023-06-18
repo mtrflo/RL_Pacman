@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class MultiEnviroment : MonoBehaviour
 {
+    public static MultiEnviroment me;
     #region Serialized vars
     public int count;
     public GameObject env;
@@ -20,6 +21,13 @@ public class MultiEnviroment : MonoBehaviour
     #endregion
     private void Awake()
     {
+        if (me != null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        me = this;
+
         if(ins_parent == null)
         {
             ins_parent = transform;

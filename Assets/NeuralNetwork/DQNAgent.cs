@@ -52,7 +52,7 @@ public class DQNAgent : MonoBehaviour
     }
     private void Start()
     {
-        
+        network.Start();
     }
     public int SelectAction(float[] observation)
     {
@@ -86,7 +86,7 @@ public class DQNAgent : MonoBehaviour
         return action;
     }
 
-    public void Learn(Transition transition)
+    public void Learn(MonoBehaviour mono, Transition transition)
     {
         replayBuffer.Add(transition);
 
@@ -120,7 +120,7 @@ public class DQNAgent : MonoBehaviour
                     batchExpectedOutputs[batchIndex] = expectedValues;
                 }
 
-                network.Learn(batchInputs, batchExpectedOutputs);
+                network.Learn(mono, batchInputs, batchExpectedOutputs);
             }
         }
     }

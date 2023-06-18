@@ -132,7 +132,7 @@ public class HeadAgent : MonoBehaviour
         //    action = 3;
         MakeAction(action);
 
-        rLAgent.Learn(_Transition);
+        rLAgent.Learn(this,_Transition);
 
         stepCount++;
         stepCounter++;
