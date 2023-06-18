@@ -50,10 +50,6 @@ public class DQNAgent : MonoBehaviour
         ReplaceTarget();
         //DontDestroyOnLoad(this);
     }
-    private void Start()
-    {
-        network.Start();
-    }
     public int SelectAction(float[] observation)
     {
         int action = 0;
@@ -247,9 +243,19 @@ public class DQNAgent : MonoBehaviour
 
     private void OnDestroy()
     {
+        foreach (var layer in network.Layers)
+        {
+
+            layer._GradB_buffer.Release();
+            layer._GradW_buffer.Release();
+            layer.biaseBuffer.Release();
+            layer.outputBuffer.Release();
+            layer.weightBuffer.Release();
+            
+        }
         //foreach (var layer in network.Layers)
         //{
-            
+
         //    layer.na_inputs.Dispose();
         //    layer.na_Weights.Dispose();
         //    layer.na_Biases.Dispose();

@@ -72,11 +72,11 @@ namespace MonoRL
             Awake();
         }
 
-        ComputeBuffer outputBuffer;
-        ComputeBuffer weightBuffer;
-        ComputeBuffer biaseBuffer;
-        ComputeBuffer _GradB_buffer;
-        ComputeBuffer _GradW_buffer;
+        public ComputeBuffer outputBuffer;
+        public ComputeBuffer weightBuffer;
+        public ComputeBuffer biaseBuffer;
+        public ComputeBuffer _GradB_buffer;
+        public ComputeBuffer _GradW_buffer;
         public NativeArray<float> na_inputs, na_Weights, na_Biases, na__Outputs, na_activatedValues;
         ForwardBurst forwardBurst;
         static JobHandle lastJobHandle;
@@ -233,17 +233,19 @@ namespace MonoRL
 
             ClearGradients();
         }
-
+        bool lrset = false;
         public IEnumerator ApplyGradientsGPU(float lr, int batchSize)
         {
             //Debug.Log("aa");
             float[] activatedValues = new float[NodeSize];
-            
+
 
 
 
             //activatedValueBuffer.SetData(activatedValues);
             //outputBuffer.SetData(_Outputs);
+
+
             biaseBuffer.SetData(Biases);
             weightBuffer.SetData(Weights);
             _GradB_buffer.SetData(_GradB);
@@ -254,15 +256,20 @@ namespace MonoRL
             applyGradsCS.SetBuffer(0, "_GradB", _GradB_buffer);
             applyGradsCS.SetBuffer(0, "_GradW", _GradW_buffer);
             applyGradsCS.SetInt("InputSize", InputSize);
-            
+            if (!lrset)
+            {
+                applyGradsCS.SetFloat("lr", lr);
+                lrset = true;
+            }
             
             applyGradsCS.Dispatch(0, NodeSize < 10 ? 1 : (NodeSize / 10), 1, 1);
             
             var requestb = AsyncGPUReadback.Request(biaseBuffer);
+            
             yield return new WaitUntil(() => requestb.done);
             NativeArray<float> nab = requestb.GetData<float>();
             nab.CopyTo(Biases);
-
+            
             var requestw = AsyncGPUReadback.Request(weightBuffer);
             yield return new WaitUntil(() => requestw.done);
             NativeArray<float> naw = requestw.GetData<float>();
@@ -270,6 +277,8 @@ namespace MonoRL
 
             naw.Dispose();
             nab.Dispose();
+
+
             ClearGradients();
         }
 

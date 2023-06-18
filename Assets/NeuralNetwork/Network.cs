@@ -37,10 +37,6 @@ public class Network
         Layers.Add(new Layer(layersSize[layersSize.Length - 2], layersSize[layersSize.Length - 1], LearningRate, outputAType, forwardCS, applyGradsCS));
         //
     }
-    public void Start()
-    {
-        applyGradsCS.SetFloat("lr", LearningRate);
-    }
     public float[] Forward(float[] inputs)
     {
         float[] calc_inputs = new float[inputs.Length];
