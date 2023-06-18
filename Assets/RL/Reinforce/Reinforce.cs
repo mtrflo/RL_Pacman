@@ -61,7 +61,7 @@ public class Reinforce : MonoBehaviour
     public string version = "test";
 
     public Network network;
-    
+
     private void Awake()
     {
         if (me != null)
@@ -77,9 +77,9 @@ public class Reinforce : MonoBehaviour
     }
     private void Start()
     {
-        
+
     }
-    public int ChooseAction(float[] state) 
+    public int ChooseAction(float[] state)
     {
         float[] actionValues = network.Forward(state);
         int action = actionValues.ToList().IndexOf(actionValues.Max());
@@ -111,22 +111,27 @@ public class Reinforce : MonoBehaviour
 
     public void Learn(Transition[] transitions)
     {
-        float G = 0;
-
-        for (int k = transitions.Length - 1; k >= 0; k--)
+        float[] G = new float[trajectoryLength];
+        G[trajectoryLength - 1] = transitions[trajectoryLength - 1].reward;
+        for (int k = trajectoryLength - 2; k >= 0; k--)
         {
             Transition transition = transitions[k];
+            G[k] = transition.reward + MathF.Pow(discountFactor, k) * G[k + 1];
+        }
 
-            G += MathF.Pow(discountFactor, k) * transition.reward;
+
+        for (int t = 0; t < trajectoryLength; t++)
+        {
+            Transition transition = transitions[t];
 
             float[] actionProbs = network.Forward(transition.prev_state);
             float[] sm_actionProbs = GetActionProbs(actionProbs);
             CategoricalDistribution catDist = new CategoricalDistribution(sm_actionProbs);
-            
-            float logProb = catDist.LogProb(transition.action);
-            float loss = logProb * G;
 
-            network.BackwardGPU(this,transition.action, loss);
+            float logProb = catDist.LogProb(transition.action);
+            float loss = -logProb * (G[t] / trajectoryLength);
+
+            network.BackwardGPU(this, transition.action, loss / 100);
 
             //Debug.Log("transition.action : " + transition.action);
             //Debug.Log("loss : " + loss);

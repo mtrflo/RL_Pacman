@@ -120,7 +120,7 @@ namespace MonoRL
         {
             //return ForwardBurst(inputs);
             float[] activatedValues = new float[NodeSize];
-            
+
             float calcOutput = 0;
             for (int nodeIndex = 0, inputIndex = 0; nodeIndex < NodeSize; nodeIndex++)
             {
@@ -150,7 +150,7 @@ namespace MonoRL
 
 
             JobHandle jobHandle = forwardBurst.Schedule(NodeSize, 100);
-            
+
             jobHandle.Complete();
 
             activatedValues = na_activatedValues.ToArray();
@@ -328,13 +328,15 @@ namespace MonoRL
 
         private void InitializeBiases()
         {
+            float variance = 1.0f / NodeSize;
+            float sqrtVar = Mathf.Sqrt(variance);
             for (int nodeIndex = 0; nodeIndex < NodeSize; nodeIndex++)
-                Biases[nodeIndex] = 0;
+                Biases[nodeIndex] = Random.Range(-sqrtVar, sqrtVar);
         }
     }
 
 }
-    [BurstCompile]
+[BurstCompile]
 public struct ForwardBurst : IJobParallelFor//a
 {
     public int NodeSize, InputSize;
