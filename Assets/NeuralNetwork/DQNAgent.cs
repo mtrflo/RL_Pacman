@@ -116,7 +116,7 @@ public class DQNAgent : MonoBehaviour
                     
                     batchExpectedOutputs[batchIndex] = expectedValues;
                 }
-
+                //in - expt
                 network.Learn(mono, batchInputs, batchExpectedOutputs);
             }
         }

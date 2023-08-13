@@ -9,7 +9,7 @@ using Random = UnityEngine.Random;
 public class PendulumAgent : MonoBehaviour
 {
     public Rigidbody rb;
-    public Reinforce RLAlg => Reinforce.me;
+    public Reinforce_Chain RLAlg => Reinforce_Chain.me;
     //public DQNAgent RLAlg => DQNAgent.me;
 
     public float delay = 1, startDelay;
