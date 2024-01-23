@@ -13,7 +13,7 @@ public class KickerAgent : MonoBehaviour
     public float delay;
     WaitForSecondsRealtime wfsr;
     private Transition _Transition = new Transition();
-    public Reinforce RLAlg => Reinforce.me;
+    public DQNAgent RLAlg => DQNAgent.me;
     public float epsilon;
     public int teamID;
 
@@ -91,11 +91,11 @@ public class KickerAgent : MonoBehaviour
 
         _Transition.Set(prev_state.ToArray(), action, current_state.ToArray(), s_reward, isPlaying);
         Utils.CopyTo(current_state, prev_state);
-        action = IsAgent ? RLAlg.SampleAction(prev_state.ToArray()) : PlayerChooseAction();
+        action = IsAgent ? RLAlg.SelectAction(prev_state.ToArray()) : PlayerChooseAction();
         MakeAction(action);
 
-
-        Learn();
+        RLAlg.Learn(this, _Transition);
+        //Learn();
 
 
         episodeCount++;
@@ -109,25 +109,25 @@ public class KickerAgent : MonoBehaviour
     List<Transition> transitions;
     int tCounter;
     bool trs = false;
-    void Learn()
-    {
-        transitions.Add(_Transition);
-        tCounter++;
-        if (!isPlaying && tCounter != RLAlg.trajectoryLength)
-        {
-            tCounter = RLAlg.trajectoryLength;
-            //print("t != tl");
-        }
-        if (tCounter == RLAlg.trajectoryLength)
-        {
-            RLAlg.Learn(transitions.ToArray());
+    //void Learn()
+    //{
+    //    transitions.Add(_Transition);
+    //    tCounter++;
+    //    if (!isPlaying && tCounter != RLAlg.trajectoryLength)
+    //    {
+    //        tCounter = RLAlg.trajectoryLength;
+    //        //print("t != tl");
+    //    }
+    //    if (tCounter == RLAlg.trajectoryLength)
+    //    {
+    //        RLAlg.Learn(transitions.ToArray());
 
-            tCounter = 0;
-            trs = true;
-        }
-        if (trs)
-            transitions.RemoveAt(0);
-    }
+    //        tCounter = 0;
+    //        trs = true;
+    //    }
+    //    if (trs)
+    //        transitions.RemoveAt(0);
+    //}
     int PlayerChooseAction()
     {
         int action = 0;

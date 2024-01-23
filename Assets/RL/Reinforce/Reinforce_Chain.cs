@@ -85,20 +85,21 @@ public class Reinforce_Chain : MonoBehaviour
     {
         float G = 0;
         for (int t = trajectoryLength - 1; t > 0; t--)
-            G +=   (discountFactor * (trajectoryLength - t) /t )  * transitions[t].reward ;
-
-        G = Mathf.Exp(1) * G / (trajectoryLength );
-
+            G +=   ( (t + 1) / trajectoryLength)  * transitions[t].reward ;
+        //Mathf.Exp(1) *
+        //G =  G / (trajectoryLength );
+        print("G : " + G);
         Transition transition = transitions.Last();
-
+        //transition.reward = G;
 
         float[] predictedValues = network.Forward(transition.prev_state);
         float QEval = predictedValues[transition.action];
         float QNext = network.Forward(transition.state_).Max();
-        float QTarget = G + discountFactor * QNext;
+        float QTarget = transition.reward + discountFactor * QNext;
         
-        float loss = QEval - QTarget;
-        //float loss = QTarget - QEval;
+        //float loss = QEval - QTarget;
+        float loss = QTarget - QEval;
+        loss = MathF.Pow(loss, 2);
         
         network.Backward(transition.action, loss);
 
