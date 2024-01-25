@@ -8,7 +8,7 @@ public class PipeSpawner : MonoBehaviour {
 	public float spawnTime = 5f;		// The amount of time between each spawn.
 	public float spawnDelay = 3f;		// The amount of time before spawning starts.
 	public PipeMove pipe;
-	public float[] heights;
+	public Vector2 minMax;
 
 	//public TimeController timeController;
 
@@ -48,8 +48,9 @@ public class PipeSpawner : MonoBehaviour {
 	
 	void Spawn ()
 	{
-		int heightIndex = Random.Range(0, heights.Length);
-		Vector2 pos = new Vector2(transform.position.x, heights[heightIndex] + transform.position.y);
+		//int heightIndex = Random.Range(0, heights.Length);
+        //                                              heights[heightIndex]
+        Vector2 pos = new Vector2(transform.position.x, Random.Range(minMax.x, minMax.y) + transform.position.y);
 		if (pipe)
 		{
             PipeMove pm = Instantiate(pipe, pos, transform.rotation,transform);

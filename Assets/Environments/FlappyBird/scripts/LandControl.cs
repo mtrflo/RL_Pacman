@@ -5,12 +5,13 @@ using DG.Tweening;
 public class LandControl : MonoBehaviour {
 
     private Sequence landSequence;
+    public float speed;
 	// Use this for initialization
 	void Start () {
         // land continue moving
         landSequence = DOTween.Sequence();
-
-        landSequence.Append(transform.DOMoveX(transform.position.x - 0.48f, 0.5f).SetEase(Ease.Linear))
+        float size = 0.48f;
+        landSequence.Append(transform.DOMoveX(transform.position.x - size, size/speed).SetEase(Ease.Linear))
             .Append(transform.DOMoveX(transform.position.x, 0f).SetEase(Ease.Linear))
             .SetLoops(-1);
     }

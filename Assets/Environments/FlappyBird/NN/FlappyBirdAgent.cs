@@ -10,6 +10,8 @@ public class FlappyBirdAgent : MonoBehaviour
 {
 
     public static int birdsCount = 0;
+
+    public bool isTraining = true;
     public GameMain gameMain;
     public BirdControl birdControl;
     //public DQNAgent dQNAgent => DQNAgent.me;
@@ -82,8 +84,6 @@ public class FlappyBirdAgent : MonoBehaviour
     {
         current_state.Clear();
         UpdateRayDistances();
-        //foreach (var distance in distances) 
-        //    AddObservation(distance);
         Vector3 birdPos = birdControl.transform.position;
 
         /*
@@ -109,12 +109,10 @@ public class FlappyBirdAgent : MonoBehaviour
 
         AddObservation(rb.velocity.y);
 
-        //print(current_state.ToCommaSeparatedString());
         if (prev_state.Count == 0)
             Utils.CopyTo(current_state, prev_state);
 
         float s_reward = reward;
-
 
 
         if (addReward)
@@ -133,27 +131,24 @@ public class FlappyBirdAgent : MonoBehaviour
                 print("maxScoringCount : " + maxScoringCount);
             }
         }
-        //print("action : " + action);
-        //print("reward : " + s_reward);
         _Transition.Set(prev_state.ToArray(), action, current_state.ToArray(), s_reward, birdControl.dead);
         Utils.CopyTo(current_state, prev_state);
         action = rLAgent.SelectAction(prev_state.ToArray(), epsilon);
         MakeAction(action);
-        rLAgent.Learn(_Transition);
+        if (isTraining)
+            rLAgent.Learn(_Transition);
         episodeCount++;
         totalEpisodeCount++;
-        //if (maxEpisodeCount < episodeCount)
-        //{
-        //    maxEpisodeCount = episodeCount;
-        //    print("maxTimeStep : " + maxEpisodeCount);
-        //}
-        //if (totalEpisodeCount % replaceTargetCount == 0)
-        //{
-        //    rLAgent.ReplaceTarget();
-        //    print("replace");
-        //}
-
-
+        /*if (maxEpisodeCount < episodeCount)
+        {
+            maxEpisodeCount = episodeCount;
+            print("maxTimeStep : " + maxEpisodeCount);
+        }
+        if (totalEpisodeCount % replaceTargetCount == 0)
+        {
+            rLAgent.ReplaceTarget();
+            print("replace");
+        }*/
 
         if (birdControl.dead)
             Restart();
