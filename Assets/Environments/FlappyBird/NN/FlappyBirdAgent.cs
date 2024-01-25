@@ -20,7 +20,7 @@ public class FlappyBirdAgent : MonoBehaviour
 
     public float reward = 0.1f, terminateReward = -1f, scoreReward = 1, distanceReward = 0f;
     public int distanceRewardCount = 50;
-    public static int maxEpisodeCount;
+    public static int maxScoringCount;
     public int episodeCount;
     public int replaceTargetCount;
     public static int totalEpisodeCount;
@@ -66,11 +66,11 @@ public class FlappyBirdAgent : MonoBehaviour
     IEnumerator ActionMaker()
     {
         yield return new WaitWhile(() => pipeSpawner.lastPipe == null);
-
-        wfsr = new WaitForSecondsRealtime(delay);
+        yield return new WaitForSeconds(Random.Range(Time.fixedDeltaTime, Time.fixedDeltaTime * 5));
+        //wfsr = new WaitForSecondsRealtime(delay);
         while (birdControl.inGame || birdControl.dead)
         {
-            yield return wfsr;
+            yield return new WaitForSeconds(Time.fixedDeltaTime);
             ChooseAction();
             if (birdControl.dead)
                 break;
@@ -125,12 +125,12 @@ public class FlappyBirdAgent : MonoBehaviour
         if (birdControl.dead)
         {
             s_reward = terminateReward;
-            if (maxEpisodeCount < episodeCount)
+            if (maxScoringCount < birdControl.scoreMgr.currentScore)
             {
-                maxEpisodeCount = episodeCount;
-                Scoring.me.NewScore(maxEpisodeCount);
+                maxScoringCount = birdControl.scoreMgr.currentScore;
+                Scoring.me.NewScore(maxScoringCount);
 
-                print("maxEpisodeCount : " + maxEpisodeCount);
+                print("maxScoringCount : " + maxScoringCount);
             }
         }
         //print("action : " + action);

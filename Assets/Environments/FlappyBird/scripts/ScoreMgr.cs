@@ -7,18 +7,18 @@ public class ScoreMgr : MonoBehaviour {
 	public GameObject[] scorePrefabs;
 	public float digitOffset;
 	public TextMeshPro textMeshProUGUI;
-    private int nowScore = 0;
+    public int currentScore = 0;
 
     void Start()
     {
-        nowScore = 0;
-        SetScore(nowScore);
+        currentScore = 0;
+        SetScore(currentScore);
     }
 
     public void AddScore()
     {
-        nowScore ++;
-        SetScore(nowScore);
+        currentScore ++;
+        SetScore(currentScore);
     }
 
     public void SetScore(int score)
