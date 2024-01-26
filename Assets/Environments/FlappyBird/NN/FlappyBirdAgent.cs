@@ -71,7 +71,7 @@ public class FlappyBirdAgent : MonoBehaviour
     {
         yield return new WaitWhile(() => pipeSpawner.lastPipe == null);
         yield return new WaitForSeconds(Random.Range(Time.fixedDeltaTime, Time.fixedDeltaTime * 5));
-        wfs = new WaitForSeconds(delay);
+        wfs = isHeruistic ? null : new WaitForSeconds( delay);
         while (birdControl.inGame || birdControl.dead)
         {
             yield return wfs;
@@ -172,9 +172,8 @@ public class FlappyBirdAgent : MonoBehaviour
     int HeruisticSelectAction()
     {
         int action = 0;
-        if (Input.GetKey(KeyCode.Space))
+        if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
             action = 1;
-        print("hers action : " + action);
         return action;
     }
     public Transform[] rayPoints;

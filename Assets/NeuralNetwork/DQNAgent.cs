@@ -16,6 +16,9 @@ using Unity.Mathematics;
 public class DQNAgent : MonoBehaviour
 {
     public static DQNAgent me;
+    [Header("Cloning")]
+    public TextAsset clonedNetwork;
+    public bool clone;
     [Range(0, 1)]
     public float epsilon = 0.8f;//exploit - explore     0-1
     [Range(0, 1)]
@@ -121,6 +124,20 @@ public class DQNAgent : MonoBehaviour
         //}
     }
 
+    public void LearnSupervised(Transition transition)
+    {
+        Transition[] randomSamples = new Transition[] { transition };
+        float[][] batchInputs = randomSamples.Select(x => x.prev_state).ToArray();
+        float[][] batchExpectedOutputs = new float[batchInputs.Length][];
+        float[] expectedValues = new float[network.layersSize.Last()];
+        for (int i = 0; i < expectedValues.Length; i++)
+            expectedValues[i] = -1;
+        expectedValues[transition.action] = 1;
+        batchExpectedOutputs[0] = expectedValues;
+        network.Learn(batchInputs, batchExpectedOutputs);
+
+    }
+
     public void ReplaceTarget()
     {
         void CopyUpdate()
@@ -180,20 +197,34 @@ public class DQNAgent : MonoBehaviour
     [ContextMenu("Save")]
     public void SaveNetwork()
     {
+        SaveNetwork(Path.Combine(Application.streamingAssetsPath, version + ".txt"));
+    }
+    public void SaveNetwork(string filePath)
+    {
         string data = JsonUtility.ToJson(network);
-        File.WriteAllText(Path.Combine(Application.streamingAssetsPath, version + ".txt"), data);
+        File.WriteAllText(filePath, data);
     }
     public void LoadNetwork()
     {
-        if (version == "")
-            return;
-        string filePath = Path.Combine(Application.streamingAssetsPath, version + ".txt");
+        if (clone)
+        {
+            if (clonedNetwork == null)
+                return;
+            string data = clonedNetwork.text;
+            network = JsonUtility.FromJson<Network>(data);
+        }
+        else
+        {
+            if (version == "")
+                return;
+            string filePath = Path.Combine(Application.streamingAssetsPath, version + ".txt");
 
-        if (!File.Exists(filePath))
-            return;
+            if (!File.Exists(filePath))
+                return;
 
-        string data = File.ReadAllText(filePath);
-        network = JsonUtility.FromJson<Network>(data);
+            string data = File.ReadAllText(filePath);
+            network = JsonUtility.FromJson<Network>(data);
+        }
     }
     private void OnValidate()
     {
@@ -264,22 +295,19 @@ public class DQNAgent : MonoBehaviour
     }
 }
 [Serializable]
-public class Transition
+public struct Transition
 {
     public float[] prev_state;
     public int action;
     public float[] state_;
     public float reward;
     public bool isDone;
-    public Transition(float[] state, int action, float[] state_, float reward, bool isDone)
-    {
-        Set(state, action, state_, reward, isDone);
-        this.isDone = isDone;
-    }
-    public Transition()
-    {
-
-    }
+    //public Transition(float[] state, int action, float[] state_, float reward, bool isDone)
+    //{
+    //    Set(state, action, state_, reward, isDone);
+    //    this.isDone = isDone;
+    //}
+    
     public void Set(float[] state, int action, float[] state_, float reward, bool isDone = false)
     {
         if (this.prev_state == null)

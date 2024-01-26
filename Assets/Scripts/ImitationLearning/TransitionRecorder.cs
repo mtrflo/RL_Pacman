@@ -8,7 +8,8 @@ using UnityEngine.UIElements;
 public class TransitionRecorder : MonoBehaviour
 {
     public static TransitionRecorder me;
-    public string fileName;
+    public bool record = false;
+    public string fileName, folderPath;
     public int stepCount = 10000;
     public int addedTrCount = 0;
     string filePath;
@@ -16,26 +17,26 @@ public class TransitionRecorder : MonoBehaviour
     
     private void Awake()
     {
-        filePath = Path.Combine(Application.streamingAssetsPath, "records", fileName + ".txt");
+        filePath = Path.Combine(Application.dataPath, folderPath, "records", fileName + ".txt");
         print("filePath : " + filePath);
         me = this;
         TransitionsData = new Transitions();
     }
-
+    bool isRecorded = false;
     public void AddTransition(Transition transition)
     {
-        if (addedTrCount > stepCount)
-        {
+        if(!record)
             return;
-        }
-        else if (addedTrCount == stepCount)
-            Record();
-        else
+
+        if (isRecorded)
+            return;
+        if (addedTrCount == stepCount)
         {
-            TransitionsData.transitions.Add(transition);
-            addedTrCount++;
+            isRecorded = true;
+            Record();
         }
-        
+        TransitionsData.transitions.Add(transition);
+        addedTrCount++;
     }
 
     public void Record()
