@@ -20,6 +20,7 @@ public class BirdEnv : MonoBehaviour
     }
     public void Restart()
     {
+        name = "0";
         FlappyBirdAgent bird = Instantiate(head, transform);
         bird.env = this;
         bird.epsilon = Mathf.Lerp(epsRange.x, epsRange.y, 1f * myId / (1f * count));

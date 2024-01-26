@@ -84,14 +84,14 @@ public class DQNAgent : MonoBehaviour
 
     public void Learn(Transition transition)
     {
-        replayBuffer.Add(transition);
+        //replayBuffer.Add(transition);
 
-        if (replayBuffer.Size() >= batchSize)
-        {
-            for (int e = 0; e < pCount; e++)
-            {
+        //if (replayBuffer.Size() >= batchSize)
+        //{
+            //for (int e = 0; e < pCount; e++)
+            //{
 
-                Transition[] randomSamples = replayBuffer.GetRandomSamples(batchSize);
+                Transition[] randomSamples = new Transition[] { transition};
 
                 float[][] batchInputs = randomSamples.Select(x => x.prev_state).ToArray();
                 float[][] batchExpectedOutputs = new float[batchInputs.Length][];
@@ -117,8 +117,8 @@ public class DQNAgent : MonoBehaviour
                 }
 
                 network.Learn(batchInputs, batchExpectedOutputs);
-            }
-        }
+            //}
+        //}
     }
 
     public void ReplaceTarget()

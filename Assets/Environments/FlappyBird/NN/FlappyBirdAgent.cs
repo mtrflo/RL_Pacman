@@ -12,6 +12,8 @@ public class FlappyBirdAgent : MonoBehaviour
     public static int birdsCount = 0;
 
     public bool isTraining = true;
+    public bool isHeruistic = false;
+    public bool recordDemonstration = false;
     public GameMain gameMain;
     public BirdControl birdControl;
     //public DQNAgent dQNAgent => DQNAgent.me;
@@ -27,7 +29,7 @@ public class FlappyBirdAgent : MonoBehaviour
     public int replaceTargetCount;
     public static int totalEpisodeCount;
 
-    //public TimeController timeController;
+    public TimeController timeController;
     public float epsilon;
     public BirdEnv env;
     public PipeSpawner pipeSpawner;
@@ -42,7 +44,7 @@ public class FlappyBirdAgent : MonoBehaviour
         current_state = new List<float>();
 
         startDelay = delay;
-        //timeController.ChangeVarsByTimeScale += ChangeVars;
+        //ChangeVars(timeController.timeScale);
 
     }
     bool addReward = false;
@@ -64,15 +66,16 @@ public class FlappyBirdAgent : MonoBehaviour
     }
     int action;
     List<float> prev_state, current_state;
-    WaitForSecondsRealtime wfsr;
+    WaitForSeconds wfs;
     IEnumerator ActionMaker()
     {
         yield return new WaitWhile(() => pipeSpawner.lastPipe == null);
         yield return new WaitForSeconds(Random.Range(Time.fixedDeltaTime, Time.fixedDeltaTime * 5));
-        //wfsr = new WaitForSecondsRealtime(delay);
+        wfs = new WaitForSeconds(delay);
         while (birdControl.inGame || birdControl.dead)
         {
-            yield return new WaitForSeconds(Time.fixedDeltaTime);
+            yield return wfs;
+            
             ChooseAction();
             if (birdControl.dead)
                 break;
@@ -80,6 +83,7 @@ public class FlappyBirdAgent : MonoBehaviour
 
     }
     float[] distances;
+    int lastScore = 0;
     void ChooseAction()
     {
         current_state.Clear();
@@ -133,7 +137,7 @@ public class FlappyBirdAgent : MonoBehaviour
         }
         _Transition.Set(prev_state.ToArray(), action, current_state.ToArray(), s_reward, birdControl.dead);
         Utils.CopyTo(current_state, prev_state);
-        action = rLAgent.SelectAction(prev_state.ToArray(), epsilon);
+        action = isHeruistic ? HeruisticSelectAction() : rLAgent.SelectAction(prev_state.ToArray(), epsilon);
         MakeAction(action);
         if (isTraining)
             rLAgent.Learn(_Transition);
@@ -153,11 +157,31 @@ public class FlappyBirdAgent : MonoBehaviour
         if (birdControl.dead)
             Restart();
 
-    }
+        //score name
+        if ( (lastScore + 1)< birdControl.scoreMgr.currentScore)
+        {
+            lastScore = birdControl.scoreMgr.currentScore;
+            transform.parent.name = lastScore.ToString();
+        }
 
+        if (recordDemonstration && !isTraining && isHeruistic)
+        {
+            TransitionRecorder.me.AddTransition(_Transition);
+        }
+    }
+    int HeruisticSelectAction()
+    {
+        int action = 0;
+        if (Input.GetKey(KeyCode.Space))
+            action = 1;
+        print("hers action : " + action);
+        return action;
+    }
     public Transform[] rayPoints;
+    RaycastHit2D hit;
     void UpdateRayDistances()
     {
+        
         for (int i = 0; i < distances.Length; i++)
             distances[i] = GetRayLength(rayPoints[i]);
     }
@@ -165,7 +189,7 @@ public class FlappyBirdAgent : MonoBehaviour
     private float GetRayLength(Transform point)
     {
         float dstns = -1;
-        RaycastHit2D hit = Physics2D.Raycast(point.transform.position, point.right, 10, ~LayerMask.GetMask("bird"));
+        hit = Physics2D.Raycast(point.position, point.right, 6, ~LayerMask.GetMask("bird"));
         if (hit.collider != null)
         {
             dstns = hit.distance;
@@ -183,9 +207,9 @@ public class FlappyBirdAgent : MonoBehaviour
 
     void Restart()
     {
+        transform.parent.name = "0";
         env.Restart();
         Destroy(gameObject);
-
         //ResetAgent();
         /*
         birdsCount--;
@@ -223,7 +247,7 @@ public class FlappyBirdAgent : MonoBehaviour
     void ChangeVars(float ts)
     {
         delay = startDelay / ts;
-        wfsr = new WaitForSecondsRealtime(delay);
+        wfs = new WaitForSeconds(delay);
     }
     private void OnDestroy()
     {
