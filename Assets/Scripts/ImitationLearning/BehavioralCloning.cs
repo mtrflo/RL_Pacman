@@ -14,8 +14,11 @@ public class BehavioralCloning : MonoBehaviour
     public int yieldEvery = 2;
     private Transitions transitions;
     public DQNAgent dqn;
+    public float minRewardPrice = 1;
+    public List<Transition> waiters;
     private void Start()
     {
+        waiters = new List<Transition>();
         transitions = TransitionRecorder.me.LoadTransitions(demonstrator);
         StartCloning();
     }
@@ -32,7 +35,7 @@ public class BehavioralCloning : MonoBehaviour
         {
             for (int i = 0; i < count; i++)
             {
-                progress = i * 1f / count;
+                progress = (j/ repeat) + (0.1f *( i * 1f / count));
                 //dqn.Learn(transitions.transitions[i]);
                 dqn.LearnSupervised(transitions.transitions[i]);
                 if (i % yieldEvery == 0)

@@ -14,22 +14,29 @@ public class TransitionRecorder : MonoBehaviour
     public int addedTrCount = 0;
     string filePath;
     Transitions TransitionsData;
-    
+    public float minRewardPrice = 1, currentWaitersRewardSum = 0;
+    public List<Transition> waiters;
     private void Awake()
     {
         filePath = Path.Combine(Application.dataPath, folderPath, "records", fileName + ".txt");
         print("filePath : " + filePath);
         me = this;
+        waiters = new List<Transition>();
         TransitionsData = new Transitions();
     }
     bool isRecorded = false;
     public void AddTransition(Transition transition)
     {
+        
+
         if(!record)
             return;
 
         if (isRecorded)
             return;
+
+        
+
         if (addedTrCount == stepCount)
         {
             isRecorded = true;

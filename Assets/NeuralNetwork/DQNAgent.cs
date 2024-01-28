@@ -16,6 +16,7 @@ using Unity.Mathematics;
 public class DQNAgent : MonoBehaviour
 {
     public static DQNAgent me;
+    public string version = "test";
     [Header("Cloning")]
     public TextAsset clonedNetwork;
     public bool clone;
@@ -25,15 +26,19 @@ public class DQNAgent : MonoBehaviour
     public float gamma = 0.8f;
     [Range(0, 1)]
     public float lr = 0.1f;
+    
+    #region ReplayBuffer
     [Header("ReplayBuffer")]
-    public int bufferSize = 500;
-    public int batchSize = 50;
-    public int pCount = 1;
+    [HideInInspector] public int bufferSize = 1;
+    [HideInInspector] public int batchSize = 1;
+    [HideInInspector] public int pCount = 1;
     [Range(0, 1)]
-    public float softUpdateFactor = 0.05f;
-    public string version = "test";
-    public Network network, targetNetwork;
-    public ReplayBuffer<Transition> replayBuffer;
+    [HideInInspector] public float softUpdateFactor = 1;
+    [HideInInspector] public ReplayBuffer<Transition> replayBuffer;
+    [HideInInspector] public Network targetNetwork;
+    #endregion
+    
+    public Network network;
     private void Awake()
     {
         replayBuffer = new ReplayBuffer<Transition>(bufferSize);
