@@ -26,7 +26,7 @@ public class DQNAgent : MonoBehaviour
     public float gamma = 0.8f;
     [Range(0, 1)]
     public float lr = 0.1f;
-    
+
     #region ReplayBuffer
     [Header("ReplayBuffer")]
     [HideInInspector] public int bufferSize = 1;
@@ -37,7 +37,7 @@ public class DQNAgent : MonoBehaviour
     [HideInInspector] public ReplayBuffer<Transition> replayBuffer;
     [HideInInspector] public Network targetNetwork;
     #endregion
-    
+
     public Network network;
     private void Awake()
     {
@@ -74,7 +74,7 @@ public class DQNAgent : MonoBehaviour
         return action;
     }
 
-    public int SelectAction(float[] observation,float _epsilon)
+    public int SelectAction(float[] observation, float _epsilon)
     {
         int action = 0;
         float e = Random.Range(0, 1f);
@@ -96,36 +96,36 @@ public class DQNAgent : MonoBehaviour
 
         //if (replayBuffer.Size() >= batchSize)
         //{
-            //for (int e = 0; e < pCount; e++)
-            //{
+        //for (int e = 0; e < pCount; e++)
+        //{
 
-                Transition[] randomSamples = new Transition[] { transition};
+        Transition[] randomSamples = new Transition[] { transition };
 
-                float[][] batchInputs = randomSamples.Select(x => x.prev_state).ToArray();
-                float[][] batchExpectedOutputs = new float[batchInputs.Length][];
+        float[][] batchInputs = randomSamples.Select(x => x.prev_state).ToArray();
+        float[][] batchExpectedOutputs = new float[batchInputs.Length][];
 
-                for (int batchIndex = 0; batchIndex < batchSize; batchIndex++)
-                {
-                    Transition sampleTransition = randomSamples[batchIndex];
-                    batchInputs[batchIndex] = sampleTransition.prev_state;
+        for (int batchIndex = 0; batchIndex < batchSize; batchIndex++)
+        {
+            Transition sampleTransition = randomSamples[batchIndex];
+            batchInputs[batchIndex] = sampleTransition.prev_state;
 
-                    float[] predictedValues = network.Forward(sampleTransition.prev_state);
-                    float QEval = predictedValues[sampleTransition.action];
-                    float QNext = network.Forward(sampleTransition.state_).Max();
-                    float QTarget = sampleTransition.reward + gamma * QNext;
-                    if (sampleTransition.isDone)
-                        QTarget = sampleTransition.reward;
+            float[] predictedValues = network.Forward(sampleTransition.prev_state);
+            float QEval = predictedValues[sampleTransition.action];
+            float QNext = network.Forward(sampleTransition.state_).Max();
+            float QTarget = sampleTransition.reward + gamma * QNext;
+            if (sampleTransition.isDone)
+                QTarget = sampleTransition.reward;
 
-                    float[] expectedValues = predictedValues.ToArray();
-                    
-                    
-                    expectedValues[sampleTransition.action] = QTarget;
-                    
-                    batchExpectedOutputs[batchIndex] = expectedValues;
-                }
+            float[] expectedValues = predictedValues.ToArray();
 
-                network.Learn(batchInputs, batchExpectedOutputs);
-            //}
+
+            expectedValues[sampleTransition.action] = QTarget;
+
+            batchExpectedOutputs[batchIndex] = expectedValues;
+        }
+
+        network.Learn(batchInputs, batchExpectedOutputs);
+        //}
         //}
     }
 
@@ -137,10 +137,15 @@ public class DQNAgent : MonoBehaviour
         float[] expectedValues = new float[network.layersSize.Last()];
         float[] networkForward = network.Forward(transition.state_);
         float networkForwardMax = networkForward.Max();
+        //if (networkForwardMax == expectedValues[transition.action])
+        //    return;
         float networkForwardMin = networkForward.Min();
+        float mid = (networkForwardMax - networkForwardMin) / 10;
+        float min = mid < 0 ? mid * 2 : mid / 2;
+        float max = mid < 0 ? mid / 2 : mid * 2;
         for (int i = 0; i < expectedValues.Length; i++)
-            expectedValues[i] = networkForwardMin;
-        expectedValues[transition.action] = networkForwardMax;
+            expectedValues[i] = min;
+        expectedValues[transition.action] = max;
         batchExpectedOutputs[0] = expectedValues;
         network.Learn(batchInputs, batchExpectedOutputs);
 
@@ -164,7 +169,7 @@ public class DQNAgent : MonoBehaviour
             }
         }
 
-        
+
 
         void SoftUpdate()
         {
@@ -175,7 +180,7 @@ public class DQNAgent : MonoBehaviour
             , mainNetworkLayersWeightsWeigthsCount = 0
             , layerBiasCount = 0;
 
-            
+
             for (int i = 0; i < mainNetworkLayerCount; i++)
             {
                 mainNetworkLayerWeightCount = network.Layers[i].Weights.Length;
@@ -281,14 +286,14 @@ public class DQNAgent : MonoBehaviour
     }
 
     public bool isNan => Application.isPlaying && float.IsNaN(network.Layers[0].Weights[0]);
-    [ReadOnly,ShowIf("isNan"), Label("NAAAAAAAAAAAAAAAAAAN!!!!!!!!!!!!!!")]
+    [ReadOnly, ShowIf("isNan"), Label("NAAAAAAAAAAAAAAAAAAN!!!!!!!!!!!!!!")]
     public bool Nannn;
 
     private void OnDestroy()
     {
         foreach (var layer in network.Layers)
         {
-            
+
             layer.na_inputs.Dispose();
             layer.na_Weights.Dispose();
             layer.na_Biases.Dispose();
@@ -319,7 +324,7 @@ public struct Transition
     //    Set(state, action, state_, reward, isDone);
     //    this.isDone = isDone;
     //}
-    
+
     public void Set(float[] state, int action, float[] state_, float reward, bool isDone = false)
     {
         if (this.prev_state == null)
@@ -332,5 +337,5 @@ public struct Transition
         this.reward = reward;
         this.isDone = isDone;
     }
-    
+
 }

@@ -15,7 +15,7 @@ public class BehavioralCloning : MonoBehaviour
     private Transitions transitions;
     public DQNAgent dqn;
     public bool supervised = true;
-   
+    public bool rt = false;
     private void Start()
     {
         transitions = TransitionRecorder.me.LoadTransitions(demonstrator);
@@ -24,8 +24,12 @@ public class BehavioralCloning : MonoBehaviour
     }
     public void StartCloning()
     {
-        StartCoroutine(IECloning());
+        if(rt)
+            StartCoroutine(IERTCloning());
+        else
+            StartCoroutine(IECloning());
     }
+    public float delay;
     IEnumerator IECloning()
     {
         float tlr = dqn.network.LearningRate;
@@ -36,7 +40,6 @@ public class BehavioralCloning : MonoBehaviour
             for (int i = 0; i < count; i++)
             {
                 progress = (j *1f/ repeat) + (0.1f *( i * 1f / count));
-                //dqn.Learn(transitions.transitions[i]);
                 if(supervised)
                     dqn.LearnSupervised(transitions.transitions[i]);
                 else
@@ -47,12 +50,22 @@ public class BehavioralCloning : MonoBehaviour
             //progress = j * 1f / repeat;
         }
         dqn.network.LearningRate = tlr;
-        print("dqn.network.LearningRate : " + dqn.network.LearningRate);
         dqn.SaveNetwork(filePath);
         print("cloned");
         yield return null;
 
     }
-
+    IEnumerator IERTCloning()
+    {
+        WaitForSeconds wfs = new WaitForSeconds(delay);
+        int step = 0;
+        while (true)
+        {
+            dqn.Learn(transitions.transitions[Random.Range(0, transitions.transitions.Count)]);
+            if (step % yieldEvery == 0)
+                yield return wfs;
+            step++;
+        }
+    }
     public string filePath => Path.Combine(Application.dataPath, folderPath, "clones", fileName + ".txt");
 }
