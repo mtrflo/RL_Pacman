@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class MultiEnviroment : MonoBehaviour
 {
+    public bool disable = true;
     #region Serialized vars
     public int count;
     public GameObject env;
@@ -20,13 +21,16 @@ public class MultiEnviroment : MonoBehaviour
     #endregion
     private void Awake()
     {
-        if(ins_parent == null)
+        if (ins_parent == null)
         {
             ins_parent = transform;
         }
     }
     void Start()
     {
+        if (disable)
+            return;
+
         for (int i = 0; i < count; i++)
         {
             Vector3 offset = Vector3.one * ((i + 1) * space);
@@ -37,4 +41,6 @@ public class MultiEnviroment : MonoBehaviour
             //env_t.transform.Translate(, 0,0, Space.World);
         }
     }
+
+
 }

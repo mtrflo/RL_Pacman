@@ -135,9 +135,12 @@ public class DQNAgent : MonoBehaviour
         float[][] batchInputs = randomSamples.Select(x => x.prev_state).ToArray();
         float[][] batchExpectedOutputs = new float[batchInputs.Length][];
         float[] expectedValues = new float[network.layersSize.Last()];
+        float[] networkForward = network.Forward(transition.state_);
+        float networkForwardMax = networkForward.Max();
+        float networkForwardMin = networkForward.Min();
         for (int i = 0; i < expectedValues.Length; i++)
-            expectedValues[i] = -1;
-        expectedValues[transition.action] = 1;
+            expectedValues[i] = networkForwardMin;
+        expectedValues[transition.action] = networkForwardMax;
         batchExpectedOutputs[0] = expectedValues;
         network.Learn(batchInputs, batchExpectedOutputs);
 
@@ -216,7 +219,10 @@ public class DQNAgent : MonoBehaviour
             if (clonedNetwork == null)
                 return;
             string data = clonedNetwork.text;
+            float tlr = network.LearningRate;
             network = JsonUtility.FromJson<Network>(data);
+            network.LearningRate = tlr;
+            print("Network cloned");
         }
         else
         {
@@ -229,6 +235,7 @@ public class DQNAgent : MonoBehaviour
 
             string data = File.ReadAllText(filePath);
             network = JsonUtility.FromJson<Network>(data);
+            print("network loaded");
         }
     }
     private void OnValidate()

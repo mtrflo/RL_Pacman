@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class BirdEnv : MonoBehaviour
 {
-    public FlappyBirdAgent head;
+    public FlappyBirdAgent birdAgent;
+    [HideInInspector] public FlappyBirdAgent currentBird;
     public Vector2 epsRange;
 
     public int count;
@@ -16,12 +17,14 @@ public class BirdEnv : MonoBehaviour
         id++;
         count = FindObjectOfType<MultiEnviroment>().count;
         
-        head.epsilon = Mathf.Lerp(epsRange.x, epsRange.y, 1f * myId / (1f * count));
+        birdAgent.epsilon = Mathf.Lerp(epsRange.x, epsRange.y, 1f * myId / (1f * count));
+        currentBird = birdAgent;
     }
     public void Restart()
     {
         name = "0";
-        FlappyBirdAgent bird = Instantiate(head, transform);
+        FlappyBirdAgent bird = Instantiate(birdAgent, transform);
+        currentBird = bird;
         bird.env = this;
         bird.epsilon = Mathf.Lerp(epsRange.x, epsRange.y, 1f * myId / (1f * count));
     }

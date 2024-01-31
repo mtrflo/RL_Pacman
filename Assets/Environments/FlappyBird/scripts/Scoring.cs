@@ -32,4 +32,6 @@ public class Scoring : MonoBehaviour
             timesID++;
         }
     }
+    //TimeBasedInvoke
 }
+

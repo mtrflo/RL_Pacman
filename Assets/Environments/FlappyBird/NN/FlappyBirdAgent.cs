@@ -124,16 +124,14 @@ public class FlappyBirdAgent : MonoBehaviour
             addReward = false;
             s_reward = scoreReward;
         }
+        if (maxScoringCount < birdControl.scoreMgr.currentScore)
+        {
+            maxScoringCount = birdControl.scoreMgr.currentScore;
+            Scoring.me.NewScore(maxScoringCount);
+        }
         if (birdControl.dead)
         {
             s_reward = terminateReward;
-            if (maxScoringCount < birdControl.scoreMgr.currentScore)
-            {
-                maxScoringCount = birdControl.scoreMgr.currentScore;
-                Scoring.me.NewScore(maxScoringCount);
-
-                print("maxScoringCount : " + maxScoringCount);
-            }
         }
         _Transition.Set(prev_state.ToArray(), action, current_state.ToArray(), s_reward, birdControl.dead);
         Utils.CopyTo(current_state, prev_state);
@@ -253,4 +251,6 @@ public class FlappyBirdAgent : MonoBehaviour
         //timeController.ChangeVarsByTimeScale -= ChangeVars;
 
     }
+
+    
 }

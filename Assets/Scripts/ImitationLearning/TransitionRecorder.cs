@@ -19,35 +19,60 @@ public class TransitionRecorder : MonoBehaviour
     private void Awake()
     {
         filePath = Path.Combine(Application.dataPath, folderPath, "records", fileName + ".txt");
-        print("filePath : " + filePath);
         me = this;
         waiters = new List<Transition>();
         TransitionsData = new Transitions();
     }
     bool isRecorded = false;
+    private bool isGateOpened = false;
     public void AddTransition(Transition transition)
     {
-        
 
-        if(!record)
+
+        if (!record || isRecorded)
             return;
 
-        if (isRecorded)
-            return;
 
-        
 
-        if (addedTrCount == stepCount)
+        if (isGateOpened)
         {
-            isRecorded = true;
-            Record();
+            TransitionsData.transitions.Add(transition);
+            addedTrCount++;
         }
-        TransitionsData.transitions.Add(transition);
-        addedTrCount++;
+        else if (currentWaitersRewardSum <= minRewardPrice && !isGateOpened)
+        {
+            print("transition.reward : " + transition.reward);
+            currentWaitersRewardSum += transition.reward;
+            waiters.Add(transition);
+        }
+        else
+            OpenGate();
+
+        if (transition.isDone)
+            CloseGate();
+
+        if (stepCount <= addedTrCount)
+        {
+            Record();
+            CloseGate();
+        }
     }
 
+    void CloseGate()
+    {
+        waiters = new List<Transition>();
+        currentWaitersRewardSum = 0;
+        isGateOpened = false;
+    }
+    void OpenGate()
+    {
+        TransitionsData.transitions.AddRange(waiters);
+        addedTrCount += waiters.Count;
+        isGateOpened = true;
+    }
     public void Record()
     {
+        isRecorded = true;
         string data = JsonUtility.ToJson(TransitionsData);
         File.WriteAllText(filePath, data);
         print(stepCount + " steps recorded");
