@@ -35,6 +35,8 @@ public class FlappyBirdAgent : MonoBehaviour
     public PipeSpawner pipeSpawner;
     private Transition _Transition = new Transition();
     private Rigidbody2D rb;
+
+    FixedSizeQueue<Transition> transitionTrajectory;
     private void Awake()
     {
         //timeController = TimeController.me;
@@ -45,7 +47,7 @@ public class FlappyBirdAgent : MonoBehaviour
 
         startDelay = delay;
         //ChangeVars(timeController.timeScale);
-
+        transitionTrajectory = new FixedSizeQueue<Transition>(rLAgent.trajectoryLength);
     }
     bool addReward = false;
     private void Start()
@@ -90,6 +92,7 @@ public class FlappyBirdAgent : MonoBehaviour
         UpdateRayDistances();
         Vector3 birdPos = birdControl.transform.position;
 
+        #region observation
         /*
         //AddObservation(birdControl.transform.localPosition.y);// bird y pos
         //AddObservation(dis);// pipe distance 
@@ -109,15 +112,14 @@ public class FlappyBirdAgent : MonoBehaviour
         AddObservation(distances[1]);
         AddObservation(distances[2]);
         AddObservation(distances[3]);
-
-
         AddObservation(rb.velocity.y);
+        #endregion
+
 
         if (prev_state.Count == 0)
             Utils.CopyTo(current_state, prev_state);
 
         float s_reward = reward;
-
 
         if (addReward)
         {
@@ -133,13 +135,16 @@ public class FlappyBirdAgent : MonoBehaviour
         {
             s_reward = terminateReward;
         }
+        Transition prevTransition = _Transition;
         _Transition.Set(prev_state.ToArray(), action, current_state.ToArray(), s_reward, birdControl.dead);
         Utils.CopyTo(current_state, prev_state);
         action = isHeruistic ? HeruisticSelectAction() : rLAgent.SelectAction(prev_state.ToArray(), epsilon);
         MakeAction(action);
         if (isTraining)
-            rLAgent.Learn(_Transition);
-        episodeCount++;
+            rLAgent.nqLearn(_Transition,prevTransition);
+
+        transitionTrajectory.Enqueue(_Transition);
+        episodeCount++; 
         totalEpisodeCount++;
         /*if (maxEpisodeCount < episodeCount)
         {
@@ -166,6 +171,7 @@ public class FlappyBirdAgent : MonoBehaviour
         {
             TransitionRecorder.me.AddTransition(_Transition);
         }
+        
     }
     int HeruisticSelectAction()
     {

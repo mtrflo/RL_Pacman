@@ -38,11 +38,17 @@ public class DQNAgent : MonoBehaviour
     [HideInInspector] public Network targetNetwork;
     #endregion
 
+    #region Trajectory
+    [Header("Trajectory")]
+    public bool enableBackT = false;
+    public float tl = 0.1f;
+    public int length = 2;
+    #endregion
     public Network network;
     private void Awake()
     {
         replayBuffer = new ReplayBuffer<Transition>(bufferSize);
-
+        transitionQueue = new Queue<Transition>(length);
         if (me != null)
         {
             Destroy(gameObject);
@@ -89,7 +95,7 @@ public class DQNAgent : MonoBehaviour
 
         return action;
     }
-
+    Queue<Transition> transitionQueue;
     public void Learn(Transition transition)
     {
         //replayBuffer.Add(transition);
@@ -114,7 +120,9 @@ public class DQNAgent : MonoBehaviour
             float QNext = network.Forward(sampleTransition.state_).Max();
             float QTarget = sampleTransition.reward + gamma * QNext;
             if (sampleTransition.isDone)
+            {
                 QTarget = sampleTransition.reward;
+            }
 
             float[] expectedValues = predictedValues.ToArray();
 
@@ -125,10 +133,29 @@ public class DQNAgent : MonoBehaviour
         }
 
         network.Learn(batchInputs, batchExpectedOutputs);
+
         //}
         //}
     }
+    public void nqLearn(Transition transition, Transition prevTransition)
+    {
+        Learn(transition);
 
+        transitionQueue.Enqueue(transition);
+
+        if (enableBackT)
+        {
+            float currentRew = transition.reward;
+            float prevRew = prevTransition.reward;
+            if (Mathf.Abs(currentRew) > 0.01f)
+            {
+                //print(" bef prevRew : " + prevRew);
+                prevTransition.reward = Mathf.Lerp(prevRew, currentRew, tl);
+                //print("prevTransition.reward : " + prevTransition.reward);
+                Learn(prevTransition);
+            }
+        }
+    }
     public void LearnSupervised(Transition transition)
     {
         Transition[] randomSamples = new Transition[] { transition };
