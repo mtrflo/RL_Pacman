@@ -73,11 +73,11 @@ public class FlappyBirdAgent : MonoBehaviour
     {
         yield return new WaitWhile(() => pipeSpawner.lastPipe == null);
         yield return new WaitForSeconds(Random.Range(Time.fixedDeltaTime, Time.fixedDeltaTime * 5));
-        wfs = isHeruistic ? null : new WaitForSeconds( delay);
+        wfs = isHeruistic ? null : new WaitForSeconds(delay);
         while (birdControl.inGame || birdControl.dead)
         {
             yield return wfs;
-            
+
             ChooseAction();
             if (birdControl.dead)
                 break;
@@ -139,12 +139,14 @@ public class FlappyBirdAgent : MonoBehaviour
         Utils.CopyTo(current_state, prev_state);
         action = isHeruistic ? HeruisticSelectAction() : rLAgent.SelectAction(prev_state.ToArray(), epsilon);
         MakeAction(action);
-        
+
         if (isTraining)
-            rLAgent.nqLearn(_Transition,transitionTrajectory);
-        transitionTrajectory.Push(_Transition);
-        
-        episodeCount++; 
+        {
+            rLAgent.nqLearn(_Transition, transitionTrajectory);
+            transitionTrajectory.Push(_Transition);
+        }
+
+        episodeCount++;
         totalEpisodeCount++;
         /*if (maxEpisodeCount < episodeCount)
         {
@@ -161,7 +163,7 @@ public class FlappyBirdAgent : MonoBehaviour
             Restart();
 
         //score name
-        if ( (lastScore + 1)< birdControl.scoreMgr.currentScore)
+        if ((lastScore + 1) < birdControl.scoreMgr.currentScore)
         {
             lastScore = birdControl.scoreMgr.currentScore;
             transform.parent.name = lastScore.ToString();
@@ -171,7 +173,7 @@ public class FlappyBirdAgent : MonoBehaviour
         {
             TransitionRecorder.me.AddTransition(_Transition);
         }
-        
+
     }
     int HeruisticSelectAction()
     {
@@ -184,7 +186,7 @@ public class FlappyBirdAgent : MonoBehaviour
     RaycastHit2D hit;
     void UpdateRayDistances()
     {
-        
+
         for (int i = 0; i < distances.Length; i++)
             distances[i] = GetRayLength(rayPoints[i]);
     }
@@ -258,5 +260,5 @@ public class FlappyBirdAgent : MonoBehaviour
 
     }
 
-    
+
 }

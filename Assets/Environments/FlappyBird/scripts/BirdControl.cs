@@ -84,18 +84,12 @@ public class BirdControl : MonoBehaviour {
 	{
 		if (other.name == "land" || other.name == "pipe_up" || other.name == "pipe_down")
 		{
-            //if (other.name == "pipe_up" || other.name == "pipe_down")
-            //{
-            //    pipe = other.transform.parent.GetComponent<PipeMove>().nextPipe;
-            //    //Destroy(other.transform.parent.gameObject);
-            //}
             if (!dead)
             {
                 animator.SetTrigger("die");
 				GameOver();
 				OnDie();
             }
-			
 
 			if (other.name == "land")
 			{
