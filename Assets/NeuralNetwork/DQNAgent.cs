@@ -42,13 +42,12 @@ public class DQNAgent : MonoBehaviour
     [Header("Trajectory")]
     public bool enableBackT = false;
     public float tl = 0.1f;
-    public int length = 2;
+    public int trajectoryLength = 2;
     #endregion
     public Network network;
     private void Awake()
     {
         replayBuffer = new ReplayBuffer<Transition>(bufferSize);
-        transitionQueue = new Queue<Transition>(length);
         if (me != null)
         {
             Destroy(gameObject);
@@ -137,24 +136,34 @@ public class DQNAgent : MonoBehaviour
         //}
         //}
     }
-    public void nqLearn(Transition transition, Transition prevTransition)
+    public void nqLearn(Transition currentTransition, MaxSizeStack<Transition> trajectoryStack)
     {
-        Learn(transition);
-
-        transitionQueue.Enqueue(transition);
-
-        if (enableBackT)
+        Learn(currentTransition);
+        float currentRew = currentTransition.reward;
+        if (enableBackT && trajectoryStack.IsFull)
         {
-            float currentRew = transition.reward;
-            float prevRew = prevTransition.reward;
-            if (Mathf.Abs(currentRew) > 0.01f)
+            //if (Mathf.Abs(currentRew) > 0.01f)
+            if (currentRew > 0.01f)
             {
-                //print(" bef prevRew : " + prevRew);
-                prevTransition.reward = Mathf.Lerp(prevRew, currentRew, tl);
-                //print("prevTransition.reward : " + prevTransition.reward);
-                Learn(prevTransition);
+                float prevRew;
+                int trId = 0;
+                do
+                {
+                    trId++;
+                    Transition prevTransition = trajectoryStack.Pop();
+                    prevRew = prevTransition.reward;
+                    //print(" bef prevRew : " + prevRew);
+                    prevTransition.reward = Mathf.Lerp(prevRew, currentRew, tl);
+                    //print("prevTransition.reward : " + prevTransition.reward);
+
+                    Learn(prevTransition);
+
+                    currentRew = prevTransition.reward;
+                }
+                while (trajectoryStack.Count > 0);
             }
         }
+
     }
     public void LearnSupervised(Transition transition)
     {
@@ -365,4 +374,47 @@ public struct Transition
         this.isDone = isDone;
     }
 
+}
+public class MaxSizeStack<T>
+{
+    private List<T> stack;
+    private int maxSize;
+
+    public int Count { get { return stack.Count; } }
+
+    public MaxSizeStack(int maxSize)
+    {
+        if (maxSize <= 0)
+            throw new ArgumentOutOfRangeException("maxSize must be greater than zero.");
+
+        this.maxSize = maxSize;
+        this.stack = new List<T>();
+    }
+
+    public void Push(T item)
+    {
+        stack.Add(item);
+
+        if (stack.Count > maxSize)
+            stack.RemoveAt(0);
+    }
+
+    public T Pop()
+    {
+        if (stack.Count == 0)
+            throw new InvalidOperationException("The stack is empty.");
+
+        T item = stack[stack.Count - 1];
+        stack.RemoveAt(stack.Count - 1);
+        return item;
+    }
+
+    public T Peek()
+    {
+        if (stack.Count == 0)
+            throw new InvalidOperationException("The stack is empty.");
+
+        return stack[stack.Count - 1];
+    }
+    public bool IsFull { get { return Count == maxSize; } }
 }

@@ -36,7 +36,7 @@ public class FlappyBirdAgent : MonoBehaviour
     private Transition _Transition = new Transition();
     private Rigidbody2D rb;
 
-    FixedSizeQueue<Transition> transitionTrajectory;
+    MaxSizeStack<Transition> transitionTrajectory;
     private void Awake()
     {
         //timeController = TimeController.me;
@@ -47,7 +47,7 @@ public class FlappyBirdAgent : MonoBehaviour
 
         startDelay = delay;
         //ChangeVars(timeController.timeScale);
-        transitionTrajectory = new FixedSizeQueue<Transition>(rLAgent.trajectoryLength);
+        transitionTrajectory = new MaxSizeStack<Transition>(rLAgent.trajectoryLength);
     }
     bool addReward = false;
     private void Start()
@@ -135,15 +135,15 @@ public class FlappyBirdAgent : MonoBehaviour
         {
             s_reward = terminateReward;
         }
-        Transition prevTransition = _Transition;
         _Transition.Set(prev_state.ToArray(), action, current_state.ToArray(), s_reward, birdControl.dead);
         Utils.CopyTo(current_state, prev_state);
         action = isHeruistic ? HeruisticSelectAction() : rLAgent.SelectAction(prev_state.ToArray(), epsilon);
         MakeAction(action);
+        
         if (isTraining)
-            rLAgent.nqLearn(_Transition,prevTransition);
-
-        transitionTrajectory.Enqueue(_Transition);
+            rLAgent.nqLearn(_Transition,transitionTrajectory);
+        transitionTrajectory.Push(_Transition);
+        
         episodeCount++; 
         totalEpisodeCount++;
         /*if (maxEpisodeCount < episodeCount)

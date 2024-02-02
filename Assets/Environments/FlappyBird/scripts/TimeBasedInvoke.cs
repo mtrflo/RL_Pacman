@@ -53,12 +53,12 @@ public class TimeBasedInvoke : MonoBehaviour
         birdEnvs.Sort((x, y) => x.currentBird.birdControl.scoreMgr.currentScore.CompareTo(y.currentBird.birdControl.scoreMgr.currentScore));
         IEnumerator IEDestroy()
         {
-            print("env c : " + multiEnviromewnt.count);
             for (int i = 0; i < count; i++)
             {
                 Destroy(birdEnvs[i].gameObject);
                 yield return null;
             }
+            print("cycle starts with env c : " + multiEnviromewnt.count);
             multiEnviromewnt.count -= count;
         }
         StartCoroutine(IEDestroy());
