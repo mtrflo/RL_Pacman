@@ -143,7 +143,10 @@ public class FlappyBirdAgent : MonoBehaviour
         if (isTraining)
         {
             rLAgent.nqLearn(_Transition, transitionTrajectory);
-            transitionTrajectory.Push(_Transition);
+            if(rLAgent.enableBackT)
+                transitionTrajectory.Push(_Transition);
+            
+            //rLAgent.Learn(_Transition);
         }
 
         episodeCount++;

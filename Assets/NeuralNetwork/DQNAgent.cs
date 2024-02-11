@@ -11,7 +11,8 @@ using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using Unity.Mathematics;
-
+using MathNet.Numerics;
+using System.Threading.Tasks;
 
 public class DQNAgent : MonoBehaviour
 {
@@ -41,7 +42,6 @@ public class DQNAgent : MonoBehaviour
     #region Trajectory
     [Header("Trajectory")]
     public bool enableBackT = false;
-    public float tl = 0.1f;
     public int trajectoryLength = 2;
     #endregion
     public Network network;
@@ -140,30 +140,40 @@ public class DQNAgent : MonoBehaviour
     {
         Learn(currentTransition);
         float currentRew = currentTransition.reward;
-        if (enableBackT && trajectoryStack.IsFull)
+        if (enableBackT && (trajectoryStack.IsFull || Mathf.Abs(currentRew) > 0.01f))
         {
-            //if (Mathf.Abs(currentRew) > 0.01f)
-            if (currentRew > 0.01f)
+            if (Mathf.Abs(currentRew) > 0.01f)
+            //if (currentRew > 0.01f)
             {
-                float prevRew;
+                float R = currentRew;
                 int trId = 0;
                 do
                 {
                     trId++;
-                    Transition prevTransition = trajectoryStack.Pop();
-                    prevRew = prevTransition.reward;
-                    //print(" bef prevRew : " + prevRew);
-                    prevTransition.reward = Mathf.Lerp(prevRew, currentRew, tl);
-                    //print("prevTransition.reward : " + prevTransition.reward);
+                    Transition Transition_n = trajectoryStack.Pop();
+                    R = Transition_n.reward + gamma * R;
+                    //print(" Transition_n.reward : " + Transition_n.reward);
+                    Transition_n.reward = R;
+                    //print("R : " + R);
 
-                    Learn(prevTransition);
-
-                    currentRew = prevTransition.reward;
+                    Learn(Transition_n);
                 }
                 while (trajectoryStack.Count > 0);
+                print("R : " + R);
             }
-        }
+            //else
+            //{
+            //    do
+            //    {
+            //        Transition Transition_n = trajectoryStack.Pop();
+            //        Learn(Transition_n);
+            //    }
+            //    while (trajectoryStack.Count > 0);
+            //    //print("___normal end");
+            //}
 
+        }
+        //print("nq end");
     }
     public void LearnSupervised(Transition transition)
     {
@@ -375,7 +385,7 @@ public struct Transition
     }
 
 }
-public class MaxSizeStack<T>
+public class MaxSizeStack<T> : ICloneable
 {
     private List<T> stack;
     private int maxSize;
@@ -417,4 +427,11 @@ public class MaxSizeStack<T>
         return stack[stack.Count - 1];
     }
     public bool IsFull { get { return Count == maxSize; } }
+
+    public object Clone()
+    {
+        MaxSizeStack<T> clonedStack = new MaxSizeStack<T>(maxSize);
+        clonedStack.stack = new List<T>(stack);
+        return clonedStack;
+    }
 }
