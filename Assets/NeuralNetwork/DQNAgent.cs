@@ -13,6 +13,7 @@ using Random = UnityEngine.Random;
 using Unity.Mathematics;
 using MathNet.Numerics;
 using System.Threading.Tasks;
+using Unity.Burst;
 
 public class DQNAgent : MonoBehaviour
 {
@@ -23,7 +24,7 @@ public class DQNAgent : MonoBehaviour
     public bool clone;
     [Range(0, 1)]
     public float epsilon = 0.8f;//exploit - explore     0-1
-    [Range(0, 1)]
+    [Range(0, 2)]
     public float gamma = 0.8f;
     [Range(0, 1)]
     public float lr = 0.1f;
@@ -36,7 +37,7 @@ public class DQNAgent : MonoBehaviour
     [Range(0, 1)]
     [HideInInspector] public float softUpdateFactor = 1;
     [HideInInspector] public ReplayBuffer<Transition> replayBuffer;
-    [HideInInspector] public Network targetNetwork;
+    //[HideInInspector] public Network targetNetwork;
     #endregion
 
     #region Trajectory
@@ -59,8 +60,8 @@ public class DQNAgent : MonoBehaviour
 
         network.Init();
 
-        targetNetwork = DuplicateNetwork(network);
-        ReplaceTarget();
+        //targetNetwork = DuplicateNetwork(network);
+        //ReplaceTarget();
         //DontDestroyOnLoad(this);
     }
     public int SelectAction(float[] observation)
@@ -189,6 +190,12 @@ public class DQNAgent : MonoBehaviour
         float mid = (networkForwardMax - networkForwardMin) / 10;
         float min = mid < 0 ? mid * 2 : mid / 2;
         float max = mid < 0 ? mid / 2 : mid * 2;
+        if (transition.isDone)
+        {
+            float t_max = max;
+            max = min;
+            min = t_max;
+        }
         for (int i = 0; i < expectedValues.Length; i++)
             expectedValues[i] = min;
         expectedValues[transition.action] = max;
@@ -196,7 +203,7 @@ public class DQNAgent : MonoBehaviour
         network.Learn(batchInputs, batchExpectedOutputs);
 
     }
-
+    /*
     public void ReplaceTarget()
     {
         void CopyUpdate()
@@ -248,7 +255,7 @@ public class DQNAgent : MonoBehaviour
 
         SoftUpdate();
     }
-
+    */
     private void OnApplicationQuit()
     {
         SaveNetwork();
@@ -282,7 +289,10 @@ public class DQNAgent : MonoBehaviour
             string filePath = Path.Combine(Application.streamingAssetsPath, version + ".txt");
 
             if (!File.Exists(filePath))
+            {
+                print("network : random");
                 return;
+            }
 
             string data = File.ReadAllText(filePath);
             network = JsonUtility.FromJson<Network>(data);
@@ -346,6 +356,7 @@ public class DQNAgent : MonoBehaviour
             layer.na__Outputs.Dispose();
             layer.na_activatedValues.Dispose();
         }
+        /*
         foreach (var layer in targetNetwork.Layers)
         {
             layer.na_inputs.Dispose();
@@ -355,6 +366,7 @@ public class DQNAgent : MonoBehaviour
             layer.na_activatedValues.Dispose();
             //
         }
+        */
     }
 }
 [Serializable]

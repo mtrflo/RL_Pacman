@@ -139,10 +139,10 @@ public class HeadAgent : MonoBehaviour
 
         //print("reward : " + s_reward);
 
-        if (stepCounter % replaceStepCount == 0)
-        {
-            rLAgent.ReplaceTarget();
-        }
+        //if (stepCounter % replaceStepCount == 0)
+        //{
+        //    rLAgent.ReplaceTarget();
+        //}
 
 
 

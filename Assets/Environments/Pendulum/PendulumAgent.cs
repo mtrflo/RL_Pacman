@@ -97,7 +97,7 @@ public class PendulumAgent : MonoBehaviour
         {
             maxrew = s_reward;
             print("maxrew : " + maxrew);
-            rLAgent.ReplaceTarget();
+            //rLAgent.ReplaceTarget();
         }
     }
     void MakeAction(int action)

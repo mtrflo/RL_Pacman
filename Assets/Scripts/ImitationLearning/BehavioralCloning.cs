@@ -16,6 +16,7 @@ public class BehavioralCloning : MonoBehaviour
     public DQNAgent dqn;
     public bool supervised = true;
     public bool rt = false;
+    public bool removeTerm = false;
     private void Start()
     {
         transitions = TransitionRecorder.me.LoadTransitions(demonstrator);
@@ -35,15 +36,21 @@ public class BehavioralCloning : MonoBehaviour
         float tlr = dqn.network.LearningRate;
         dqn.network.LearningRate = lr;
         int count = transitions.transitions.Count;
+        Transition transition;
         for (int j = 0; j < repeat; j++)
         {
             for (int i = 0; i < count; i++)
             {
+                transition = transitions.transitions[i];
+                
+                if (removeTerm && transitions.transitions[i].isDone)
+                    continue;
+                
                 progress = (j *1f/ repeat) + (0.1f *( i * 1f / count));
                 if(supervised)
-                    dqn.LearnSupervised(transitions.transitions[i]);
+                    dqn.LearnSupervised(transition);
                 else
-                    dqn.Learn(transitions.transitions[i]);
+                    dqn.Learn(transition);
                 if (i % yieldEvery == 0)
                     yield return null;
             }
