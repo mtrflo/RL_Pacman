@@ -8,12 +8,12 @@ using UnityEngine.UIElements;
 public class TransitionRecorder : MonoBehaviour
 {
     public static TransitionRecorder me;
-    public bool record = false;
+    public bool record = false, closeAfterAdded, realTimeRecord;
     public string fileName, folderPath;
     public int stepCount = 10000;
     public int addedTrCount = 0;
     string filePath;
-    Transitions TransitionsData;
+    [HideInInspector] public Transitions TransitionsData;
     public float minRewardPrice = 1, currentWaitersRewardSum = 0;
     public List<Transition> waiters;
     private void Awake()
@@ -46,15 +46,25 @@ public class TransitionRecorder : MonoBehaviour
             waiters.Add(transition);
         }
         else
+        {
             OpenGate();
+            CloseGate();
+        }
 
         if (transition.isDone)
             CloseGate();
 
         if (stepCount <= addedTrCount)
         {
-            Record();
-            CloseGate();
+            if (realTimeRecord)
+            {
+                TransitionsData.transitions.RemoveRange(0, waiters.Count);
+            }
+            else
+            {
+                Record();
+                CloseGate();
+            }
         }
     }
 

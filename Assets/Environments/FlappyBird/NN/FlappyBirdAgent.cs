@@ -14,6 +14,7 @@ public class FlappyBirdAgent : MonoBehaviour
     public bool isTraining = true;
     public bool isHeruistic = false;
     public bool recordDemonstration = false;
+    public bool realTimeDemonstrator;
     public GameMain gameMain;
     public BirdControl birdControl;
     //public DQNAgent dQNAgent => DQNAgent.me;
@@ -143,9 +144,9 @@ public class FlappyBirdAgent : MonoBehaviour
         if (isTraining)
         {
             rLAgent.nqLearn(_Transition, transitionTrajectory);
-            if(rLAgent.enableBackT)
+            if (rLAgent.enableBackT)
                 transitionTrajectory.Push(_Transition);
-            
+
             //rLAgent.Learn(_Transition);
         }
 
@@ -166,15 +167,22 @@ public class FlappyBirdAgent : MonoBehaviour
             Restart();
 
         //score name
-        if ((lastScore + 1) < birdControl.scoreMgr.currentScore)
-        {
-            lastScore = birdControl.scoreMgr.currentScore;
-            transform.parent.name = lastScore.ToString();
-        }
+        if (!realTimeDemonstrator)
+            if ((lastScore + 1) < birdControl.scoreMgr.currentScore)
+            {
+                lastScore = birdControl.scoreMgr.currentScore;
+                transform.parent.name = lastScore.ToString();
+            }
 
         if (recordDemonstration && !isTraining && isHeruistic)
         {
             TransitionRecorder.me.AddTransition(_Transition);
+        }
+        if (realTimeDemonstrator)
+        {
+            if (!_Transition.isDone)
+                rLAgent.LearnSupervised(_Transition);
+            //rLAgent.Learn(_Transition); 
         }
 
     }

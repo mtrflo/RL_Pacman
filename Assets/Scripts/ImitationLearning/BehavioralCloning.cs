@@ -62,13 +62,14 @@ public class BehavioralCloning : MonoBehaviour
         yield return null;
 
     }
+    public TransitionRecorder recorder;
     IEnumerator IERTCloning()
     {
         WaitForSeconds wfs = new WaitForSeconds(delay);
         int step = 0;
         while (true)
         {
-            dqn.Learn(transitions.transitions[Random.Range(0, transitions.transitions.Count)]);
+            dqn.Learn(recorder.TransitionsData.transitions[Random.Range(0, transitions.transitions.Count)]);
             if (step % yieldEvery == 0)
                 yield return wfs;
             step++;

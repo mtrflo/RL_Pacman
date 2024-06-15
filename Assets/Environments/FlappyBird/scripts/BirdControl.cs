@@ -60,10 +60,10 @@ public class BirdControl : MonoBehaviour {
 
 		if (!dead)
 		{
-			if (Input.GetButtonDown("Fire1"))
-			{
-                JumpUp();
-			}
+			//if (Input.GetButtonDown("Fire1"))
+			//{
+   //             JumpUp();
+			//}
 		}
 
 		if (!landed)
