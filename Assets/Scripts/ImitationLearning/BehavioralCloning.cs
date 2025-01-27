@@ -15,7 +15,7 @@ public class BehavioralCloning : MonoBehaviour
     private Transitions transitions;
     public DQNAgent dqn;
     public bool supervised = true;
-    public bool rt = false;
+    public bool realTime = false;
     public bool removeTerm = false;
     private void Start()
     {
@@ -25,7 +25,7 @@ public class BehavioralCloning : MonoBehaviour
     }
     public void StartCloning()
     {
-        if(rt)
+        if(realTime)
             StartCoroutine(IERTCloning());
         else
             StartCoroutine(IECloning());
@@ -63,15 +63,24 @@ public class BehavioralCloning : MonoBehaviour
 
     }
     public TransitionRecorder recorder;
+    public int minRealTimeTransitionCount = 100;
     IEnumerator IERTCloning()
     {
         WaitForSeconds wfs = new WaitForSeconds(delay);
+        List<Transition> transitions = recorder.TransitionsData.transitions;
         int step = 0;
+        int count = transitions.Count;
         while (true)
         {
-            dqn.Learn(recorder.TransitionsData.transitions[Random.Range(0, transitions.transitions.Count)]);
-            if (step % yieldEvery == 0)
-                yield return wfs;
+            count = transitions.Count;
+            if (count > minRealTimeTransitionCount)
+            {
+                if (supervised)
+                    dqn.LearnSupervised(transitions[Random.Range(0, count)]);
+                else
+                    dqn.Learn(transitions[Random.Range(0, count)]);
+            }
+            yield return wfs;
             step++;
         }
     }

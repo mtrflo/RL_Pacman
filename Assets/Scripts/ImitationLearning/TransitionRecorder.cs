@@ -8,7 +8,7 @@ using UnityEngine.UIElements;
 public class TransitionRecorder : MonoBehaviour
 {
     public static TransitionRecorder me;
-    public bool record = false, closeAfterAdded, realTimeRecord;
+    public bool record = false, closeAfterAdded, realTimeRecord, priceAsTrigger;
     public string fileName, folderPath;
     public int stepCount = 10000;
     public int addedTrCount = 0;
@@ -39,9 +39,8 @@ public class TransitionRecorder : MonoBehaviour
             TransitionsData.transitions.Add(transition);
             addedTrCount++;
         }
-        else if (currentWaitersRewardSum <= minRewardPrice && !isGateOpened)
+        else if (priceAsTrigger ? transition.reward <= minRewardPrice : currentWaitersRewardSum <= minRewardPrice && !isGateOpened)
         {
-            print("transition.reward : " + transition.reward);
             currentWaitersRewardSum += transition.reward;
             waiters.Add(transition);
         }

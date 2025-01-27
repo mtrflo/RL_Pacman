@@ -127,7 +127,7 @@ public class FlappyBirdAgent : MonoBehaviour
             addReward = false;
             s_reward = scoreReward;
         }
-        if (maxScoringCount < birdControl.scoreMgr.currentScore)
+        if (maxScoringCount < birdControl.scoreMgr.currentScore && !isHeruistic)
         {
             maxScoringCount = birdControl.scoreMgr.currentScore;
             Scoring.me.NewScore(maxScoringCount);
@@ -180,9 +180,9 @@ public class FlappyBirdAgent : MonoBehaviour
         }
         if (realTimeDemonstrator)
         {
-            if (!_Transition.isDone)
-                rLAgent.LearnSupervised(_Transition);
-            //rLAgent.Learn(_Transition); 
+            //if (!_Transition.isDone)
+            //rLAgent.LearnSupervised(_Transition);
+            rLAgent.Learn(_Transition); 
         }
 
     }
