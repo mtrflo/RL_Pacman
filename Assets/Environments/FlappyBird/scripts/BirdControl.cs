@@ -68,7 +68,7 @@ public class BirdControl : MonoBehaviour {
 
 		if (!landed)
 		{
-			float v = rb.velocity.y;
+			float v = rb.linearVelocity.y;
 			
 			float rotate = Mathf.Min(Mathf.Max(-90, v * rotateRate + 60), 30);
 			
@@ -94,7 +94,7 @@ public class BirdControl : MonoBehaviour {
 			if (other.name == "land")
 			{
                 rb.gravityScale = 0;
-                rb.velocity = new Vector2(0, 0);
+                rb.linearVelocity = new Vector2(0, 0);
 
 				landed = true;
 			}
@@ -113,7 +113,7 @@ public class BirdControl : MonoBehaviour {
 
     public void JumpUp()
     {
-        rb.velocity = new Vector2(0, upSpeed);
+        rb.linearVelocity = new Vector2(0, upSpeed);
         //AudioSource.PlayClipAtPoint(jumpUp, Vector3.zero);
     }
 	

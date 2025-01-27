@@ -9,7 +9,7 @@ public class PipeMove : MonoBehaviour {
     // Use this for initialization
     void Start () {
 		Rigidbody2D body = transform.GetComponent<Rigidbody2D>();
-		body.velocity = new Vector2(moveSpeed, 0);
+		body.linearVelocity = new Vector2(moveSpeed, 0);
 		StartCoroutine(IEUpdate());
 
     }
@@ -26,6 +26,6 @@ public class PipeMove : MonoBehaviour {
 	public void GameOver()
 	{
 		Rigidbody2D body = transform.GetComponent<Rigidbody2D>();
-		body.velocity = new Vector2(0, 0);
+		body.linearVelocity = new Vector2(0, 0);
 	}
 }

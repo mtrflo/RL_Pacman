@@ -73,12 +73,12 @@ public class KickerAgent : MonoBehaviour
         AddObservation(
             rb.transform.localPosition.x,
             rb.transform.localPosition.z,
-            rb.velocity.x,
-            rb.velocity.y,
+            rb.linearVelocity.x,
+            rb.linearVelocity.y,
             enemyRB.transform.localPosition.x,
             enemyRB.transform.localPosition.z,
-            enemyRB.velocity.x,
-            enemyRB.velocity.z
+            enemyRB.linearVelocity.x,
+            enemyRB.linearVelocity.z
             );
 
         if (prev_state.Count == 0)

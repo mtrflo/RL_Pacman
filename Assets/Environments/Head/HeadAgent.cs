@@ -79,9 +79,9 @@ public class HeadAgent : MonoBehaviour
         AddObservation(rb.angularVelocity.x);
         AddObservation(rb.angularVelocity.y);
         AddObservation(rb.angularVelocity.z);
-        AddObservation(ballRB.velocity.x);
-        AddObservation(ballRB.velocity.y);
-        AddObservation(ballRB.velocity.z);
+        AddObservation(ballRB.linearVelocity.x);
+        AddObservation(ballRB.linearVelocity.y);
+        AddObservation(ballRB.linearVelocity.z);
         AddObservation(ballRB.transform.localPosition.x);
         AddObservation(ballRB.transform.localPosition.y);
         AddObservation(ballRB.transform.localPosition.z);
@@ -105,7 +105,7 @@ public class HeadAgent : MonoBehaviour
         Vector3 center = new Vector3(transform.position.x, 0, transform.position.z);
         Vector3 ballCenter = new Vector3(ballRB.transform.position.x, 0, ballRB.transform.position.z);
         float distance = Vector3.Distance(point.position, ballRB.transform.position);
-        float vel = ballRB.velocity.magnitude;
+        float vel = ballRB.linearVelocity.magnitude;
         //print("distance : " + distance);
         float s_reward = reward -( 2 * reward * distance  +  4 * reward * vel);
 

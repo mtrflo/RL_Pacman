@@ -113,7 +113,7 @@ public class FlappyBirdAgent : MonoBehaviour
         AddObservation(distances[1]);
         AddObservation(distances[2]);
         AddObservation(distances[3]);
-        AddObservation(rb.velocity.y);
+        AddObservation(rb.linearVelocity.y);
         #endregion
 
 
@@ -241,7 +241,7 @@ public class FlappyBirdAgent : MonoBehaviour
     Quaternion startRot;
     public void ResetAgent()
     {
-        rb.velocity = Vector2.zero;
+        rb.linearVelocity = Vector2.zero;
         rb.gravityScale = 1;
         prev_state.Clear();
         current_state.Clear();
